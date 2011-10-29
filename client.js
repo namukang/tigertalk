@@ -36,6 +36,7 @@ function sendMessage(msg) {
 }
 
 $(function() {
+  // Send a message if enter is pressed in entry
   var entry = $("#entry");
   var ENTER = 13; // keycode for enter
   entry.keypress(function(e) {

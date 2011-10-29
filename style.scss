@@ -3,6 +3,10 @@ body {
     margin: 0;
 }
 
+.time, .nick {
+  vertical-align: top;
+}
+
 #toolbar {
   bottom: 0;
   position: fixed;
