@@ -1,5 +1,5 @@
 var app = require('express').createServer()
-, io = require('socket.io').listen(app)
+, io = require('socket.io').listen(app);
 
 app.listen(8001);
 
@@ -16,9 +16,14 @@ app.get('/style.css', function(req, res) {
   res.sendfile(__dirname + '/style.css');
 });
 
-io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
+// Messaging
+io.sockets.on('connection', function(socket) {
+  // Forward a received message to all the clients
+  socket.on('client_send', function(msg) {
+    io.sockets.emit('server_send', {
+      time: (new Date()).getTime(),
+      nick: "DK",
+      msg: msg
+    });
   });
 });

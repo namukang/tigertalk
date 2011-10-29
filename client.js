@@ -1,5 +1,36 @@
 var socket = io.connect('http://localhost');
-socket.on('news', function (data) {
-  console.log(data);
-  socket.emit('my other event', { my: 'data' });
+
+// Receive a new message from the server
+socket.on('server_send', function(data) {
+  var time = timeString(new Date(data.time));
+  addMessage(time, data.nick, data.msg);
 });
+
+// Add a message to the log
+function addMessage(time, nick, msg) {
+  var logElement = $("#log");
+  var new_msg_html = '<tr>'
+    + '<td class="time">' + time + '</td>'
+    + '<td class="nick">' + nick + '</td>'
+    + '<td class="msg">' + msg + '</td>'
+    + '</tr>';
+  logElement.append(new_msg_html);
+}
+
+// Convert date to military time
+function timeString(date) {
+  var hour = date.getHours().toString();
+  if (hour.length == 1) {
+    hour = '0' + hour;
+  }
+  var min = date.getMinutes().toString();
+  if (min.length == 1) {
+    min = '0' + min;
+  }
+  return hour + ":" + min;
+}
+
+// Send a new message to the server
+function sendMessage(msg) {
+  socket.emit('client_send', msg);
+}
