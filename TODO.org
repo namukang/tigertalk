@@ -11,6 +11,7 @@
        - POST to '/' with ticket query
      - if POST '/':
        - read ticket and validate
+
 * Engagement
 ** TODO Add backlog
    - Useful for engaging users the moment they enter the chatroom
@@ -19,3 +20,4 @@
      is on window
    - Every time a message comes in, increment unread_msgs count unless
      focus is on window
+** TODO Highlight nicknames of messages that mention you

@@ -40,7 +40,7 @@ $(function() {
   var ENTER = 13; // keycode for enter
   entry.keypress(function(e) {
     if (e.keyCode != ENTER) return;
-    var msg = entry.attr("value").replace("\n", "");
+    var msg = entry.attr("value");
     sendMessage(msg);
     entry.attr("value", ""); // clear entry field
   });
