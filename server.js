@@ -1,11 +1,13 @@
 var app = require('express').createServer()
-, io = require('socket.io').listen(app);
+, io = require('socket.io').listen(app)
+, cas = require('./cas');
 
 app.listen(8001);
 
 // Routing
 app.get('/', function(req, res) {
-  res.sendfile(__dirname + '/index.html');
+  cas.authenticate(req, res);
+  // res.sendfile(__dirname + '/index.html');
 });
 
 app.get('/client.js', function(req, res) {
