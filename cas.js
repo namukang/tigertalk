@@ -23,7 +23,7 @@ function validate(ticket, server_res) {
     host: HOST_URL,
     path: "/cas/validate?" + query
   };
-  var req = https.get(options, function(res) {
+  https.get(options, function(res) {
     res.on('data', function(chunk) {
       var data = chunk.toString().split("\n");
       var netid = (data[0] == 'yes') ? data[1] : null;

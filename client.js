@@ -34,3 +34,14 @@ function timeString(date) {
 function sendMessage(msg) {
   socket.emit('client_send', msg);
 }
+
+$(function() {
+  var entry = $("#entry");
+  var ENTER = 13; // keycode for enter
+  entry.keypress(function(e) {
+    if (e.keyCode != ENTER) return;
+    var msg = entry.attr("value").replace("\n", "");
+    sendMessage(msg);
+    entry.attr("value", ""); // clear entry field
+  });
+});

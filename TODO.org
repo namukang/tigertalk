@@ -2,6 +2,15 @@
 ** TODO Add nicks
    - Eventually we want to use Net IDs instead of user chosen nicks
 
+* Bugs
+** TODO Get rid of ticket information in URL after authenticating
+   - Possible approach:
+     - if GET '/' with no query:
+       - redirect to CAS
+     - if GET '/' with ticket query:
+       - POST to '/' with ticket query
+     - if POST '/':
+       - read ticket and validate
 * Engagement
 ** TODO Add backlog
    - Useful for engaging users the moment they enter the chatroom
