@@ -1,13 +1,18 @@
-var app = require('express').createServer()
-, io = require('socket.io').listen(app)
+var express = require('express')
+, sio = require('socket.io')
 , cas = require('./cas');
 
+var app = express.createServer();
+var io = sio.listen(app);
+app.use(express.cookieParser());
 app.listen(8001);
 
 // Routing
 app.get('/', function(req, res) {
-  // cas.authenticate(req, res);
-  res.sendfile(__dirname + '/index.html');   
+  cas.authenticate(req, res, function(netid) {
+    res.cookie("netid", netid);
+    res.sendfile(__dirname + '/index.html');
+  });
 });
 
 app.get('/client.js', function(req, res) {
