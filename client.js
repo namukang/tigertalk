@@ -22,13 +22,19 @@ socket.on('server_send', function(data) {
 socket.on('join', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, null, JOIN_TYPE);
+  updateCount(data.count);
 });
 
 // User left room
 socket.on('part', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, null, PART_TYPE);
+  updateCount(data.count);
 });
+
+function updateCount(count) {
+  $("#count").html(count);
+}
 
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
@@ -106,8 +112,11 @@ function scrollDown() {
 }
 
 $(function() {
-  // Send a message if enter is pressed in entry
+  // Focus on entry element immediately
   var entry = $("#entry");
+  entry.focus();
+
+  // Send a message if enter is pressed in entry
   var ENTER = 13; // keycode for enter
   entry.keypress(function(e) {
     if (e.keyCode != ENTER) return;

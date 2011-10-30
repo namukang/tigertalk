@@ -15,7 +15,15 @@ body {
   border-bottom: 1px black solid;
   background: black;
   text-decoration: none;
-  color: $orange;
+  #logo {
+    float: left;
+    color: $orange;
+  }
+  #info {
+    float: right;
+    color: white;
+    margin-right: 2em;
+  }
 }
 
 #log {
@@ -32,7 +40,7 @@ body {
   }
 }
 
-.system {
+.system, .time {
   color: #777;
 }
 
