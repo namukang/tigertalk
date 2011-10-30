@@ -23,6 +23,12 @@ socket.on('join', function(data) {
   addMessage(time, data.nick, null, JOIN_TYPE);
 });
 
+// User left room
+socket.on('part', function(data) {
+  var time = timeString(new Date(data.time));
+  addMessage(time, data.nick, null, PART_TYPE);
+});
+
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
   var logElement = $("#log");
@@ -43,6 +49,16 @@ function addMessage(time, nick, msg, type) {
       + '<tr>'
       + '<td class="time"><' + time + '></td>'
       + '<td class="nick">' + nick + ':</td>'
+      + '<td class="text">' + msg + '</td>'
+      + '</tr>'
+      + '</table>';
+    break;
+
+  case PART_TYPE:
+    msg = nick + " has left the room.";
+    msg_html = '<table class="message system">'
+      + '<tr>'
+      + '<td class="time"><' + time + '></td>'
       + '<td class="text">' + msg + '</td>'
       + '</tr>'
       + '</table>';

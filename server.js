@@ -53,4 +53,12 @@ io.sockets.on('connection', function(socket) {
       });
     });
   });
+  socket.on('disconnect', function() {
+    socket.get('nick', function(err, nick) {
+      io.sockets.emit('part', {
+        time: (new Date()).getTime(),
+        nick: nick
+      });
+    });
+  });
 });
