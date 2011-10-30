@@ -4,6 +4,10 @@ var MSG_TYPE = "msg";
 var JOIN_TYPE = "join";
 var PART_TYPE = "part";
 
+// Seed number used to give nicks different colors for every session
+var SEED;
+var COLORS = ['red', 'orange', 'green', 'blue', 'purple'];
+
 var CONFIG = {
   focus: true, // whether document has focus
   unread: 0 // number of unread messages
@@ -24,7 +28,6 @@ socket.on('server_send', function(data) {
     CONFIG.unread++;
     updateTitle();
   }
-  scrollDown();
 });
 
 // New user has joined
@@ -45,26 +48,35 @@ function updateNumUsers(num_users) {
   $("#num_users").html(num_users);
 }
 
+// Assign a color to each nick
+function getColor(nick) {
+  // FIXME: add up ASCII values of first and last char
+  var index = (nick.length + SEED) % COLORS.length;
+  return COLORS[index];
+}
+
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
   var logElement = $("#log");
   var msg_html = null;
+  var time_html = '<td class="time">[' + time + ']</td>';
   switch (type) {
   case JOIN_TYPE:
     msg = nick + " joined the room.";
     msg_html = '<table class="message system">'
       + '<tr>'
-      + '<td class="time"><' + time + '></td>'
+      + time_html
       + '<td class="text">' + msg + '</td>'
       + '</tr>'
       + '</table>';
     break;
     
   case MSG_TYPE:
+    var color = getColor(nick);
     msg_html = '<table class="message">'
       + '<tr>'
-      + '<td class="time"><' + time + '></td>'
-      + '<td class="nick">' + nick + ':</td>'
+      + time_html
+      + '<td class="nick" style="color: ' + color + '">' + nick + ':</td>'
       + '<td class="text">' + msg + '</td>'
       + '</tr>'
       + '</table>';
@@ -74,13 +86,14 @@ function addMessage(time, nick, msg, type) {
     msg = nick + " left the room.";
     msg_html = '<table class="message system">'
       + '<tr>'
-      + '<td class="time"><' + time + '></td>'
+      + time_html
       + '<td class="text">' + msg + '</td>'
       + '</tr>'
       + '</table>';
     break;
   }
   logElement.append(msg_html);
+  scrollDown();
 }
 
 // Convert date to military time
@@ -131,6 +144,9 @@ function updateTitle() {
 }
 
 $(function() {
+  // Set seed
+  SEED = Math.floor(Math.random() * COLORS.length);
+
   // Focus on entry element upon page load
   var entry = $("#entry");
   entry.focus();
