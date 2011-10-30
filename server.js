@@ -9,10 +9,11 @@ app.listen(8001);
 
 // Routing
 app.get('/', function(req, res) {
-  cas.authenticate(req, res, function(netid) {
-    res.cookie("netid", netid);
-    res.sendfile(__dirname + '/index.html');
-  });
+  res.sendfile(__dirname + "/index.html");
+  // cas.authenticate(req, res, function(netid) {
+  //   res.cookie("netid", netid);
+  //   res.sendfile(__dirname + '/index.html');
+  // });
 });
 
 app.get('/client.js', function(req, res) {
@@ -29,12 +30,23 @@ app.get('/jquery-1.2.6.min.js', function(req, res) {
 
 // Messaging
 io.sockets.on('connection', function(socket) {
+  // Set nick upon connection
+  socket.on('set_nick', function(nick) {
+    socket.get('nick', function(err, existing_nick) {
+      // Only set nick if one has not been assigned
+      if (existing_nick === null) {
+        socket.set('nick', nick);
+      }
+    });
+  });
   // Forward received messages to all the clients
   socket.on('client_send', function(msg) {
-    io.sockets.emit('server_send', {
-      time: (new Date()).getTime(),
-      nick: "DK",
-      msg: msg
+    socket.get('nick', function(err, nick) {
+      io.sockets.emit('server_send', {
+        time: (new Date()).getTime(),
+        nick: nick,
+        msg: msg
+      });
     });
   });
 });

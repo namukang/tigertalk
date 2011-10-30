@@ -1,5 +1,12 @@
 var socket = io.connect('http://localhost');
 
+// Send nick upon connecting
+socket.on('connect', function() {
+  // FIXME: set nick from cookie.netid
+  var nick = "dskang";
+  socket.emit('set_nick', nick);
+});
+
 // Receive a new message from the server
 socket.on('server_send', function(data) {
   var time = timeString(new Date(data.time));
