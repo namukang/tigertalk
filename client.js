@@ -14,7 +14,8 @@ socket.on('connect', function() {
 // Receive a new message from the server
 socket.on('server_send', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, data.msg, MSG_TYPE);
+  addMessage(time, data.nick, toStaticHTML(data.msg), MSG_TYPE);
+  scrollDown();
 });
 
 // New user has joined
@@ -32,7 +33,7 @@ socket.on('part', function(data) {
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
   var logElement = $("#log");
-  var msg_html;
+  var msg_html = null;
   switch (type) {
   case JOIN_TYPE:
     msg = nick + " joined the room.";
@@ -65,7 +66,6 @@ function addMessage(time, nick, msg, type) {
     break;
   }
   logElement.append(msg_html);
-  scrollDown();
 }
 
 // Convert date to military time
@@ -79,6 +79,19 @@ function timeString(date) {
     min = '0' + min;
   }
   return hour + ":" + min;
+}
+
+// Sanitize HTML
+function toStaticHTML(input) {
+  return input.replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Check if text only contains whitespace
+function isBlank(text) {
+  var blank = /^\s*$/;
+  return (text.match(blank) !== null);
 }
 
 // Send a new message to the server
@@ -99,7 +112,9 @@ $(function() {
   entry.keypress(function(e) {
     if (e.keyCode != ENTER) return;
     var msg = entry.attr("value");
-    sendMessage(msg);
+    if (!isBlank(msg)) {
+      sendMessage(msg);
+    }
     entry.attr("value", ""); // clear entry field
   });
 });

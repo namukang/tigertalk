@@ -13,6 +13,8 @@
        - read ticket and validate
 
 ** TODO Only scroll to bottom when user is already fully scrolled
+** TODO Whitespace in beginning of message is ignored in table
+
 * Engagement
 ** TODO Add backlog
    - Useful for engaging users the moment they enter the chatroom

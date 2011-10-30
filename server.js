@@ -28,6 +28,12 @@ app.get('/jquery-1.2.6.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.2.6.min.js');
 });
 
+// Check if text only contains whitespace
+function isBlank(text) {
+  var blank = /^\s*$/;
+  return (text.match(blank) !== null);
+}
+
 // Messaging
 io.sockets.on('connection', function(socket) {
   // Set nick upon connection
@@ -45,14 +51,17 @@ io.sockets.on('connection', function(socket) {
   });
   // Forward received messages to all the clients
   socket.on('client_send', function(msg) {
-    socket.get('nick', function(err, nick) {
-      io.sockets.emit('server_send', {
-        time: (new Date()).getTime(),
-        nick: nick,
-        msg: msg
+    if (!isBlank(msg)) {
+      socket.get('nick', function(err, nick) {
+        io.sockets.emit('server_send', {
+          time: (new Date()).getTime(),
+          nick: nick,
+          msg: msg
+        });
       });
-    });
+    }
   });
+  // Notify others that user has disconnected
   socket.on('disconnect', function() {
     socket.get('nick', function(err, nick) {
       io.sockets.emit('part', {
