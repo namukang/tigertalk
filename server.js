@@ -6,7 +6,7 @@ var app = express.createServer();
 var io = sio.listen(app);
 app.use(express.cookieParser());
 app.listen(8001);
-var count = 0;
+var num_users = 0;
 
 // Routing
 app.get('/', function(req, res) {
@@ -43,11 +43,11 @@ io.sockets.on('connection', function(socket) {
       // Only set nick if one has not been assigned
       if (existing_nick === null) {
         socket.set('nick', nick);
-        count++;
+        num_users++;
         io.sockets.emit('join', {
           time: (new Date()).getTime(),
           nick: nick,
-          count: count
+          num_users: num_users
         });
       }
     });
@@ -66,12 +66,12 @@ io.sockets.on('connection', function(socket) {
   });
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
-    count--;
+    num_users--;
     socket.get('nick', function(err, nick) {
       io.sockets.emit('part', {
         time: (new Date()).getTime(),
         nick: nick,
-        count: count
+        num_users: num_users
       });
     });
   });

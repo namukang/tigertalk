@@ -4,6 +4,11 @@ var MSG_TYPE = "msg";
 var JOIN_TYPE = "join";
 var PART_TYPE = "part";
 
+var CONFIG = {
+  focus: true, // whether document has focus
+  unread: 0 // number of unread messages
+}
+
 // Send nick upon connecting
 socket.on('connect', function() {
   // FIXME: set nick from cookie.netid
@@ -15,6 +20,10 @@ socket.on('connect', function() {
 socket.on('server_send', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, toStaticHTML(data.msg), MSG_TYPE);
+  if (!CONFIG.focus) {
+    CONFIG.unread++;
+    updateTitle();
+  }
   scrollDown();
 });
 
@@ -22,18 +31,18 @@ socket.on('server_send', function(data) {
 socket.on('join', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, null, JOIN_TYPE);
-  updateCount(data.count);
+  updateNumUsers(data.num_users);
 });
 
 // User left room
 socket.on('part', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, null, PART_TYPE);
-  updateCount(data.count);
+  updateNumUsers(data.num_users);
 });
 
-function updateCount(count) {
-  $("#count").html(count);
+function updateNumUsers(num_users) {
+  $("#num_users").html(num_users);
 }
 
 // Add a message to the log
@@ -105,14 +114,24 @@ function sendMessage(msg) {
   socket.emit('client_send', msg);
 }
 
+// Scroll to the newest messages
 function scrollDown() {
   // FIXME: scroll only when user is already scrolled to the bottom
   window.scrollBy(0, 100000000000);
   $("#entry").focus();
 }
 
+// Update the document title with number of unread messages
+function updateTitle() {
+  if (CONFIG.unread) {
+    document.title = "(" + CONFIG.unread.toString() + ") TigerTalk";
+  } else {
+    document.title = "TigerTalk";
+  }
+}
+
 $(function() {
-  // Focus on entry element immediately
+  // Focus on entry element upon page load
   var entry = $("#entry");
   entry.focus();
 
@@ -125,5 +144,16 @@ $(function() {
       sendMessage(msg);
     }
     entry.attr("value", ""); // clear entry field
+  });
+
+  // Listen for browser events to update unread messages correctly
+  $(window).bind("blur", function() {
+    CONFIG.focus = false;
+  });
+
+  $(window).bind("focus", function() {
+    CONFIG.focus = true;
+    CONFIG.unread = 0;
+    updateTitle();
   });
 });
