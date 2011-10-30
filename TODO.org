@@ -12,6 +12,7 @@
      - if POST '/':
        - read ticket and validate
 
+** TODO Only scroll to bottom when user is already fully scrolled
 * Engagement
 ** TODO Add backlog
    - Useful for engaging users the moment they enter the chatroom

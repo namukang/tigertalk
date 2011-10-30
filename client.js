@@ -4,16 +4,19 @@ var socket = io.connect('http://localhost');
 socket.on('server_send', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, data.msg);
+  scrollDown();
 });
 
 // Add a message to the log
 function addMessage(time, nick, msg) {
   var logElement = $("#log");
-  var new_msg_html = '<tr>'
-    + '<td class="time">' + time + '</td>'
-    + '<td class="nick">' + nick + '</td>'
-    + '<td class="msg">' + msg + '</td>'
-    + '</tr>';
+  var new_msg_html = '<table class="message">'
+    + '<tr>'
+    + '<td class="time"><' + time + '></td>'
+    + '<td class="nick">' + nick + ':</td>'
+    + '<td class="text">' + msg + '</td>'
+    + '</tr>'
+    + '</table>';
   logElement.append(new_msg_html);
 }
 
@@ -33,6 +36,12 @@ function timeString(date) {
 // Send a new message to the server
 function sendMessage(msg) {
   socket.emit('client_send', msg);
+}
+
+function scrollDown() {
+  // FIXME: scroll only when user is already scrolled to the bottom
+  window.scrollBy(0, 100000000000);
+  $("#entry").focus();
 }
 
 $(function() {

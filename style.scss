@@ -3,6 +3,7 @@ $orange: #FA7F00;
 body {
     padding: 0;
     margin: 0;
+    font-family: 'Lucida Grande', Verdana;
 }
 
 #header {
@@ -12,13 +13,8 @@ body {
   width: 100%;
   border-bottom: 1px black solid;
   background: black;
-  a {
-    text-decoration: none;
-    color: $orange;
-    &.visited {
-      color: $orange;
-    }
-  }
+  text-decoration: none;
+  color: $orange;
 }
 
 #log {
@@ -27,8 +23,17 @@ body {
   display: block;
 }
 
-.time, .nick {
-  vertical-align: top;
+.message {
+  display: block;
+  border-spacing: 0;
+  td {
+    vertical-align: top;
+  }
+}
+
+.nick {
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 }
 
 #toolbar {
