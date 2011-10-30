@@ -4,6 +4,8 @@ var MSG_TYPE = "msg";
 var JOIN_TYPE = "join";
 var PART_TYPE = "part";
 
+var NICK;
+
 // Seed number used to give nicks different colors for every session
 var SEED;
 var orange = '#FA7F00';
@@ -16,8 +18,9 @@ var CONFIG = {
 
 // Send nick upon connecting
 socket.on('connect', function() {
-  // FIXME: set nick from cookie.netid
-  var nick = "dskang";
+  var cookieName = "netid=";
+  var nick = document.cookie.substring(cookieName.length);
+  NICK = nick;
   socket.emit('set_nick', nick);
 });
 
@@ -51,49 +54,63 @@ function updateNumUsers(num_users) {
 
 // Assign a color to each nick
 function getColor(nick) {
-  // FIXME: add up ASCII values of first and last char
-  var index = (nick.length + SEED) % COLORS.length;
+  var nickNum = 0;
+  for (var i = 0; i < nick.length; i++) {
+    nickNum += nick.charCodeAt(i);
+  }
+  var index = (nickNum + SEED) % COLORS.length;
   return COLORS[index];
 }
 
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
-  var logElement = $("#log");
-  var msg_html = null;
+  var messageElement = $(document.createElement("table"));
+  messageElement.addClass("message");
+
   var time_html = '<td class="time">[' + time + ']</td>';
   switch (type) {
   case JOIN_TYPE:
-    msg = nick + " joined the room.";
-    msg_html = '<table class="message system">'
-      + '<tr>'
+    messageElement.addClass("system");
+    var text = nick + " joined the room.";
+    var content = '<tr>'
       + time_html
-      + '<td class="text">' + msg + '</td>'
-      + '</tr>'
-      + '</table>';
+      + '<td class="text">' + text + '</td>'
+      + '</tr>';
+    messageElement.html(content);
     break;
     
   case MSG_TYPE:
+    // Indicate if you are the owner of the message
+    if (nick === NICK) {
+      messageElement.addClass("owner");
+    }
+
+    // Bold your nickname if it is mentioned in a message
+    var nick_re = new RegExp(NICK);
+    if (nick_re.test(msg)) {
+      msg = msg.replace(NICK, '<span style="font-weight: bold">' + NICK + '</span>');
+    }
+
     var color = getColor(nick);
-    msg_html = '<table class="message">'
-      + '<tr>'
+    var content = '<tr>'
       + time_html
       + '<td class="nick" style="color: ' + color + '">' + nick + ':</td>'
       + '<td class="text">' + msg + '</td>'
-      + '</tr>'
-      + '</table>';
+      + '</tr>';
+    messageElement.html(content);
     break;
 
   case PART_TYPE:
-    msg = nick + " left the room.";
-    msg_html = '<table class="message system">'
-      + '<tr>'
+    messageElement.addClass("system");
+    var text = nick + " left the room.";
+    var content = '<tr>'
       + time_html
       + '<td class="text">' + msg + '</td>'
-      + '</tr>'
-      + '</table>';
+      + '</tr>';
+    messageElement.html(content);
     break;
   }
-  logElement.append(msg_html);
+  $("#log").append(messageElement);
   scrollDown();
 }
 
