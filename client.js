@@ -1,5 +1,9 @@
 var socket = io.connect('http://localhost');
 
+var MSG_TYPE = "msg";
+var JOIN_TYPE = "join";
+var PART_TYPE = "part";
+
 // Send nick upon connecting
 socket.on('connect', function() {
   // FIXME: set nick from cookie.netid
@@ -10,21 +14,42 @@ socket.on('connect', function() {
 // Receive a new message from the server
 socket.on('server_send', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, data.msg);
-  scrollDown();
+  addMessage(time, data.nick, data.msg, MSG_TYPE);
+});
+
+// New user has joined
+socket.on('join', function(data) {
+  var time = timeString(new Date(data.time));
+  addMessage(time, data.nick, null, JOIN_TYPE);
 });
 
 // Add a message to the log
-function addMessage(time, nick, msg) {
+function addMessage(time, nick, msg, type) {
   var logElement = $("#log");
-  var new_msg_html = '<table class="message">'
-    + '<tr>'
-    + '<td class="time"><' + time + '></td>'
-    + '<td class="nick">' + nick + ':</td>'
-    + '<td class="text">' + msg + '</td>'
-    + '</tr>'
-    + '</table>';
-  logElement.append(new_msg_html);
+  var msg_html;
+  switch (type) {
+  case JOIN_TYPE:
+    msg = nick + " has joined the room.";
+    msg_html = '<table class="message system">'
+      + '<tr>'
+      + '<td class="time"><' + time + '></td>'
+      + '<td class="text">' + msg + '</td>'
+      + '</tr>'
+      + '</table>';
+    break;
+    
+  case MSG_TYPE:
+    msg_html = '<table class="message">'
+      + '<tr>'
+      + '<td class="time"><' + time + '></td>'
+      + '<td class="nick">' + nick + ':</td>'
+      + '<td class="text">' + msg + '</td>'
+      + '</tr>'
+      + '</table>';
+    break;
+  }
+  logElement.append(msg_html);
+  scrollDown();
 }
 
 // Convert date to military time

@@ -31,9 +31,12 @@ body {
   }
 }
 
-.nick {
+.system {
+  color: #777;
+}
+
+.nick, .text {
   padding-left: 0.5em;
-  padding-right: 0.5em;
 }
 
 #toolbar {

@@ -36,6 +36,10 @@ io.sockets.on('connection', function(socket) {
       // Only set nick if one has not been assigned
       if (existing_nick === null) {
         socket.set('nick', nick);
+        io.sockets.emit('join', {
+          time: (new Date()).getTime(),
+          nick: nick
+        });
       }
     });
   });
