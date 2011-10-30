@@ -27,7 +27,11 @@ function validate(ticket, server_res, callback) {
     res.on('data', function(chunk) {
       var data = chunk.toString().split("\n");
       var netid = (data[0] == 'yes') ? data[1] : null;
-      callback(netid);
+      if (netid === null) {
+        server_res.send("You are not authorized to use this appplication.");
+      } else {
+        callback(netid);
+      }
     });
   }).on('error', function(e) {
     console.log("Error during validation: " + e.message);
