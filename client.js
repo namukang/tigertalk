@@ -35,7 +35,7 @@ function addMessage(time, nick, msg, type) {
   var msg_html;
   switch (type) {
   case JOIN_TYPE:
-    msg = nick + " has joined the room.";
+    msg = nick + " joined the room.";
     msg_html = '<table class="message system">'
       + '<tr>'
       + '<td class="time"><' + time + '></td>'
@@ -55,7 +55,7 @@ function addMessage(time, nick, msg, type) {
     break;
 
   case PART_TYPE:
-    msg = nick + " has left the room.";
+    msg = nick + " left the room.";
     msg_html = '<table class="message system">'
       + '<tr>'
       + '<td class="time"><' + time + '></td>'
