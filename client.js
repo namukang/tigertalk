@@ -6,7 +6,8 @@ var PART_TYPE = "part";
 
 // Seed number used to give nicks different colors for every session
 var SEED;
-var COLORS = ['red', 'orange', 'green', 'blue', 'purple'];
+var orange = '#FA7F00';
+var COLORS = ['red', orange, 'green', 'blue', 'purple'];
 
 var CONFIG = {
   focus: true, // whether document has focus
