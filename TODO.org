@@ -3,7 +3,7 @@
    - Eventually we want to use Net IDs instead of user chosen nicks
 
 * Bugs
-** TODO Get rid of ticket information in URL after authenticating
+** DONE Get rid of ticket information in URL after authenticating
    - Possible approach:
      - if GET '/' with no query:
        - redirect to CAS

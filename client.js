@@ -16,10 +16,24 @@ var CONFIG = {
   unread: 0 // number of unread messages
 }
 
+function readCookie(name) {
+  var nameEQ = name + "=";
+  var cookies = document.cookie.split(';');
+  for (var i = 0; i < cookies.length; i++) {
+	var cookie = cookies[i];
+	while (cookie.charAt(0) == ' ') {
+      cookie = cookie.substring(1, cookie.length);
+    }
+	if (cookie.indexOf(nameEQ) == 0) {
+      return cookie.substring(nameEQ.length, cookie.length);
+    }
+  }
+  return null;
+}
+
 // Send nick upon connecting
 socket.on('connect', function() {
-  var cookieName = "netid=";
-  var nick = document.cookie.substring(cookieName.length);
+  var nick = readCookie("netid");
   NICK = nick;
   socket.emit('set_nick', nick);
 });

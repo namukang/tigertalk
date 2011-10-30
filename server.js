@@ -10,10 +10,7 @@ var num_users = 0;
 
 // Routing
 app.get('/', function(req, res) {
-  cas.authenticate(req, res, function(netid) {
-    res.cookie("netid", netid);
-    res.sendfile(__dirname + '/index.html');
-  });
+  cas.authenticate(req, res);
 });
 
 app.get('/client.js', function(req, res) {
