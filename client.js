@@ -119,7 +119,7 @@ function addMessage(time, nick, msg, type) {
     var text = nick + " left the room.";
     var content = '<tr>'
       + time_html
-      + '<td class="text">' + msg + '</td>'
+      + '<td class="text">' + text + '</td>'
       + '</tr>';
     messageElement.html(content);
     break;
