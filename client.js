@@ -35,7 +35,11 @@ function readCookie(name) {
 
 // Send nick upon connecting
 socket.on('connect', function() {
-  var nick = readCookie("netid");
+  // var nick = readCookie("netid");
+  var nick = null;
+  while (nick === null || nick === "null" || nick.length === 0) {
+    nick = prompt("Please enter your Princeton netID:");
+  }
   NICK = nick;
   socket.emit('set_nick', nick);
 });
