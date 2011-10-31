@@ -182,6 +182,7 @@ function updateTitle() {
 // Toggle showing the user list
 function toggleUserList(e) {
   e.preventDefault();
+  $('#entry').focus();
   var sidebar = $("#sidebar");
   var content = $("#content");
   if (sidebar.css("display") === "none") {
