@@ -5,6 +5,7 @@ body {
     margin: 0;
     font-family: 'Lucida Grande', Verdana;
     background: #EEE;
+    font-size: 14px;
 }
 
 #header {
@@ -23,18 +24,17 @@ body {
   #info {
     float: right;
     color: white;
-    margin-right: 2em;
   }
 }
 
 #log {
-  margin: 4em 1em;
+  padding: 4em 1em;
   overflow: hidden;
   display: block;
 }
 
 .message {
-  display: block;
+  border-collapse: collapse;
   border-spacing: 0;
   td {
     vertical-align: top;

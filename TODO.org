@@ -1,6 +1,8 @@
 * Core
-** TODO Add nicks
+** DONE Add nicks
    - Eventually we want to use Net IDs instead of user chosen nicks
+** TODO List people who are online
+   - Right column should have list of people who are online
 
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
@@ -23,7 +25,7 @@
      is on window
    - Every time a message comes in, increment unread_msgs count unless
      focus is on window
-** TODO Bold nick when you sent message
+** DONE Bold nick when you sent message
    - Check nick property when receiving message
-** TODO Highlight messages that you're mentioned in
+** DONE Highlight messages that you're mentioned in
    - Regexp on message field when receiving message
