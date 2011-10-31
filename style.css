@@ -1,0 +1,78 @@
+html, body {
+  height: 100%; }
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Lucida Grande', Verdana;
+  background: #EEE;
+  font-size: 14px; }
+
+#header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  border-bottom: 1px black solid;
+  background: black;
+  text-decoration: none;
+  height: 50px; }
+  #header #logo {
+    padding: 1em;
+    font-size: 125%;
+    float: left;
+    color: #fa7f00; }
+  #header #user-link {
+    padding: 1em;
+    float: right;
+    color: white;
+    text-decoration: none; }
+    #header #user-link:hover {
+      text-decoration: underline; }
+
+#content {
+  position: absolute;
+  top: 50px;
+  bottom: 50px;
+  overflow: auto;
+  float: left;
+  width: 85%; }
+  #content #log {
+    overflow: hidden;
+    margin: 1em; }
+
+#sidebar {
+  position: absolute;
+  top: 50px;
+  bottom: 50px;
+  overflow: auto;
+  border-left: 1px solid #777;
+  right: 0;
+  width: 15%; }
+  #sidebar #user-list {
+    margin: 1em; }
+
+table.message {
+  border-collapse: collapse;
+  border-spacing: 0; }
+  table.message td {
+    vertical-align: top; }
+
+.owner .nick {
+  font-weight: bold; }
+
+.system, .time {
+  color: #777; }
+
+.nick, .text {
+  padding-left: 0.5em; }
+
+#toolbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 50px; }
+  #toolbar #entry {
+    font-size: 100%;
+    width: 100%;
+    padding: 1em;
+    margin: 0; }
