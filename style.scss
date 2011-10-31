@@ -11,24 +11,25 @@ body {
 #header {
   position: fixed;
   top: 0;
-  padding: 1em;
   width: 100%;
   border-bottom: 1px black solid;
   background: black;
   text-decoration: none;
   #logo {
+    padding: 1em;
     font-size: 125%;
     float: left;
     color: $orange;
   }
   #info {
+    padding: 1em;
     float: right;
     color: white;
   }
 }
 
 #log {
-  padding: 4em 1em;
+  padding: 5em 1em;
   overflow: hidden;
   display: block;
 }
