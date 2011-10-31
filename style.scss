@@ -28,10 +28,14 @@ body {
     float: left;
     color: $orange;
   }
-  #info {
+  #user-link {
     padding: 1em;
     float: right;
     color: white;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
@@ -40,7 +44,6 @@ body {
   top: $header-height;
   bottom: $toolbar-height;
   overflow: auto;
-  display: block;
   float: left;
   width: 85%;
   #log {
@@ -53,13 +56,12 @@ body {
   position: absolute;
   top: $header-height;
   bottom: $toolbar-height;
+  overflow: auto;
   border-left: 1px solid #777;
   right: 0;
   width: 15%;
   #user-list {
-    overflow: auto;
-    padding: 1em;
-    padding-top: 0;
+    margin: 1em;
   }
 }
 

@@ -179,6 +179,25 @@ function updateTitle() {
   }
 }
 
+// Toggle showing the user list
+function toggleUserList(e) {
+  e.preventDefault();
+  var sidebar = $("#sidebar");
+  var content = $("#content");
+  if (sidebar.css("display") === "none") {
+    content.css("width", "85%");
+    sidebar.animate({
+      width: 'toggle'
+    }, 500);
+  } else {
+    sidebar.animate({
+      width: 'toggle'
+    }, 500, function() {
+      content.css("width", "100%");
+    });
+  }
+}
+
 $(function() {
   // Set seed
   SEED = Math.floor(Math.random() * COLORS.length);
@@ -208,4 +227,7 @@ $(function() {
     CONFIG.unread = 0;
     updateTitle();
   });
+
+  // Manage showing the user list
+  $('#user-link').click(toggleUserList);
 });
