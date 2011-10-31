@@ -1,11 +1,17 @@
 $orange: #FA7F00;
+$header-height: 50px;
+$toolbar-height: 50px;
+
+html, body {
+  height: 100%;
+}
 
 body {
-    padding: 0;
-    margin: 0;
-    font-family: 'Lucida Grande', Verdana;
-    background: #EEE;
-    font-size: 14px;
+  padding: 0;
+  margin: 0;
+  font-family: 'Lucida Grande', Verdana;
+  background: #EEE;
+  font-size: 14px;
 }
 
 #header {
@@ -15,6 +21,7 @@ body {
   border-bottom: 1px black solid;
   background: black;
   text-decoration: none;
+  height: $header-height;
   #logo {
     padding: 1em;
     font-size: 125%;
@@ -28,13 +35,35 @@ body {
   }
 }
 
-#log {
-  padding: 5em 1em;
-  overflow: hidden;
+#content {
+  position: absolute;
+  top: $header-height;
+  bottom: $toolbar-height;
+  overflow: auto;
   display: block;
+  float: left;
+  width: 85%;
+  #log {
+    overflow: hidden;
+    margin: 1em;
+  }
 }
 
-.message {
+#sidebar {
+  position: absolute;
+  top: $header-height;
+  bottom: $toolbar-height;
+  border-left: 1px solid #777;
+  right: 0;
+  width: 15%;
+  #user-list {
+    overflow: auto;
+    padding: 1em;
+    padding-top: 0;
+  }
+}
+
+table.message {
   border-collapse: collapse;
   border-spacing: 0;
   td {
@@ -58,6 +87,7 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
+  height: $toolbar-height;
   #entry {
     font-size: 100%;
     width: 100%;

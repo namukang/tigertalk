@@ -10,7 +10,8 @@ var num_users = 0;
 
 // Routing
 app.get('/', function(req, res) {
-  cas.authenticate(req, res);
+  // cas.authenticate(req, res);
+  res.sendfile(__dirname + '/index.html');
 });
 
 app.get('/client.js', function(req, res) {
@@ -21,8 +22,8 @@ app.get('/style.css', function(req, res) {
   res.sendfile(__dirname + '/style.css');
 });
 
-app.get('/jquery-1.2.6.min.js', function(req, res) {
-  res.sendfile(__dirname + '/jquery-1.2.6.min.js');
+app.get('/jquery-1.6.4.min.js', function(req, res) {
+  res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
 
 // Check if text only contains whitespace

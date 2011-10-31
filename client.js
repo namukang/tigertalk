@@ -124,8 +124,9 @@ function addMessage(time, nick, msg, type) {
     messageElement.html(content);
     break;
   }
+  var prev_scroll_height = $("#content").prop("scrollHeight");
   $("#log").append(messageElement);
-  scrollDown();
+  scrollDown(prev_scroll_height);
 }
 
 // Convert date to military time
@@ -159,10 +160,13 @@ function sendMessage(msg) {
   socket.emit('client_send', msg);
 }
 
-// Scroll to the newest messages
-function scrollDown() {
-  // FIXME: scroll only when user is already scrolled to the bottom
-  window.scrollBy(0, 100000000000);
+// Scroll to the newest messages if previously fully scrolled
+function scrollDown(prev_scroll_height) {
+  var content = $('#content');
+  var atBottom = (content.scrollTop() === prev_scroll_height - content.height());
+  if (atBottom) {
+    content.scrollTop(content.prop("scrollHeight") - content.height());
+  }
   $("#entry").focus();
 }
 
