@@ -5,7 +5,8 @@ var express = require('express')
 var app = express.createServer();
 var io = sio.listen(app);
 app.use(express.cookieParser());
-app.listen(8001);
+var port = process.env.PORT || 3000;
+app.listen(port);
 // Maps users to the number of connections they have
 var userDict = {};
 // List of unique users
