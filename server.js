@@ -6,7 +6,10 @@ var app = express.createServer();
 var io = sio.listen(app);
 app.use(express.cookieParser());
 app.listen(8001);
-var num_users = 0;
+// Maps users to the number of connections they have
+var userDict = {};
+// List of unique users
+var userList = [];
 
 // Routing
 app.get('/', function(req, res) {
@@ -32,6 +35,15 @@ function isBlank(text) {
   return (text.match(blank) !== null);
 }
 
+function removeFromUserList(nick) {
+  for (var i = 0; i < userList.length; i++) {
+    if (userList[i] === nick) {
+      userList.splice(i, 1);
+      break;
+    }
+  }
+}
+
 // Messaging
 io.sockets.on('connection', function(socket) {
   // Set nick upon connection
@@ -40,12 +52,24 @@ io.sockets.on('connection', function(socket) {
       // Only set nick if one has not been assigned
       if (existing_nick === null) {
         socket.set('nick', nick);
-        num_users++;
-        io.sockets.emit('join', {
-          time: (new Date()).getTime(),
-          nick: nick,
-          num_users: num_users
+        // Populate the user list for the client
+        socket.emit('populate', {
+          user_list: userList
         });
+        // Only alert other users of connect if this is user's initial
+        // connection
+        if (!userDict.hasOwnProperty(nick) || userDict[nick] === 0) {
+          // Number of connections for this user is 1
+          userDict[nick] = 1;
+          // Add to user list after populating client
+          userList.push(nick);
+          io.sockets.emit('join', {
+            time: (new Date()).getTime(),
+            nick: nick
+          });
+        } else {
+          userDict[nick] += 1;
+        }
       }
     });
   });
@@ -63,13 +87,18 @@ io.sockets.on('connection', function(socket) {
   });
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
-    num_users--;
     socket.get('nick', function(err, nick) {
-      io.sockets.emit('part', {
-        time: (new Date()).getTime(),
-        nick: nick,
-        num_users: num_users
-      });
+      // Reduce number of connections by 1
+      userDict[nick] -= 1;
+      // Only alert other users of disconnect if user has no more
+      // connections
+      if (userDict[nick] === 0) {
+        removeFromUserList(nick);
+        io.sockets.emit('part', {
+          time: (new Date()).getTime(),
+          nick: nick
+        });
+      }
     });
   });
 });

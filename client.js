@@ -11,6 +11,8 @@ var SEED;
 var orange = '#FA7F00';
 var COLORS = ['red', orange, 'green', 'blue', 'purple'];
 
+var USERS = [];
+
 var CONFIG = {
   focus: true, // whether document has focus
   unread: 0 // number of unread messages
@@ -52,18 +54,48 @@ socket.on('server_send', function(data) {
 socket.on('join', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, null, JOIN_TYPE);
-  updateNumUsers(data.num_users);
+  addToUserList(data.nick);
+  updateNumUsers();
 });
 
 // User left room
 socket.on('part', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, null, PART_TYPE);
-  updateNumUsers(data.num_users);
+  removeFromUserList(data.nick);
+  updateNumUsers();
 });
 
-function updateNumUsers(num_users) {
-  $("#num_users").html(num_users);
+// Populate the user list
+socket.on('populate', function(data) {
+  var user_list = data.user_list;
+  for (var i = 0; i < user_list.length; i++) {
+    addToUserList(user_list[i]);
+  }
+  updateNumUsers();
+});
+
+function addToUserList(nick) {
+  USERS.push(nick);
+  var userList = $('#users');
+  var userElem = $(document.createElement('li'));
+  userElem.addClass(nick);
+  userElem.html(nick);
+  userList.prepend(userElem);
+}
+
+function removeFromUserList(nick) {
+  for (var i = 0; i < USERS.length; i++) {
+    if (USERS[i] === nick) {
+      USERS.splice(i, 1);
+      break;
+    }
+  }
+  $('#users .' + nick).first().remove();
+}
+
+function updateNumUsers() {
+  $(".num_users").html(USERS.length);
 }
 
 // Assign a color to each nick
@@ -78,9 +110,6 @@ function getColor(nick) {
 
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
-  if (nick === null) {
-    nick = "null";
-  }
   var messageElement = $(document.createElement("table"));
   messageElement.addClass("message");
 

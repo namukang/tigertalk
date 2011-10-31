@@ -1,18 +1,20 @@
 * Core
 ** DONE Add nicks
    - Eventually we want to use Net IDs instead of user chosen nicks
-** TODO List people who are online
+** DONE List people who are online
    - Right column should have list of people who are online
+** DONE Manage same user signing in multiple times
+   - When a user signs in multiple times, they don't show up in the
+     user list multiple times; instead, they are brought to the
+     conversation
+** DONE Remove user count and replace with array of unique users
+   - Also, don't send the user count on every join/part; let the user
+     manage all of that client side after seeding the user list/count
 
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
-   - Possible approach:
-     - if GET '/' with no query:
-       - redirect to CAS
-     - if GET '/' with ticket query:
-       - POST to '/' with ticket query
-     - if POST '/':
-       - read ticket and validate
+   - Solution: assign user a cookie containing ticket and redirect to
+     home
 ** TODO Width 100% overflows with padding
 ** TODO Only scroll to bottom when user is already fully scrolled
 ** TODO Whitespace in beginning of message is ignored in table (feature?)
