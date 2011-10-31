@@ -10,8 +10,8 @@ var num_users = 0;
 
 // Routing
 app.get('/', function(req, res) {
-  cas.authenticate(req, res);
-  // res.sendfile(__dirname + '/index.html');
+  // cas.authenticate(req, res);
+  res.sendfile(__dirname + '/index.html');
 });
 
 app.get('/client.js', function(req, res) {

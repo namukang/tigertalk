@@ -214,11 +214,11 @@ $(function() {
   var ENTER = 13; // keycode for enter
   entry.keypress(function(e) {
     if (e.keyCode != ENTER) return;
-    var msg = entry.attr("value");
+    var msg = entry.val();
     if (!isBlank(msg)) {
       sendMessage(msg);
     }
-    entry.attr("value", ""); // clear entry field
+    entry.val(""); // clear entry field
   });
 
   // Listen for browser events to update unread messages correctly
