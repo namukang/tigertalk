@@ -78,6 +78,9 @@ function getColor(nick) {
 
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
+  if (nick === null) {
+    nick = "null";
+  }
   var messageElement = $(document.createElement("table"));
   messageElement.addClass("message");
 

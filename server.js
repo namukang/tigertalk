@@ -7,15 +7,11 @@ var io = sio.listen(app);
 app.use(express.cookieParser());
 app.listen(8001);
 var num_users = 0;
-var DEBUG = true;
 
 // Routing
 app.get('/', function(req, res) {
-  if (DEBUG) {
-    res.sendfile(__dirname + '/index.html');
-  } else {
-    cas.authenticate(req, res);
-  }
+  cas.authenticate(req, res);
+  // res.sendfile(__dirname + '/index.html');
 });
 
 app.get('/client.js', function(req, res) {
