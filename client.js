@@ -273,10 +273,7 @@ function toggleAbout(e) {
 
 // Notify server of disconnection
 $(window).unload(function() {
-  $.get("/part", {
-    nick: NICK
-  });
-  // socket.disconnect();
+  socket.disconnectSync();
 });
 
 $(function() {
