@@ -267,4 +267,7 @@ $(function() {
 
   // Manage showing the user list
   $('#user-link').click(toggleUserList);
+
+  // Disconnect when closing window
+  window.onbeforeunload = socket.emit('disconnect');
 });

@@ -76,7 +76,7 @@ io.sockets.on('connection', function(socket) {
   socket.on('set_nick', function(nick) {
     socket.get('nick', function(err, existing_nick) {
       // Only set nick if one has not been assigned
-      if (existing_nick === null) {
+      if (existing_nick === null && nick !== null) {
         socket.set('nick', nick);
         // Populate the user list for the client
         socket.emit('populate', {
@@ -116,9 +116,11 @@ io.sockets.on('connection', function(socket) {
     socket.get('nick', function(err, nick) {
       // Reduce number of connections by 1
       userDict[nick] -= 1;
+      console.log(userDict); // REMOVE
       // Only alert other users of disconnect if user has no more
       // connections
       if (userDict[nick] === 0) {
+        delete userDict[nick];
         removeFromUserList(nick);
         io.sockets.emit('part', {
           time: (new Date()).getTime(),
