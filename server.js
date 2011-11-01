@@ -3,6 +3,7 @@ var express = require('express')
 , cas = require('./cas');
 
 var app = express.createServer();
+var port = process.env.PORT || 3000;
 
 // Configuration
 app.configure(function() {
@@ -10,8 +11,6 @@ app.configure(function() {
 });
 
 app.configure('development', function() {
-  var port = process.env.PORT || 3000;
-  app.set('port', port);
   app.use(express.errorHandler({
     dumpExceptions: true,
     showStack: true
@@ -19,12 +18,11 @@ app.configure('development', function() {
 });
 
 app.configure('production', function() {
-  app.set('port', 80);
   app.use(express.errorHandler());
 });
 
-app.listen(app.settings.port);
-console.log("Server listening on port %d", app.settings.port);
+app.listen(port);
+console.log("Server listening on port %d", port);
 
 var io = sio.listen(app);
 
