@@ -241,38 +241,36 @@ function toggleUserList(e) {
   e.preventDefault();
   $('#entry').focus();
   var sidebar = $("#sidebar");
-  var content = $("#content");
-  if (sidebar.css("display") === "none") {
-    content.css("width", "85%");
-    sidebar.animate({
-      width: 'toggle'
-    }, 500);
-  } else {
-    sidebar.animate({
-      width: 'toggle'
-    }, 500, function() {
-      content.css("width", "100%");
-    });
-  }
+  var main = $(".main");
+  main.width("85%");
+  sidebar.animate({
+    width: 'toggle'
+  }, function() {
+    if (sidebar.is(":hidden")) {
+      main.width("100%");
+    }
+  });
 }
 
 // Show About content
-function showAbout(e) {
-  e.preventDefault();
-  $("#log").hide();
-  $("#about").slideDown();
-}
-
-// Show Chat content
-function showChat(e) {
+function toggleAbout(e) {
   e.preventDefault();
   $('#entry').focus();
-  $("#about").hide();
-  $("#log").slideDown(function() {
-    scrollDown();
+  var extra = $("#extra");
+  var content = $("#content");
+  var header = $("#header");
+  content.offset({
+    top: header.height() + extra.height()
+  });
+  extra.slideToggle(function() {
+    if (extra.is(":hidden")) {
+      content.offset({
+        top: header.height()
+      });
+    }
   });
 }
-  
+
 // Notify server of disconnection
 $(window).unload(function() {
   socket.emit('disconnect');
@@ -308,9 +306,6 @@ $(function() {
     updateTitle();
   });
 
-  // Manage showing the user list
   $('#user-link').click(toggleUserList);
-
-  $('#about-link').click(showAbout);
-  $('#chat-link').click(showChat);
+  $('#about-link').click(toggleAbout);
 });

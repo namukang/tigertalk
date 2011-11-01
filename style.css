@@ -32,14 +32,18 @@ body {
     #header a:hover {
       text-decoration: underline; }
 
-#content {
+.main {
   position: absolute;
   top: 50px;
-  bottom: 50px;
   overflow: auto;
   float: left;
   width: 85%; }
-  #content #log, #content #about {
+  .main#content {
+    bottom: 50px; }
+  .main#extra {
+    height: 175px;
+    border-bottom: 1px solid #777; }
+  .main #log, .main #about {
     overflow: hidden;
     margin: 1em; }
 

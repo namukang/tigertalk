@@ -43,13 +43,19 @@ body {
   }
 }
 
-#content {
+.main {
   position: absolute;
   top: $header-height;
-  bottom: $toolbar-height;
   overflow: auto;
   float: left;
   width: 85%;
+  &#content {
+    bottom: $toolbar-height;
+  }
+  &#extra {
+    height: 175px;
+    border-bottom: 1px solid #777;
+  }
   #log, #about {
     overflow: hidden;
     margin: 1em;
