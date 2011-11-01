@@ -26,6 +26,9 @@
    - [ ] Facebook ads
    - [ ] Google Analytics
    - [X] Team email
+** TODO Better security
+   - Don't let client decide nickname; they will just hold the ticket
+     which will serve as a unique ID
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
