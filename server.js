@@ -27,10 +27,10 @@ console.log("Server listening on port %d", port);
 var io = sio.listen(app);
 
 // Use long-polling since Heroku does not support WebSockets
-io.configure(function () {
-  io.set("transports", ["xhr-polling"]);
-  io.set("polling duration", 10);
-});
+// io.configure(function () {
+//   io.set("transports", ["xhr-polling"]);
+//   io.set("polling duration", 10);
+// });
 
 // Maps users to the number of connections they have
 var userDict = {};

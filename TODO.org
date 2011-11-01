@@ -16,11 +16,16 @@
 ** TODO Users names aren't bolded in online list
 ** TODO Users remain signed in after quitting
    - Look at Ryan Dahl's chat server
+     - Use a get request with the user's id
+     - Our problem is that we don't have a mapping from a random ID to
+       a the nick/netid. We have just the netid for the socket so
+       anyone can just sign off another user if they so wish. We don't
+       want that!
 ** TODO Deployment
-   - Facebook page
-   - Facebook ads
-   - Google Analytics
-   - Team email
+   - [ ] Facebook page
+   - [ ] Facebook ads
+   - [ ] Google Analytics
+   - [X] Team email
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
