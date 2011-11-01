@@ -12,15 +12,30 @@
   <body>
     <div id="header">
       <div id="logo">TigerTalk</div>
-      <a id="user-link" href="#"><span class="num_users"></span> users online</a>
+      <div id="links">
+        <a id="chat-link" href="#">Chat</a>
+        <span>|</span>
+        <a id="about-link" href="#">About</a>
+        <span>|</span>
+        <a id="user-link" href="#"><span class="num_users">?</span>
+        users online</a>
+      </div>
     </div>
     <div id="content">
       <div id="log">
       </div>
+      <div id="about" style="display: none">
+        <h3 style="margin-top: 0">TigerTalk</h3>
+        <p>TigerTalk is a way for Princeton students to engage in
+        awesome conversations with students they would otherwise
+        never have met.</p>
+        <p>I'd love to hear your feedback and ideas! Email me at
+        <a href="mailto:dan@dskang.com">dan@dskang.com</a>.</p>
+      </div>
     </div>
     <div id="sidebar">
       <div id="user-list">
-        <span id="users-title">Online Users (<span class="num_users"></span>)</span>
+        <span id="users-title">Online Users (<span class="num_users">?</span>)</span>
         <ul id="users">
         </ul>
       </div>

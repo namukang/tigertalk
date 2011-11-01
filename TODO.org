@@ -11,7 +11,7 @@
    - Also, don't send the user count on every join/part; let the user
      manage all of that client side after seeding the user list/count
 
-** TODO Add contact info for feedback
+** DONE Add contact info for feedback
 ** DONE Sort the online list
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating

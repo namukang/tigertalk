@@ -21,12 +21,15 @@ body {
     font-size: 125%;
     float: left;
     color: #fa7f00; }
-  #header #user-link {
-    padding: 1em;
+  #header #links {
     float: right;
+    padding: 1em;
+    color: white; }
+  #header a {
+    padding: 0 1em;
     color: white;
     text-decoration: none; }
-    #header #user-link:hover {
+    #header a:hover {
       text-decoration: underline; }
 
 #content {
@@ -36,7 +39,7 @@ body {
   overflow: auto;
   float: left;
   width: 85%; }
-  #content #log {
+  #content #log, #content #about {
     overflow: hidden;
     margin: 1em; }
 

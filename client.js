@@ -175,9 +175,12 @@ function addMessage(time, nick, msg, type) {
     messageElement.html(content);
     break;
   }
-  var prev_scroll_height = $("#content").prop("scrollHeight");
+  // Scroll to bottom only if already scrolled to bottom
+  var atBottom = scrolledToBottom();
   $("#log").append(messageElement);
-  scrollDown(prev_scroll_height);
+  if (atBottom) {
+    scrollDown();
+  }
 }
 
 // Convert date to military time
@@ -211,13 +214,16 @@ function sendMessage(msg) {
   socket.emit('client_send', msg);
 }
 
-// Scroll to the newest messages if previously fully scrolled
-function scrollDown(prev_scroll_height) {
+// Return true if content is scrolled to bottom
+function scrolledToBottom() {
   var content = $('#content');
-  var atBottom = (content.scrollTop() === prev_scroll_height - content.height());
-  if (atBottom) {
-    content.scrollTop(content.prop("scrollHeight") - content.height());
-  }
+  return (content.scrollTop() === content.prop("scrollHeight") - content.height());
+}
+
+// Scroll to the newest messages
+function scrollDown() {
+  var content = $('#content');
+  content.scrollTop(content.prop("scrollHeight") - content.height());
   $("#entry").focus();
 }
 
@@ -250,6 +256,22 @@ function toggleUserList(e) {
   }
 }
 
+// Show About content
+function showAbout(e) {
+  e.preventDefault();
+  $("#log").hide();
+  $("#about").show();
+}
+
+// Show Chat content
+function showChat(e) {
+  e.preventDefault();
+  $('#entry').focus();
+  $("#about").hide();
+  $("#log").show();
+  scrollDown();
+}
+  
 $(function() {
   // Set seed
   SEED = Math.floor(Math.random() * COLORS.length);
@@ -282,4 +304,7 @@ $(function() {
 
   // Manage showing the user list
   $('#user-link').click(toggleUserList);
+
+  $('#about-link').click(showAbout);
+  $('#chat-link').click(showChat);
 });

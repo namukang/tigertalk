@@ -28,9 +28,13 @@ body {
     float: left;
     color: $orange;
   }
-  #user-link {
-    padding: 1em;
+  #links {
     float: right;
+    padding: 1em;
+    color: white;
+  }
+  a {
+    padding: 0 1em;
     color: white;
     text-decoration: none;
     &:hover {
@@ -46,7 +50,7 @@ body {
   overflow: auto;
   float: left;
   width: 85%;
-  #log {
+  #log, #about {
     overflow: hidden;
     margin: 1em;
   }
