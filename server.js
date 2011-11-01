@@ -114,12 +114,14 @@ io.sockets.on('connection', function(socket) {
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
     socket.get('nick', function(err, nick) {
+      if (nick === null) return;
       // Reduce number of connections by 1
       userDict[nick] -= 1;
-      console.log(userDict); // REMOVE
       // Only alert other users of disconnect if user has no more
       // connections
       if (userDict[nick] === 0) {
+        // Remove user from dictionary if they have no more
+        // connections
         delete userDict[nick];
         removeFromUserList(nick);
         io.sockets.emit('part', {
