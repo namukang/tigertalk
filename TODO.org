@@ -13,6 +13,14 @@
 
 ** DONE Add contact info for feedback
 ** DONE Sort the online list
+** TODO Users names aren't bolded in online list
+** TODO Users remain signed in after quitting
+   - Look at Ryan Dahl's chat server
+** TODO Deployment
+   - Facebook page
+   - Facebook ads
+   - Google Analytics
+   - Team email
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to

@@ -273,6 +273,11 @@ function showChat(e) {
   });
 }
   
+// Notify server of disconnection
+$(window).unload(function() {
+  socket.emit('disconnect');
+});
+
 $(function() {
   // Set seed
   SEED = Math.floor(Math.random() * COLORS.length);
