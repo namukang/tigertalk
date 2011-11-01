@@ -272,9 +272,9 @@ function toggleAbout(e) {
 }
 
 // Notify server of disconnection
-window.onbeforeunload = function() {
+$(window).unload(function() {
   socket.disconnectSync();
-}
+});
 
 $(function() {
   // Set seed
