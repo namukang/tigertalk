@@ -3,10 +3,37 @@ var express = require('express')
 , cas = require('./cas');
 
 var app = express.createServer();
+
+// Configuration
+app.configure(function() {
+  app.use(express.cookieParser());
+});
+
+app.configure('development', function() {
+  var port = process.env.PORT || 3000;
+  app.set('port', port);
+  app.use(express.errorHandler({
+    dumpExceptions: true,
+    showStack: true
+  }));
+});
+
+app.configure('production', function() {
+  app.set('port', 80);
+  app.use(express.errorHandler());
+});
+
+app.listen(app.settings.port);
+console.log("Server listening on port %d", app.settings.port);
+
 var io = sio.listen(app);
-app.use(express.cookieParser());
-var port = process.env.PORT || 3000;
-app.listen(port);
+
+// Use long-polling since Heroku does not support WebSockets
+io.configure(function () {
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 10);
+});
+
 // Maps users to the number of connections they have
 var userDict = {};
 // List of unique users
