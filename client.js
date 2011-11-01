@@ -96,7 +96,7 @@ function addToUserList(nick) {
     var userElem = $(document.createElement('li'));
     userElem.addClass(curNick);
     if (curNick === NICK) {
-      userElem.css("font-weight", "bold");
+      userElem.addClass('self');
     }
     userElem.html(curNick);
     userList.append(userElem);
@@ -153,7 +153,7 @@ function addMessage(time, nick, msg, type) {
     // Bold your nickname if it is mentioned in a message
     var nick_re = new RegExp(NICK);
     if (nick_re.test(msg)) {
-      msg = msg.replace(NICK, '<span style="font-weight: bold">' + NICK + '</span>');
+      msg = msg.replace(NICK, '<span class="self">' + NICK + '</span>');
     }
 
     var color = getColor(nick);

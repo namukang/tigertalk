@@ -66,7 +66,7 @@ table.message {
   table.message td {
     vertical-align: top; }
 
-.owner .nick {
+.owner .nick, .self {
   font-weight: bold; }
 
 .system, .time {
