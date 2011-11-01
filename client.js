@@ -72,20 +72,32 @@ socket.on('part', function(data) {
 
 // Populate the user list
 socket.on('populate', function(data) {
-  var user_list = data.user_list;
-  for (var i = 0; i < user_list.length; i++) {
-    addToUserList(user_list[i]);
+  // data.user_list does not need to be sorted since the immediately
+  // following 'join' will sort the list
+  USERS = data.user_list;
+  var userList = $('#users');
+  for (var i = 0; i < USERS.length; i++) {
+    var nick = USERS[i];
+    var userElem = $(document.createElement('li'));
+    userElem.addClass(nick);
+    userElem.html(nick);
+    userList.append(userElem);
   }
   updateNumUsers();
 });
 
 function addToUserList(nick) {
   USERS.push(nick);
+  USERS.sort();
   var userList = $('#users');
-  var userElem = $(document.createElement('li'));
-  userElem.addClass(nick);
-  userElem.html(nick);
-  userList.prepend(userElem);
+  userList.empty();
+  for (var i = 0; i < USERS.length; i++) {
+    var curNick = USERS[i];
+    var userElem = $(document.createElement('li'));
+    userElem.addClass(curNick);
+    userElem.html(curNick);
+    userList.append(userElem);
+  }
 }
 
 function removeFromUserList(nick) {

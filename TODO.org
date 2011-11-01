@@ -12,7 +12,7 @@
      manage all of that client side after seeding the user list/count
 
 ** TODO Add contact info for feedback
-** TODO Sort the online list
+** DONE Sort the online list
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
