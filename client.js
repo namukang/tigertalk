@@ -273,7 +273,7 @@ function toggleAbout(e) {
 
 // Notify server of disconnection
 $(window).unload(function() {
-  socket.emit('disconnect');
+  socket.disconnect();
 });
 
 $(function() {
