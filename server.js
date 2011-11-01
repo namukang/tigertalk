@@ -3,6 +3,7 @@ var express = require('express')
 , cas = require('./cas');
 
 var app = express.createServer();
+var port = process.env.PORT || 3000;
 
 // Configuration
 app.configure(function() {
@@ -20,7 +21,9 @@ app.configure('production', function() {
   app.use(express.errorHandler());
 });
 
-app.listen(3000);
+app.listen(port);
+console.log("Server listening on port %d", port);
+
 var io = sio.listen(app);
 
 // Use long-polling since Heroku does not support WebSockets
