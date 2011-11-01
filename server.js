@@ -55,6 +55,11 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
 
+app.get('/part', function(req, res) {
+  var nick = req.query.nick;
+  disconnectUser(nick);
+});
+
 // Check if text only contains whitespace
 function isBlank(text) {
   var blank = /^\s*$/;
@@ -66,6 +71,25 @@ function removeFromUserList(nick) {
     if (userList[i] === nick) {
       userList.splice(i, 1);
       break;
+    }
+  }
+}
+
+function disconnectUser(nick) {
+  if (userDict.hasOwnProperty(nick)) {
+    // Reduce number of connections by 1
+    userDict[nick] -= 1;
+    // Only alert other users of disconnect if user has no more
+    // connections
+    if (userDict[nick] === 0) {
+      // Remove user from dictionary if they have no more
+      // connections
+      delete userDict[nick];
+      removeFromUserList(nick);
+      io.sockets.emit('part', {
+        time: (new Date()).getTime(),
+        nick: nick
+      });
     }
   }
 }
@@ -115,20 +139,7 @@ io.sockets.on('connection', function(socket) {
   socket.on('disconnect', function() {
     socket.get('nick', function(err, nick) {
       if (nick === null) return;
-      // Reduce number of connections by 1
-      userDict[nick] -= 1;
-      // Only alert other users of disconnect if user has no more
-      // connections
-      if (userDict[nick] === 0) {
-        // Remove user from dictionary if they have no more
-        // connections
-        delete userDict[nick];
-        removeFromUserList(nick);
-        io.sockets.emit('part', {
-          time: (new Date()).getTime(),
-          nick: nick
-        });
-      }
+      disconnectUser(nick);
     });
   });
 });
