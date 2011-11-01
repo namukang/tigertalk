@@ -95,6 +95,9 @@ function addToUserList(nick) {
     var curNick = USERS[i];
     var userElem = $(document.createElement('li'));
     userElem.addClass(curNick);
+    if (curNick === NICK) {
+      userElem.css("font-weight", "bold");
+    }
     userElem.html(curNick);
     userList.append(userElem);
   }
