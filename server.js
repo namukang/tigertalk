@@ -116,6 +116,7 @@ io.sockets.on('connection', function(socket) {
     socket.get('nick', function(err, nick) {
       // Reduce number of connections by 1
       userDict[nick] -= 1;
+      console.log(userDict);
       // Only alert other users of disconnect if user has no more
       // connections
       if (userDict[nick] === 0) {
