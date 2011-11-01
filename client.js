@@ -260,7 +260,7 @@ function toggleUserList(e) {
 function showAbout(e) {
   e.preventDefault();
   $("#log").hide();
-  $("#about").show();
+  $("#about").slideDown();
 }
 
 // Show Chat content
@@ -268,8 +268,9 @@ function showChat(e) {
   e.preventDefault();
   $('#entry').focus();
   $("#about").hide();
-  $("#log").show();
-  scrollDown();
+  $("#log").slideDown(function() {
+    scrollDown();
+  });
 }
   
 $(function() {
