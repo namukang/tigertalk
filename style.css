@@ -50,6 +50,12 @@ body {
   width: 15%; }
   #sidebar #user-list {
     margin: 1em; }
+    #sidebar #user-list #users-title {
+      white-space: nowrap;
+      font-weight: bold; }
+    #sidebar #user-list #users {
+      list-style-type: square;
+      padding-left: 2em; }
 
 table.message {
   border-collapse: collapse;

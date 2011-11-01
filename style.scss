@@ -62,6 +62,14 @@ body {
   width: 15%;
   #user-list {
     margin: 1em;
+    #users-title {
+      white-space: nowrap;
+      font-weight: bold;
+    }
+    #users {
+      list-style-type: square;
+      padding-left: 2em;
+    }
   }
 }
 
