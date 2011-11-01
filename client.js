@@ -275,7 +275,7 @@ function showChat(e) {
   
 // Notify server of disconnection
 $(window).unload(function() {
-  socket.emit('part');
+  socket.emit('disconnect');
 });
 
 $(function() {
