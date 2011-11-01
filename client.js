@@ -1,4 +1,4 @@
-var socket = io.connect('http://localhost');
+var socket = io.connect('http://localhost:3000');
 
 var MSG_TYPE = "msg";
 var JOIN_TYPE = "join";
