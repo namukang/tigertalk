@@ -7,6 +7,7 @@ var port = process.env.PORT || 3000;
 
 // Configuration
 app.configure(function() {
+  app.use(express.bodyParser());
   app.use(express.cookieParser());
 });
 
@@ -64,13 +65,25 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
 
-app.get('/part', function(req, res) {
-  disconnectUser(req.query.ticket);
+app.post('/part', function(req, res) {
+  var ticket = req.body.ticket;
+  var nick = ticketDict[ticket];
+  // Make sure user has connection before disconnecting them
+  if (userDict.hasOwnProperty(nick)) {
+    disconnectUser(ticket);
+  }
+  res.end();
 });
 
 function randomAuth(res) {
   var randTicket = Math.floor(Math.random() * 999999999);
+  while (ticketDict.hasOwnProperty(randTicket)) {
+    randTicket = Math.floor(Math.random() * 999999999);
+  }
   var randNick = "Tiger #" + Math.floor(Math.random() * 99999);
+  while (userDict.hasOwnProperty(randNick)) {
+    randNick = "Tiger #" + Math.floor(Math.random() * 99999);
+  }
   res.cookie("ticket", randTicket);
   ticketDict[randTicket] = randNick;
   res.sendfile(__dirname + '/index.html');

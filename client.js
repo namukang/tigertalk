@@ -148,7 +148,6 @@ function getColor(nick) {
 
 // Add a message to the log
 function addMessage(time, nick, msg, type) {
-  console.log("Message: nick: " + nick + " type: " + type);
   var messageElement = $(document.createElement("table"));
   messageElement.addClass("message");
 
@@ -299,7 +298,7 @@ function toggleAbout(e) {
 $(window).unload(function() {
   $.ajax({
     url: "/part",
-    type: "GET",
+    type: "POST",
     async: false,
     data: {
       ticket: readCookie("ticket")
