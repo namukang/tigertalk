@@ -96,6 +96,8 @@ socket.on('populate', function(data) {
     userList.append(userElem);
   }
   updateNumUsers();
+  // Remove loading message
+  $("#loading").remove();
 });
 
 function addToUserList(nick) {
@@ -332,4 +334,7 @@ $(function() {
 
   $('#user-link').click(toggleUserList);
   $('#about-link').click(toggleAbout);
+
+  // Showing loading message
+  $("#log").append("<table id='loading'><tr><td>Connecting...</td></tr></table>");
 });
