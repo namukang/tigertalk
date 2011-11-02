@@ -24,7 +24,7 @@
 ** TODO Deployment
    - [ ] Facebook page
    - [ ] Facebook ads
-   - [ ] Google Analytics
+   - [X] Google Analytics
    - [X] Team email
 ** DONE Better security
    - Don't let client decide nickname; they will just hold the ticket
