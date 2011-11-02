@@ -336,5 +336,5 @@ $(function() {
   $('#about-link').click(toggleAbout);
 
   // Showing loading message
-  $("#log").append("<table id='loading'><tr><td>Connecting...</td></tr></table>");
+  $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");
 });
