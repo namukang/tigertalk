@@ -8,7 +8,7 @@ var TYPES = {
 
 var orange = '#FA7F00';
 var CONFIG = {
-  focus: true, // whether document has focus
+  focus: false, // whether document has focus
   unread: 0, // number of unread messages
   users: [], // online users
   nick: null, // user's nick
@@ -248,12 +248,11 @@ function scrolledToBottom() {
 function scrollDown() {
   var content = $('#content');
   content.scrollTop(content.prop("scrollHeight") - content.height());
-  $("#entry").focus();
 }
 
 // Update the document title with number of unread messages
 function updateTitle() {
-  if (CONFIG.unread) {
+  if (CONFIG.unread > 0) {
     document.title = "(" + CONFIG.unread.toString() + ") TigerTalk";
   } else {
     document.title = "TigerTalk";
@@ -322,11 +321,11 @@ $(function() {
   });
 
   // Listen for browser events to update unread messages correctly
-  $(window).bind("blur", function() {
+  $(window).blur(function() {
     CONFIG.focus = false;
   });
 
-  $(window).bind("focus", function() {
+  $(window).focus(function() {
     CONFIG.focus = true;
     CONFIG.unread = 0;
     updateTitle();
