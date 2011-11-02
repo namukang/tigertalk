@@ -64,6 +64,10 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
 
+app.get('/part', function(req, res) {
+  disconnectUser(req.query.ticket);
+});
+
 function randomAuth(res) {
   var randTicket = Math.floor(Math.random() * 999999999);
   var randNick = "Tiger #" + Math.floor(Math.random() * 99999);
@@ -84,6 +88,29 @@ function removeFromUserList(nick) {
       userList.splice(i, 1);
       break;
     }
+  }
+}
+
+function disconnectUser(ticket) {
+  // Don't do anything if user has already been disconnected
+  if (!ticketDict.hasOwnProperty(ticket)) {
+    return;
+  }
+  var nick = ticketDict[ticket];
+  // Remove binding from this ticket to its nick
+  delete ticketDict[ticket];
+  // Reduce number of connections by 1
+  userDict[nick] -= 1;
+  // Only alert other users of disconnect if user has no more
+  // connections
+  if (userDict[nick] === 0) {
+    // Remove binding from nick to number of connections
+    delete userDict[nick];
+    removeFromUserList(nick);
+    io.sockets.emit('part', {
+      time: (new Date()).getTime(),
+      nick: nick
+    });
   }
 }
 
@@ -133,22 +160,7 @@ io.sockets.on('connection', function(socket) {
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
     socket.get('ticket', function(err, ticket) {
-      var nick = ticketDict[ticket];
-      // Remove binding from this ticket to its nick
-      delete ticketDict[ticket];
-      // Reduce number of connections by 1
-      userDict[nick] -= 1;
-      // Only alert other users of disconnect if user has no more
-      // connections
-      if (userDict[nick] === 0) {
-        // Remove binding from nick to number of connections
-        delete userDict[nick];
-        removeFromUserList(nick);
-        io.sockets.emit('part', {
-          time: (new Date()).getTime(),
-          nick: nick
-        });
-      }
+      disconnectUser(ticket);
     });
   });
 });

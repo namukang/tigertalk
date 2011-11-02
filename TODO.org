@@ -13,7 +13,7 @@
 
 ** DONE Add contact info for feedback
 ** DONE Sort the online list
-** TODO Users names aren't bolded in online list
+** DONE Users names aren't bolded in online list
 ** TODO Users remain signed in after quitting
    - Look at Ryan Dahl's chat server
      - Use a get request with the user's id
@@ -26,7 +26,7 @@
    - [ ] Facebook ads
    - [ ] Google Analytics
    - [X] Team email
-** TODO Better security
+** DONE Better security
    - Don't let client decide nickname; they will just hold the ticket
      which will serve as a unique ID
 * Bugs
