@@ -106,7 +106,7 @@ function addToUserList(nick) {
   for (var i = 0; i < CONFIG.users.length; i++) {
     var curNick = CONFIG.users[i];
     var userElem = $(document.createElement('li'));
-    userElem.addClass(nickToClassName(nick));
+    userElem.addClass(nickToClassName(curNick));
     if (curNick === CONFIG.nick) {
       userElem.addClass('self');
     }
