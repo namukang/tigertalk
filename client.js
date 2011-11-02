@@ -8,7 +8,7 @@ var TYPES = {
 
 var orange = '#FA7F00';
 var CONFIG = {
-  focus: false, // whether document has focus
+  focus: true, // whether document has focus
   unread: 0, // number of unread messages
   users: [], // online users
   nick: null, // user's nick
