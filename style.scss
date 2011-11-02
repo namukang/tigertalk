@@ -1,6 +1,7 @@
 $orange: #FA7F00;
 $header-height: 50px;
 $toolbar-height: 50px;
+$sidebar-width: 20%;
 
 html, body {
   height: 100%;
@@ -48,7 +49,7 @@ body {
   top: $header-height;
   overflow: auto;
   float: left;
-  width: 85%;
+  width: 100% - $sidebar-width;
   &#content {
     bottom: $toolbar-height;
   }
@@ -69,11 +70,11 @@ body {
   overflow: auto;
   border-left: 1px solid #777;
   right: 0;
-  width: 15%;
+  width: $sidebar-width;
   #user-list {
     margin: 1em;
+    white-space: nowrap;
     #users-title {
-      white-space: nowrap;
       font-weight: bold;
     }
     #users {

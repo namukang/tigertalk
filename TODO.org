@@ -37,6 +37,8 @@
 ** TODO Only scroll to bottom when user is already fully scrolled
 ** TODO Whitespace in beginning of message is ignored in table (feature?)
 
+** TODO Unread count doesn't show up
+** TODO Users get disconnected randomly
 * Engagement
 ** TODO Add backlog
    - Useful for engaging users the moment they enter the chatroom
@@ -49,3 +51,6 @@
    - Check nick property when receiving message
 ** DONE Highlight messages that you're mentioned in
    - Regexp on message field when receiving message
+
+18A46
+B2593

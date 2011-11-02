@@ -37,7 +37,7 @@ body {
   top: 50px;
   overflow: auto;
   float: left;
-  width: 85%; }
+  width: 80%; }
   .main#content {
     bottom: 50px; }
   .main#extra {
@@ -54,11 +54,11 @@ body {
   overflow: auto;
   border-left: 1px solid #777;
   right: 0;
-  width: 15%; }
+  width: 20%; }
   #sidebar #user-list {
-    margin: 1em; }
+    margin: 1em;
+    white-space: nowrap; }
     #sidebar #user-list #users-title {
-      white-space: nowrap;
       font-weight: bold; }
     #sidebar #user-list #users {
       list-style-type: square;

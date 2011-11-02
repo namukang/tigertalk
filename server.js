@@ -11,6 +11,7 @@ app.configure(function() {
 });
 
 app.configure('development', function() {
+  app.set('address', 'http://localhost:' + port);
   app.use(express.errorHandler({
     dumpExceptions: true,
     showStack: true
@@ -18,29 +19,37 @@ app.configure('development', function() {
 });
 
 app.configure('production', function() {
+  app.set('address', 'http://www.tigertalk.me');
   app.use(express.errorHandler());
 });
 
 app.listen(port);
-console.log("Server listening on port %d", port);
+console.log("Server at %s listening on port %d", app.settings.address, port);
 
 var io = sio.listen(app);
+useLongPolling();
 
 // Use long-polling since Heroku does not support WebSockets
-io.configure(function () {
-  io.set("transports", ["xhr-polling"]);
-  io.set("polling duration", 10);
-});
+function useLongPolling() {
+  io.configure(function () {
+    io.set("transports", ["xhr-polling"]);
+    io.set("polling duration", 10);
+  });
+}
 
-// Maps users to the number of connections they have
+// Maps tickets to nicks
+var ticketDict = {};
+// Maps nicks to their number of connections
 var userDict = {};
 // List of unique users
 var userList = [];
 
 // Routing
 app.get('/', function(req, res) {
-  // cas.authenticate(req, res);
-  res.sendfile(__dirname + '/index.html');
+  // cas.authenticate(req, res, app.settings.address, ticketDict);
+
+  // Use the following when not using CAS
+  randomAuth(res);
 });
 
 app.get('/client.js', function(req, res) {
@@ -54,6 +63,14 @@ app.get('/style.css', function(req, res) {
 app.get('/jquery-1.6.4.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
+
+function randomAuth(res) {
+  var randTicket = Math.floor(Math.random() * 999999999);
+  var randNick = "Tiger #" + Math.floor(Math.random() * 99999);
+  res.cookie("ticket", randTicket);
+  ticketDict[randTicket] = randNick;
+  res.sendfile(__dirname + '/index.html');
+}
 
 // Check if text only contains whitespace
 function isBlank(text) {
@@ -72,37 +89,38 @@ function removeFromUserList(nick) {
 
 // Messaging
 io.sockets.on('connection', function(socket) {
-  // Set nick upon connection
-  socket.on('set_nick', function(nick) {
-    socket.get('nick', function(err, existing_nick) {
-      // Only set nick if one has not been assigned
-      if (existing_nick === null && nick !== null) {
-        socket.set('nick', nick);
-        // Populate the user list for the client
-        socket.emit('populate', {
-          user_list: userList
-        });
-        // Only alert other users of connect if this is user's initial
-        // connection
-        if (!userDict.hasOwnProperty(nick) || userDict[nick] === 0) {
-          // Number of connections for this user is 1
-          userDict[nick] = 1;
-          // Add to user list after populating client
-          userList.push(nick);
-          io.sockets.emit('join', {
-            time: (new Date()).getTime(),
-            nick: nick
-          });
-        } else {
-          userDict[nick] += 1;
-        }
-      }
+  socket.on('identify', function(ticket) {
+    socket.set('ticket', ticket);
+    var nick = ticketDict[ticket];
+    if (nick === undefined) {
+      socket.emit('reconnect');
+      return;
+    }
+    socket.emit('populate', {
+      user_list: userList,
+      nick: nick
     });
+    // Only alert other users of connect if this is user's initial
+    // connection
+    if (!userDict.hasOwnProperty(nick)) {
+      // Number of connections for this user is 1
+      userDict[nick] = 1;
+      // Add to user list after populating client
+      userList.push(nick);
+      io.sockets.emit('join', {
+        time: (new Date()).getTime(),
+        nick: nick
+      });
+    } else {
+      userDict[nick] += 1;
+    }
   });
+
   // Forward received messages to all the clients
   socket.on('client_send', function(msg) {
     if (!isBlank(msg)) {
-      socket.get('nick', function(err, nick) {
+      socket.get('ticket', function(err, ticket) {
+        var nick = ticketDict[ticket];
         io.sockets.emit('server_send', {
           time: (new Date()).getTime(),
           nick: nick,
@@ -111,17 +129,19 @@ io.sockets.on('connection', function(socket) {
       });
     }
   });
+
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
-    socket.get('nick', function(err, nick) {
-      if (nick === null) return;
+    socket.get('ticket', function(err, ticket) {
+      var nick = ticketDict[ticket];
+      // Remove binding from this ticket to its nick
+      delete ticketDict[ticket];
       // Reduce number of connections by 1
       userDict[nick] -= 1;
       // Only alert other users of disconnect if user has no more
       // connections
       if (userDict[nick] === 0) {
-        // Remove user from dictionary if they have no more
-        // connections
+        // Remove binding from nick to number of connections
         delete userDict[nick];
         removeFromUserList(nick);
         io.sockets.emit('part', {

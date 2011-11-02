@@ -1,28 +1,28 @@
 var https = require('https'),
 qs = require('querystring');
 
-var APP_URL = 'http://localhost:8001';
 var HOST_URL = 'fed.princeton.edu';
 
-exports.authenticate = function(req, res) {
+exports.authenticate = function(req, res, app_url, ticketDict) {
   if (req.query.hasOwnProperty("ticket")) {
     res.cookie("ticket", req.query.ticket);
     res.redirect('home');
   } else if (req.cookies.ticket) {
-    validate(req.cookies.ticket, res, function(netid) {
-      res.clearCookie("ticket");
-      res.cookie("netid", netid);
+    validate(req.cookies.ticket, res, app_url, function(netid) {
+      // Add a new user
+      ticketDict[req.cookies.ticket] = netid;
+      console.log(ticketDict);
       res.sendfile(__dirname + '/index.html');
     });
   } else {
-    login_url = "https://" + HOST_URL + "/cas/login?service=" + APP_URL
+    login_url = "https://" + HOST_URL + "/cas/login?service=" + app_url
     res.redirect(login_url);
   }
 };
 
-function validate(ticket, server_res, callback) {
+function validate(ticket, server_res, app_url, callback) {
   var query = qs.stringify({
-    service: APP_URL,
+    service: app_url,
     ticket: ticket
   });
   var options = {
@@ -34,7 +34,8 @@ function validate(ticket, server_res, callback) {
       var data = chunk.toString().split("\n");
       var netid = (data[0] == 'yes') ? data[1] : null;
       if (netid === null) {
-        login_url = "https://" + HOST_URL + "/cas/login?service=" + APP_URL
+        server_res.clearCookie("ticket");
+        login_url = "https://" + HOST_URL + "/cas/login?service=" + app_url
         server_res.redirect(login_url);
       } else {
         callback(netid);

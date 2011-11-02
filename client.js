@@ -1,53 +1,64 @@
 var socket = io.connect(document.location.hostname);
 
-var MSG_TYPE = "msg";
-var JOIN_TYPE = "join";
-var PART_TYPE = "part";
+var TYPES = {
+  msg: "msg",
+  join: "join",
+  part: "part"
+}
 
-var NICK;
-
-// Seed number used to give nicks different colors for every session
-var SEED;
 var orange = '#FA7F00';
-var COLORS = ['red', orange, 'green', 'blue', 'purple'];
-
-var USERS = [];
-
 var CONFIG = {
   focus: true, // whether document has focus
-  unread: 0 // number of unread messages
+  unread: 0, // number of unread messages
+  users: [], // online users
+  nick: null, // user's nick
+  seed: 0, // used to give nicks different colors for every session
+  colors: ['red', 'green', 'blue', 'purple'] // colors for nicks
+}
+
+// Cookie code!
+// http://www.quirksmode.org/js/cookies.html
+function createCookie(name,value,days) {
+  if (days) {
+	var date = new Date();
+	date.setTime(date.getTime()+(days*24*60*60*1000));
+	var expires = "; expires="+date.toGMTString();
+  }
+  else var expires = "";
+  document.cookie = name+"="+value+expires+"; path=/";
 }
 
 function readCookie(name) {
   var nameEQ = name + "=";
-  var cookies = document.cookie.split(';');
-  for (var i = 0; i < cookies.length; i++) {
-	var cookie = cookies[i];
-	while (cookie.charAt(0) == ' ') {
-      cookie = cookie.substring(1, cookie.length);
-    }
-	if (cookie.indexOf(nameEQ) == 0) {
-      return cookie.substring(nameEQ.length, cookie.length);
-    }
+  var ca = document.cookie.split(';');
+  for(var i=0;i < ca.length;i++) {
+	var c = ca[i];
+	while (c.charAt(0)==' ') c = c.substring(1,c.length);
+	if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
   }
   return null;
 }
 
-// Send nick upon connecting
+function eraseCookie(name) {
+  createCookie(name,"",-1);
+}
+// END cookie code
+
+// Need to reestablish identity
+socket.on('reconnect', function() {
+  window.location.reload();
+});
+
+// Identify the socket using its ticket
 socket.on('connect', function() {
-  // var nick = readCookie("netid");
-  var nick = null;
-  while (nick === null || nick === "null" || nick.length === 0) {
-    nick = prompt("Please enter your Princeton netID:");
-  }
-  NICK = nick;
-  socket.emit('set_nick', nick);
+  var ticket = readCookie("ticket");
+  socket.emit('identify', ticket);
 });
 
 // Receive a new message from the server
 socket.on('server_send', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, toStaticHTML(data.msg), MSG_TYPE);
+  addMessage(time, data.nick, toStaticHTML(data.msg), TYPES.msg);
   if (!CONFIG.focus) {
     CONFIG.unread++;
     updateTitle();
@@ -57,7 +68,7 @@ socket.on('server_send', function(data) {
 // New user has joined
 socket.on('join', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, null, JOIN_TYPE);
+  addMessage(time, data.nick, null, TYPES.join);
   addToUserList(data.nick);
   updateNumUsers();
 });
@@ -65,7 +76,7 @@ socket.on('join', function(data) {
 // User left room
 socket.on('part', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, null, PART_TYPE);
+  addMessage(time, data.nick, null, TYPES.part);
   removeFromUserList(data.nick);
   updateNumUsers();
 });
@@ -74,10 +85,11 @@ socket.on('part', function(data) {
 socket.on('populate', function(data) {
   // data.user_list does not need to be sorted since the immediately
   // following 'join' will sort the list
-  USERS = data.user_list;
+  CONFIG.users = data.user_list;
+  CONFIG.nick = data.nick;
   var userList = $('#users');
-  for (var i = 0; i < USERS.length; i++) {
-    var nick = USERS[i];
+  for (var i = 0; i < CONFIG.users.length; i++) {
+    var nick = CONFIG.users[i];
     var userElem = $(document.createElement('li'));
     userElem.addClass(nick);
     userElem.html(nick);
@@ -87,15 +99,15 @@ socket.on('populate', function(data) {
 });
 
 function addToUserList(nick) {
-  USERS.push(nick);
-  USERS.sort();
+  CONFIG.users.push(nick);
+  CONFIG.users.sort();
   var userList = $('#users');
   userList.empty();
-  for (var i = 0; i < USERS.length; i++) {
-    var curNick = USERS[i];
+  for (var i = 0; i < CONFIG.users.length; i++) {
+    var curNick = CONFIG.users[i];
     var userElem = $(document.createElement('li'));
     userElem.addClass(curNick);
-    if (curNick === NICK) {
+    if (curNick === CONFIG.nick) {
       userElem.addClass('self');
     }
     userElem.html(curNick);
@@ -104,9 +116,9 @@ function addToUserList(nick) {
 }
 
 function removeFromUserList(nick) {
-  for (var i = 0; i < USERS.length; i++) {
-    if (USERS[i] === nick) {
-      USERS.splice(i, 1);
+  for (var i = 0; i < CONFIG.users.length; i++) {
+    if (CONFIG.users[i] === nick) {
+      CONFIG.users.splice(i, 1);
       break;
     }
   }
@@ -114,7 +126,7 @@ function removeFromUserList(nick) {
 }
 
 function updateNumUsers() {
-  $(".num_users").html(USERS.length);
+  $(".num_users").html(CONFIG.users.length);
 }
 
 // Assign a color to each nick
@@ -123,8 +135,8 @@ function getColor(nick) {
   for (var i = 0; i < nick.length; i++) {
     nickNum += nick.charCodeAt(i);
   }
-  var index = (nickNum + SEED) % COLORS.length;
-  return COLORS[index];
+  var index = (nickNum + CONFIG.seed) % CONFIG.colors.length;
+  return CONFIG.colors[index];
 }
 
 // Add a message to the log
@@ -134,7 +146,7 @@ function addMessage(time, nick, msg, type) {
 
   var time_html = '<td class="time">[' + time + ']</td>';
   switch (type) {
-  case JOIN_TYPE:
+  case TYPES.join:
     messageElement.addClass("system");
     var text = nick + " joined the room.";
     var content = '<tr>'
@@ -144,19 +156,24 @@ function addMessage(time, nick, msg, type) {
     messageElement.html(content);
     break;
     
-  case MSG_TYPE:
+  case TYPES.msg:
     // Indicate if you are the owner of the message
-    if (nick === NICK) {
+    if (nick === CONFIG.nick) {
       messageElement.addClass("owner");
     }
 
     // Bold your nickname if it is mentioned in a message
-    var nick_re = new RegExp(NICK);
+    var nick_re = new RegExp(CONFIG.nick);
     if (nick_re.test(msg)) {
-      msg = msg.replace(NICK, '<span class="self">' + NICK + '</span>');
+      msg = msg.replace(CONFIG.nick, '<span class="self">' + CONFIG.nick + '</span>');
     }
 
-    var color = getColor(nick);
+    var color = null;
+    if (nick === CONFIG.nick) {
+      color = orange;
+    } else {
+      color = getColor(nick);
+    }
     var content = '<tr>'
       + time_html
       + '<td class="nick" style="color: ' + color + '">' + nick + ':</td>'
@@ -165,7 +182,7 @@ function addMessage(time, nick, msg, type) {
     messageElement.html(content);
     break;
 
-  case PART_TYPE:
+  case TYPES.part:
     messageElement.addClass("system");
     var text = nick + " left the room.";
     var content = '<tr>'
@@ -242,7 +259,7 @@ function toggleUserList(e) {
   $('#entry').focus();
   var sidebar = $("#sidebar");
   var main = $(".main");
-  main.width("85%");
+  main.width("80%");
   sidebar.animate({
     width: 'toggle'
   }, function() {
@@ -273,12 +290,11 @@ function toggleAbout(e) {
 
 // Notify server of disconnection
 $(window).unload(function() {
-  socket.disconnect();
 });
 
 $(function() {
   // Set seed
-  SEED = Math.floor(Math.random() * COLORS.length);
+  CONFIG.seed = Math.floor(Math.random() * CONFIG.colors.length);
 
   // Focus on entry element upon page load
   var entry = $("#entry");
