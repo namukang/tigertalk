@@ -296,8 +296,13 @@ function toggleAbout(e) {
 
 // Notify server of disconnection
 $(window).unload(function() {
-  $.get("/part", {
-    ticket: readCookie("ticket")
+  $.ajax({
+    url: "/part",
+    type: "GET",
+    async: false,
+    data: {
+      ticket: readCookie("ticket")
+    }
   });
 });
 
