@@ -106,7 +106,7 @@ function addToUserList(nick) {
   for (var i = 0; i < CONFIG.users.length; i++) {
     var curNick = CONFIG.users[i];
     var userElem = $(document.createElement('li'));
-    userElem.addClass(curNick);
+    userElem.addClass(nickToClassName(nick));
     if (curNick === CONFIG.nick) {
       userElem.addClass('self');
     }
@@ -122,7 +122,12 @@ function removeFromUserList(nick) {
       break;
     }
   }
-  $('#users .' + nick).first().remove();
+  $('#users .' + nickToClassName(nick)).first().remove();
+}
+
+// Convert nicknames to class names
+function nickToClassName(nick) {
+  return nick.replace("#", "").replace(" ", "_");
 }
 
 function updateNumUsers() {

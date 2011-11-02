@@ -51,6 +51,3 @@
    - Check nick property when receiving message
 ** DONE Highlight messages that you're mentioned in
    - Regexp on message field when receiving message
-
-18A46
-B2593
