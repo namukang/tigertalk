@@ -314,6 +314,7 @@ function toggleAbout(e) {
 
 // Notify server of disconnection
 $(window).unload(function() {
+  socket.disconnect();
   // $.ajax({
   //   url: "/part",
   //   type: "GET",
