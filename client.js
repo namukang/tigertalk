@@ -315,14 +315,14 @@ function toggleAbout(e) {
 // Notify server of disconnection
 $(window).unload(function() {
   socket.disconnect();
-  // $.ajax({
-  //   url: "/part",
-  //   type: "GET",
-  //   async: false,
-  //   data: {
-  //     ticket: CONFIG.ticket
-  //   }
-  // });
+  $.ajax({
+    url: "/part",
+    type: "GET",
+    async: false,
+    data: {
+      ticket: CONFIG.ticket
+    }
+  });
 });
 
 function logout(e) {

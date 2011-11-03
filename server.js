@@ -67,18 +67,18 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
 
-// app.get('/part', function(req, res) {
-//   var ticket = req.query.ticket;
-//   var nick = ticketToNick[ticket];
-//   // Make sure user has connection before disconnecting them
-//   if (nickToSockets.hasOwnProperty(nick)) {
-//     // Just disconnect the first socket since most users will only
-//     // have one socket open at a time
-//     var socket = nickToSockets[nick][0];
-//     disconnectSession(nick, socket);
-//   }
-//   res.end();
-// });
+app.get('/part', function(req, res) {
+  var ticket = req.query.ticket;
+  var nick = ticketToNick[ticket];
+  // Make sure user has connection before disconnecting them
+  if (nickToSockets.hasOwnProperty(nick)) {
+    // BAD SOLUTION FOR NOW: Just disconnect the first socket since
+    // most users will only have one socket open at a time
+    var socket = nickToSockets[nick][0];
+    disconnectSession(nick, socket);
+  }
+  res.end();
+});
 
 function randomAuth(req, res) {
   var cookieTicket = req.cookies.ticket;
