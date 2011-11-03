@@ -158,7 +158,6 @@ io.sockets.on('connection', function(socket) {
     } else {
       userDict[nick] += 1;
     }
-    console.log(userDict); // FIXME
   });
 
   // Forward received messages to all the clients
