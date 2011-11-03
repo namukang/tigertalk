@@ -11,6 +11,7 @@ var CONFIG = {
   focus: true, // whether document has focus
   unread: 0, // number of unread messages
   users: [], // online users
+  ticket: null, // user's ticket
   nick: null, // user's nick
   seed: 0, // used to give nicks different colors for every session
   colors: ['red', 'green', 'blue', 'purple'] // colors for nicks
@@ -51,8 +52,8 @@ socket.on('reconnect', function() {
 
 // Identify the socket using its ticket
 socket.on('connect', function() {
-  var ticket = readCookie("ticket");
-  socket.emit('identify', ticket);
+  CONFIG.ticket = readCookie("ticket");
+  socket.emit('identify', CONFIG.ticket);
 });
 
 // Receive a new message from the server
@@ -301,7 +302,7 @@ $(window).unload(function() {
     type: "GET",
     async: false,
     data: {
-      ticket: readCookie("ticket")
+      ticket: CONFIG.ticket
     }
   });
 });
