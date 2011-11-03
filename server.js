@@ -65,8 +65,8 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
 
-app.post('/part', function(req, res) {
-  var ticket = req.body.ticket;
+app.get('/part', function(req, res) {
+  var ticket = req.query.ticket;
   var nick = ticketDict[ticket];
   // Make sure user has connection before disconnecting them
   if (userDict.hasOwnProperty(nick)) {

@@ -298,7 +298,7 @@ function toggleAbout(e) {
 $(window).unload(function() {
   $.ajax({
     url: "/part",
-    type: "POST",
+    type: "GET",
     async: false,
     data: {
       ticket: readCookie("ticket")
