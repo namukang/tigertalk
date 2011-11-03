@@ -50,7 +50,7 @@ app.get('/', function(req, res) {
   // cas.authenticate(req, res, app.settings.address, ticketDict);
 
   // Use the following when not using CAS
-  randomAuth(res);
+  randomAuth(req, res);
 });
 
 app.get('/client.js', function(req, res) {
@@ -75,18 +75,23 @@ app.get('/part', function(req, res) {
   res.end();
 });
 
-function randomAuth(res) {
-  var randTicket = Math.floor(Math.random() * 999999999);
-  while (ticketDict.hasOwnProperty(randTicket)) {
-    randTicket = Math.floor(Math.random() * 999999999);
+function randomAuth(req, res) {
+  var cookieTicket = req.cookies.ticket;
+  if (cookieTicket && ticketDict.hasOwnProperty(cookieTicket)) {
+    res.sendfile(__dirname + '/index.html');
+  } else {
+    var randTicket = Math.floor(Math.random() * 999999999);
+    while (ticketDict.hasOwnProperty(randTicket)) {
+      randTicket = Math.floor(Math.random() * 999999999);
+    }
+    var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
+    while (userDict.hasOwnProperty(randNick)) {
+      randNick = "Tiger #" + Math.floor(Math.random() * 9999);
+    }
+    res.cookie("ticket", randTicket);
+    ticketDict[randTicket] = randNick;
+    res.sendfile(__dirname + '/index.html');
   }
-  var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
-  while (userDict.hasOwnProperty(randNick)) {
-    randNick = "Tiger #" + Math.floor(Math.random() * 9999);
-  }
-  res.cookie("ticket", randTicket);
-  ticketDict[randTicket] = randNick;
-  res.sendfile(__dirname + '/index.html');
 }
 
 // Check if text only contains whitespace
@@ -106,12 +111,11 @@ function removeFromUserList(nick) {
 
 function disconnectUser(ticket) {
   // Don't do anything if user has already been disconnected
-  if (!ticketDict.hasOwnProperty(ticket)) {
-    return;
-  }
+  // FIXME: ticket is no longer being deleted
+  // if (!ticketDict.hasOwnProperty(ticket)) {
+  //   return;
+  // }
   var nick = ticketDict[ticket];
-  // Remove binding from this ticket to its nick
-  delete ticketDict[ticket];
   // Reduce number of connections by 1
   userDict[nick] -= 1;
   // Only alert other users of disconnect if user has no more
@@ -154,6 +158,7 @@ io.sockets.on('connection', function(socket) {
     } else {
       userDict[nick] += 1;
     }
+    console.log(userDict); // FIXME
   });
 
   // Forward received messages to all the clients
@@ -171,9 +176,10 @@ io.sockets.on('connection', function(socket) {
   });
 
   // Notify others that user has disconnected
-  socket.on('disconnect', function() {
-    socket.get('ticket', function(err, ticket) {
-      disconnectUser(ticket);
-    });
-  });
+  // FIXME: user is being DCed twice
+  // socket.on('disconnect', function() {
+  //   socket.get('ticket', function(err, ticket) {
+  //     disconnectUser(ticket);
+  //   });
+  // });
 });

@@ -8,12 +8,18 @@ exports.authenticate = function(req, res, app_url, ticketDict) {
     res.cookie("ticket", req.query.ticket);
     res.redirect('home');
   } else if (req.cookies.ticket) {
-    validate(req.cookies.ticket, res, app_url, function(netid) {
-      // Add a new user
-      ticketDict[req.cookies.ticket] = netid;
-      console.log(ticketDict);
+    var cookieTicket = req.cookies.ticket;
+    // Don't validate if we already know the user
+    if (ticketDict.hasOwnProperty(cookieTicket)) {
       res.sendfile(__dirname + '/index.html');
-    });
+    } else {
+      validate(cookieTicket, res, app_url, function(netid) {
+        // Add a new user
+        ticketDict[cookieTicket] = netid;
+        console.log(ticketDict); // FIXME
+        res.sendfile(__dirname + '/index.html');
+      });
+    }
   } else {
     redirectToCAS(app_url, res);
   }
