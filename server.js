@@ -80,9 +80,9 @@ function randomAuth(res) {
   while (ticketDict.hasOwnProperty(randTicket)) {
     randTicket = Math.floor(Math.random() * 999999999);
   }
-  var randNick = "Tiger #" + Math.floor(Math.random() * 99999);
+  var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
   while (userDict.hasOwnProperty(randNick)) {
-    randNick = "Tiger #" + Math.floor(Math.random() * 99999);
+    randNick = "Tiger #" + Math.floor(Math.random() * 9999);
   }
   res.cookie("ticket", randTicket);
   ticketDict[randTicket] = randNick;
