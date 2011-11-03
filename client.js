@@ -286,6 +286,7 @@ function toggleAbout(e) {
   content.offset({
     top: header.height() + extra.height()
   });
+  scrollDown();
   extra.slideToggle(function() {
     if (extra.is(":hidden")) {
       content.offset({

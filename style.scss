@@ -90,6 +90,9 @@ table.message {
   td {
     vertical-align: top;
   }
+  .nick {
+    white-space: nowrap;
+  }
 }
 
 .owner .nick, .self {

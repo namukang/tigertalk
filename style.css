@@ -69,6 +69,8 @@ table.message {
   border-spacing: 0; }
   table.message td {
     vertical-align: top; }
+  table.message .nick {
+    white-space: nowrap; }
 
 .owner .nick, .self {
   font-weight: bold; }
