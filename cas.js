@@ -15,6 +15,9 @@ exports.authenticate = function(req, res, app_url, ticketToNick, nickToTicket) {
     } else {
       validate(cookieTicket, res, app_url, function(netid) {
         // Remove previous tickets for this user if any
+        // Effects: User is disconnected from any other sessions not
+        // using this cookie but this is okay since most users will be
+        // using the same cookie
         if (nickToTicket.hasOwnProperty(netid)) {
           var oldTicket = nickToTicket[netid];
           delete ticketToNick[oldTicket];
@@ -25,7 +28,6 @@ exports.authenticate = function(req, res, app_url, ticketToNick, nickToTicket) {
         res.sendfile(__dirname + '/index.html');
       });
     }
-    console.log(ticketToNick); // REMOVE
   } else {
     redirectToCAS(app_url, res);
   }
