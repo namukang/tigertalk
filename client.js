@@ -3,7 +3,8 @@ var socket = io.connect(document.location.hostname);
 var TYPES = {
   msg: "msg",
   join: "join",
-  part: "part"
+  part: "part",
+  logout: "logout"
 }
 
 var orange = '#FA7F00';
@@ -43,7 +44,6 @@ function readCookie(name) {
 function eraseCookie(name) {
   createCookie(name,"",-1);
 }
-// END cookie code
 
 // Need to reestablish identity
 socket.on('reconnect', function() {
@@ -82,11 +82,20 @@ socket.on('part', function(data) {
   updateNumUsers();
 });
 
+// User logged out
+socket.on('logout', function(data) {
+  var time = timeString(new Date(data.time));
+  addMessage(time, null, null, TYPES.logout);
+  $('#users').empty();
+  $('.num_users').html('?');
+  socket.disconnect();
+});
+
 // Populate the user list
 socket.on('populate', function(data) {
-  // data.user_list does not need to be sorted since the immediately
+  // data.nick_list does not need to be sorted since the immediately
   // following 'join' will sort the list
-  CONFIG.users = data.user_list;
+  CONFIG.users = data.nick_list;
   CONFIG.nick = data.nick;
   refreshUserList();
   updateNumUsers();
@@ -196,6 +205,16 @@ function addMessage(time, nick, msg, type) {
       + '</tr>';
     messageElement.html(content);
     break;
+
+  case TYPES.logout:
+    messageElement.addClass("system");
+    var text = "You have been logged out.";
+    var content = '<tr>'
+      + time_html
+      + '<td class="text">' + text + '</td>'
+      + '</tr>';
+    messageElement.html(content);
+    break;
   }
   // Scroll to bottom only if already scrolled to bottom
   var atBottom = scrolledToBottom();
@@ -295,15 +314,20 @@ function toggleAbout(e) {
 
 // Notify server of disconnection
 $(window).unload(function() {
-  $.ajax({
-    url: "/part",
-    type: "GET",
-    async: false,
-    data: {
-      ticket: CONFIG.ticket
-    }
-  });
+  // $.ajax({
+  //   url: "/part",
+  //   type: "GET",
+  //   async: false,
+  //   data: {
+  //     ticket: CONFIG.ticket
+  //   }
+  // });
 });
+
+function logout(e) {
+  e.preventDefault();
+  socket.emit('logout');
+}
 
 $(function() {
   // Set seed
@@ -337,6 +361,7 @@ $(function() {
 
   $('#user-link').click(toggleUserList);
   $('#about-link').click(toggleAbout);
+  $('#logout-link').click(logout);
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");
