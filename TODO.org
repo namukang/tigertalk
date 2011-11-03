@@ -14,7 +14,7 @@
 ** DONE Add contact info for feedback
 ** DONE Sort the online list
 ** DONE Users names aren't bolded in online list
-** TODO Users remain signed in after quitting
+** DONE Users remain signed in after quitting
    - Look at Ryan Dahl's chat server
      - Use a get request with the user's id
      - Our problem is that we don't have a mapping from a random ID to
@@ -34,11 +34,11 @@
    - Solution: assign user a cookie containing ticket and redirect to
      home
 ** TODO Width 100% overflows with padding
-** TODO Only scroll to bottom when user is already fully scrolled
-** TODO Whitespace in beginning of message is ignored in table (feature?)
-
-** TODO Unread count doesn't show up
-** TODO Users get disconnected randomly
+** DONE Only scroll to bottom when user is already fully scrolled
+** DONE Whitespace in beginning of message is ignored in table (feature?)
+   - lololol this is a feature now
+** DONE Unread count doesn't show up
+** DONE Users get disconnected randomly
 * Engagement
 ** TODO Add backlog
    - Useful for engaging users the moment they enter the chatroom
