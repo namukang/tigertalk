@@ -1,3 +1,9 @@
+* Descriptions
+  TigerTalk is a project to connect the Princeton community through an
+  online real-time chat system so that the community as a whole can
+  benefit from stimulating interesting discussions between members of
+  the community who would otherwise never get a chance to meet each
+  other.
 * Core
 ** DONE Add nicks
    - Eventually we want to use Net IDs instead of user chosen nicks
@@ -29,6 +35,9 @@
 ** DONE Better security
    - Don't let client decide nickname; they will just hold the ticket
      which will serve as a unique ID
+** TODO Cache ticket to reduce load times
+   - Instead of destroying the ticket when the socket disconnects, let
+     them use the same ticket with their netid
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
@@ -51,3 +60,6 @@
    - Check nick property when receiving message
 ** DONE Highlight messages that you're mentioned in
    - Regexp on message field when receiving message
+* Feature Requests
+** TODO Smaller, user-created rooms
+** TODO Private messaging

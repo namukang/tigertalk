@@ -15,8 +15,7 @@ exports.authenticate = function(req, res, app_url, ticketDict) {
       res.sendfile(__dirname + '/index.html');
     });
   } else {
-    login_url = "https://" + HOST_URL + "/cas/login?service=" + app_url
-    res.redirect(login_url);
+    redirectToCAS(app_url, res);
   }
 };
 
@@ -35,8 +34,7 @@ function validate(ticket, server_res, app_url, callback) {
       var netid = (data[0] == 'yes') ? data[1] : null;
       if (netid === null) {
         server_res.clearCookie("ticket");
-        login_url = "https://" + HOST_URL + "/cas/login?service=" + app_url
-        server_res.redirect(login_url);
+        redirectToCAS(app_url, server_res);
       } else {
         callback(netid);
       }
@@ -44,4 +42,9 @@ function validate(ticket, server_res, app_url, callback) {
   }).on('error', function(e) {
     console.log("Error during validation: " + e.message);
   });
+}
+
+function redirectToCAS(app_url, res) {
+  login_url = "https://" + HOST_URL + "/cas/login?service=" + app_url
+  res.redirect(login_url);
 }
