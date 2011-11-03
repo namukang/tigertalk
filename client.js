@@ -88,14 +88,7 @@ socket.on('populate', function(data) {
   // following 'join' will sort the list
   CONFIG.users = data.user_list;
   CONFIG.nick = data.nick;
-  var userList = $('#users');
-  for (var i = 0; i < CONFIG.users.length; i++) {
-    var nick = CONFIG.users[i];
-    var userElem = $(document.createElement('li'));
-    userElem.addClass(nick);
-    userElem.html(nick);
-    userList.append(userElem);
-  }
+  refreshUserList();
   updateNumUsers();
   // Remove loading message
   $("#loading").remove();
@@ -104,8 +97,12 @@ socket.on('populate', function(data) {
 function addToUserList(nick) {
   CONFIG.users.push(nick);
   CONFIG.users.sort();
+  $('#users').empty();
+  refreshUserList();
+}
+
+function refreshUserList() {
   var userList = $('#users');
-  userList.empty();
   for (var i = 0; i < CONFIG.users.length; i++) {
     var curNick = CONFIG.users[i];
     var userElem = $(document.createElement('li'));
