@@ -3,8 +3,7 @@ var socket = io.connect(document.location.hostname);
 var TYPES = {
   msg: "msg",
   join: "join",
-  part: "part",
-  logout: "logout"
+  part: "part"
 }
 
 var orange = '#FA7F00';
@@ -80,15 +79,6 @@ socket.on('part', function(data) {
   addMessage(time, data.nick, null, TYPES.part);
   removeFromUserList(data.nick);
   updateNumUsers();
-});
-
-// User logged out
-socket.on('logout', function(data) {
-  var time = timeString(new Date(data.time));
-  addMessage(time, null, null, TYPES.logout);
-  $('#users').empty();
-  $('.num_users').html('?');
-  socket.disconnect();
 });
 
 // Populate the user list
@@ -205,16 +195,6 @@ function addMessage(time, nick, msg, type) {
       + '</tr>';
     messageElement.html(content);
     break;
-
-  case TYPES.logout:
-    messageElement.addClass("system");
-    var text = "You have been logged out.";
-    var content = '<tr>'
-      + time_html
-      + '<td class="text">' + text + '</td>'
-      + '</tr>';
-    messageElement.html(content);
-    break;
   }
   // Scroll to bottom only if already scrolled to bottom
   var atBottom = scrolledToBottom();
@@ -314,20 +294,15 @@ function toggleAbout(e) {
 
 // Notify server of disconnection
 $(window).unload(function() {
-  // $.ajax({
-  //   url: "/part",
-  //   type: "GET",
-  //   async: false,
-  //   data: {
-  //     ticket: CONFIG.ticket
-  //   }
-  // });
+  $.ajax({
+    url: "/part",
+    type: "GET",
+    async: false,
+    data: {
+      ticket: CONFIG.ticket
+    }
+  });
 });
-
-function logout(e) {
-  e.preventDefault();
-  socket.emit('logout');
-}
 
 $(function() {
   // Set seed
@@ -361,7 +336,6 @@ $(function() {
 
   $('#user-link').click(toggleUserList);
   $('#about-link').click(toggleAbout);
-  $('#logout-link').click(logout);
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");

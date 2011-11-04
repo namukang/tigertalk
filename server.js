@@ -38,21 +38,19 @@ function useLongPolling() {
   });
 }
 
-// Maps tickets to nicks one-to-one
+// Maps tickets to nicks
 var ticketToNick = {};
-// Maps nicks to tickets one-to-one
-var nickToTicket = {};
-// Maps nicks to their sockets one-to-many
-var nickToSockets = {};
+// Maps nicks to their number of connections
+var nickToNumConn = {};
 // List of unique users
 var nickList = [];
 
 // Routing
 app.get('/', function(req, res) {
-  // cas.authenticate(req, res, app.settings.address, ticketToNick, nickToTicket);
+  // cas.authenticate(req, res, app.settings.address, ticketToNick);
 
   // Use the following when not using CAS
-  randomAuth(req, res);
+  randomAuth(res);
 });
 
 app.get('/client.js', function(req, res) {
@@ -68,44 +66,27 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
 });
 
 app.get('/part', function(req, res) {
-  // var ticket = req.query.ticket;
-  // var nick = ticketToNick[ticket];
-  // // Make sure user has connection before disconnecting them
-  // if (nickToSockets.hasOwnProperty(nick)) {
-  //   // BAD SOLUTION FOR NOW: Just disconnect the socket if there's
-  //   // only one left
-  //   var sockets = nickToSockets[nick];
-  //   console.log(sockets);
-  //   if (sockets.length == 1) {
-  //     disconnectSession(nick, sockets[0]);
-  //   }
-  // }
-  // res.end();
+  var ticket = req.query.ticket;
+  var nick = ticketToNick[ticket];
+  // Make sure user has connection before disconnecting them
+  if (nickToNumConn.hasOwnProperty(nick)) {
+    disconnectUser(ticket);
+  }
+  res.end();
 });
 
-function randomAuth(req, res) {
-  var cookieTicket = req.cookies.ticket;
-  if (cookieTicket && ticketToNick.hasOwnProperty(cookieTicket)) {
-    res.sendfile(__dirname + '/index.html');
-  } else {
-    var randTicket = Math.floor(Math.random() * 999999999);
-    while (ticketToNick.hasOwnProperty(randTicket)) {
-      randTicket = Math.floor(Math.random() * 999999999);
-    }
-    var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
-    while (nickToSockets.hasOwnProperty(randNick)) {
-      randNick = "Tiger #" + Math.floor(Math.random() * 9999);
-    }
-    res.cookie("ticket", randTicket);
-    // Remove previous tickets for this user if any
-    if (nickToTicket.hasOwnProperty(randNick)) {
-      var oldTicket = nickToTicket[randNick];
-      delete ticketToNick[oldTicket];
-    }
-    nickToTicket[randNick] = randTicket;
-    ticketToNick[randTicket] = randNick;
-    res.sendfile(__dirname + '/index.html');
+function randomAuth(res) {
+  var randTicket = Math.floor(Math.random() * 999999999);
+  while (ticketToNick.hasOwnProperty(randTicket)) {
+    randTicket = Math.floor(Math.random() * 999999999);
   }
+  var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
+  while (nickToNumConn.hasOwnProperty(randNick)) {
+    randNick = "Tiger #" + Math.floor(Math.random() * 9999);
+  }
+  res.cookie("ticket", randTicket);
+  ticketToNick[randTicket] = randNick;
+  res.sendfile(__dirname + '/index.html');
 }
 
 // Check if text only contains whitespace
@@ -124,12 +105,21 @@ function removeFromList(element, list) {
   }
 }
 
-function disconnectSession(nick, socket) {
-  if (!nickToSockets.hasOwnProperty(nick)) return;
-  var sockets = nickToSockets[nick];
-  removeFromList(socket, sockets);
-  if (sockets.length === 0) {
-    delete nickToSockets[nick];
+function disconnectUser(ticket) {
+  // Don't do anything if user has already been disconnected
+  if (!ticketToNick.hasOwnProperty(ticket)) {
+    return;
+  }
+  var nick = ticketToNick[ticket];
+  // Remove binding from this ticket to its nick
+  delete ticketToNick[ticket];
+  // Reduce number of connections by 1
+  nickToNumConn[nick] -= 1;
+  // Only alert other users of disconnect if user has no more
+  // connections
+  if (nickToNumConn[nick] === 0) {
+    // Remove binding from nick to number of connections
+    delete nickToNumConn[nick];
     removeFromList(nick, nickList);
     io.sockets.emit('part', {
       time: (new Date()).getTime(),
@@ -153,8 +143,9 @@ io.sockets.on('connection', function(socket) {
     });
     // Only alert other users of connect if this is user's initial
     // connection
-    if (!nickToSockets.hasOwnProperty(nick)) {
-      nickToSockets[nick] = [socket];
+    if (!nickToNumConn.hasOwnProperty(nick)) {
+      // Number of connections for this user is 1
+      nickToNumConn[nick] = 1;
       // Add to user list after populating client
       nickList.push(nick);
       io.sockets.emit('join', {
@@ -162,7 +153,7 @@ io.sockets.on('connection', function(socket) {
         nick: nick
       });
     } else {
-      nickToSockets[nick].push(socket);
+      nickToNumConn[nick] += 1;
     }
   });
 
@@ -183,36 +174,7 @@ io.sockets.on('connection', function(socket) {
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
     socket.get('ticket', function(err, ticket) {
-      if (ticketToNick.hasOwnProperty(ticket)) {
-        var nick = ticketToNick[ticket];
-        disconnectSession(nick, socket);
-      }
-    });
-  });
-
-  // Log out the user completely
-  socket.on('logout', function() {
-    socket.get('ticket', function(err, ticket) {
-      if (!ticketToNick.hasOwnProperty(ticket)) return;
-      var nick = ticketToNick[ticket];
-      if (!nickToSockets.hasOwnProperty(nick)) return;
-      var sockets = nickToSockets[nick];
-      // Moving from back to front since disconnectSession removes socket
-      // from sockets array
-      for (var i = sockets.length - 1; i >= 0; i--) {
-        var socket = sockets[i];
-        socket.emit('logout', {
-          time: (new Date()).getTime()
-        });
-        // Delete all tickets associated with this user
-        socket.get('ticket', function(err, ticket) {
-          if (ticketToNick.hasOwnProperty(ticket)) {
-            delete ticketToNick[ticket];
-          }
-        });
-        disconnectSession(nick, socket);
-      }
-      delete nickToTicket[nick];
+      disconnectUser(ticket);
     });
   });
 });

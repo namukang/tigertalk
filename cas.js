@@ -3,31 +3,16 @@ qs = require('querystring');
 
 var HOST_URL = 'fed.princeton.edu';
 
-exports.authenticate = function(req, res, app_url, ticketToNick, nickToTicket) {
+exports.authenticate = function(req, res, app_url, ticketToNick) {
   if (req.query.hasOwnProperty("ticket")) {
     res.cookie("ticket", req.query.ticket);
     res.redirect('home');
   } else if (req.cookies.ticket) {
-    var cookieTicket = req.cookies.ticket;
-    // Don't validate if we already know the user
-    if (ticketToNick.hasOwnProperty(cookieTicket)) {
+    validate(req.cookies.ticket, res, app_url, function(netid) {
+      // Add a new user
+      ticketToNick[req.cookies.ticket] = netid;
       res.sendfile(__dirname + '/index.html');
-    } else {
-      validate(cookieTicket, res, app_url, function(netid) {
-        // Remove previous tickets for this user if any
-        // Effects: User is disconnected from any other sessions not
-        // using this cookie but this is okay since most users will be
-        // using the same cookie
-        if (nickToTicket.hasOwnProperty(netid)) {
-          var oldTicket = nickToTicket[netid];
-          delete ticketToNick[oldTicket];
-        }
-        // Add a new user
-        nickToTicket[netid] = cookieTicket;
-        ticketToNick[cookieTicket] = netid;
-        res.sendfile(__dirname + '/index.html');
-      });
-    }
+    });
   } else {
     redirectToCAS(app_url, res);
   }
