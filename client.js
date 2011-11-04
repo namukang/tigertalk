@@ -56,7 +56,7 @@ socket.on('connect', function() {
 });
 
 // Receive a new message from the server
-socket.on('server_send', function(data) {
+socket.on('msg', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.nick, toStaticHTML(data.msg), TYPES.msg);
   if (!CONFIG.focus) {
@@ -91,6 +91,13 @@ socket.on('populate', function(data) {
   updateNumUsers();
   // Remove loading message
   $("#loading").remove();
+  // Populate log with backlog
+  var backlog = data.backlog;
+  for (var i = 0; i < backlog.length; i++) {
+    var msg = backlog[i];
+    var time = timeString(new Date(msg.time));
+    addMessage(time, msg.nick, msg.msg, msg.type);
+  }
 });
 
 function addToUserList(nick) {
@@ -161,6 +168,11 @@ function addMessage(time, nick, msg, type) {
     break;
     
   case TYPES.msg:
+    if (nick === undefined) {
+      console.log("Undefined nick in msg!");
+      console.log("msg: " + msg);
+      return;
+    }
     // Indicate if you are the owner of the message
     if (nick === CONFIG.nick) {
       messageElement.addClass("owner");
@@ -302,6 +314,14 @@ $(window).unload(function() {
       ticket: CONFIG.ticket
     }
   });
+  // On page refresh, unload happens AFTER get request (setting the
+  // new cookie) so we'd be clearing the cookie before we got to use
+  // it if we clear the cookie unconditionally on unload
+  if (CONFIG.ticket === readCookie("ticket")) {
+    // We want to clear the cookie so that we don't have to validate
+    // an invalid ticket and then validate a valid ticket
+    eraseCookie('ticket');
+  }
 });
 
 $(function() {

@@ -5,6 +5,8 @@ var express = require('express')
 var app = express.createServer();
 var port = process.env.PORT || 3000;
 
+var BACKLOG_SIZE = 200;
+
 // Configuration
 app.configure(function() {
   app.use(express.bodyParser());
@@ -44,6 +46,8 @@ var ticketToNick = {};
 var nickToNumConn = {};
 // List of unique users
 var nickList = [];
+// Back log
+var backLog = [];
 
 // Routing
 app.get('/', function(req, res) {
@@ -68,10 +72,7 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
 app.get('/part', function(req, res) {
   var ticket = req.query.ticket;
   var nick = ticketToNick[ticket];
-  // Make sure user has connection before disconnecting them
-  if (nickToNumConn.hasOwnProperty(nick)) {
-    disconnectUser(ticket);
-  }
+  disconnectUser(ticket);
   res.end();
 });
 
@@ -105,6 +106,14 @@ function removeFromList(element, list) {
   }
 }
 
+function addToBackLog(type, msg) {
+  msg['type'] = type;
+  backLog.push(msg);
+  while (backLog.length > BACKLOG_SIZE) {
+    backLog.unshift();
+  }
+}
+
 function disconnectUser(ticket) {
   // Don't do anything if user has already been disconnected
   if (!ticketToNick.hasOwnProperty(ticket)) {
@@ -121,25 +130,30 @@ function disconnectUser(ticket) {
     // Remove binding from nick to number of connections
     delete nickToNumConn[nick];
     removeFromList(nick, nickList);
-    io.sockets.emit('part', {
+    var msg = {
       time: (new Date()).getTime(),
       nick: nick
-    });
+    };
+    io.sockets.emit('part', msg);
+    addToBackLog('part', msg);
   }
 }
 
 // Messaging
 io.sockets.on('connection', function(socket) {
   socket.on('identify', function(ticket) {
-    socket.set('ticket', ticket);
-    var nick = ticketToNick[ticket];
-    if (nick === undefined) {
+    // Occurs when user loses their connection but remains on the
+    // application so they try to reconnect with an invalid ticket
+    if (!ticketToNick.hasOwnProperty(ticket)) {
       socket.emit('reconnect');
       return;
     }
+    socket.set('ticket', ticket);
+    var nick = ticketToNick[ticket];
     socket.emit('populate', {
       nick_list: nickList,
-      nick: nick
+      nick: nick,
+      backlog: backLog
     });
     // Only alert other users of connect if this is user's initial
     // connection
@@ -148,25 +162,29 @@ io.sockets.on('connection', function(socket) {
       nickToNumConn[nick] = 1;
       // Add to user list after populating client
       nickList.push(nick);
-      io.sockets.emit('join', {
+      var msg = {
         time: (new Date()).getTime(),
         nick: nick
-      });
+      };
+      io.sockets.emit('join', msg);
+      addToBackLog('join', msg);
     } else {
       nickToNumConn[nick] += 1;
     }
   });
 
   // Forward received messages to all the clients
-  socket.on('client_send', function(msg) {
-    if (!isBlank(msg)) {
+  socket.on('client_send', function(text) {
+    if (!isBlank(text)) {
       socket.get('ticket', function(err, ticket) {
         var nick = ticketToNick[ticket];
-        io.sockets.emit('server_send', {
+        var msg = {
           time: (new Date()).getTime(),
           nick: nick,
-          msg: msg
-        });
+          msg: text
+        };
+        io.sockets.emit('msg', msg);
+        addToBackLog('msg', msg);
       });
     }
   });

@@ -38,6 +38,11 @@
 ** TODO Cache ticket to reduce load times
    - Instead of destroying the ticket when the socket disconnects, let
      them use the same ticket with their netid
+   - Problem: person is disconnected twice (loses two sessions instead
+     of one) due to socket.disconnect and also the /part b/c socket.io
+     doesn't work as expected on tigertalk.me so multiple sessions is
+     a shitshow
+** TODO Transform links into clickable links
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
@@ -49,7 +54,7 @@
 ** DONE Unread count doesn't show up
 ** DONE Users get disconnected randomly
 * Engagement
-** TODO Add backlog
+** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
 ** DONE Add unread messages to document title
    - Listen for browser events (blur, focus) so we know when the focus
