@@ -159,6 +159,9 @@ function addMessage(time, nick, msg, type) {
   switch (type) {
   case TYPES.join:
     messageElement.addClass("system");
+    if (nick === CONFIG.nick) {
+      messageElement.addClass("self");
+    }
     var text = nick + " joined the room.";
     var content = '<tr>'
       + time_html
