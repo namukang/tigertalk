@@ -198,9 +198,10 @@ function addMessage(time, nick, msg, type) {
     msg = msg.replace(url_re, '<a target="_blank" href="$&">$&</a>');
 
     // Bold your nickname if it is mentioned in a message
-    var nick_re = new RegExp(CONFIG.nick);
-    if (nick_re.test(msg)) {
-      msg = msg.replace(CONFIG.nick, '<span class="self">' + CONFIG.nick + '</span>');
+    var firstname_re = new RegExp(CONFIG.nick.split(' ')[0], 'i');
+    var firstname_match = firstname_re.exec(msg);
+    if (firstname_match) {
+      msg = msg.replace(firstname_match, '<span class="self">' + firstname_match + '</span>');
     }
 
     var color = null;
