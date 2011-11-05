@@ -107,6 +107,8 @@ function validate(token, res, callback) {
           res.send("You must be in the Princeton network to use TigerTalk.");
         }
       }
+    }).on('error', function(e) {
+      console.log("Error in validate: " + e.message);
     });
   });
 }
@@ -120,14 +122,20 @@ function getName(token, callback) {
     path: '/me?' + args
   };
   https.get(options, function(fb_res) {
+    var data = '';
     fb_res.on('data', function(chunk) {
-      var response = JSON.parse(chunk.toString());
+      data += chunk.toString();
+    });
+    fb_res.on('end', function() {
+      var response = JSON.parse(data);
       if (response.hasOwnProperty("error")) {
         res.send(response.error.type + ": " + response.error.message);
       } else {
         callback(response.name);
       }
     });
+  }).on('error', function(e) {
+    console.log("Error in getName: " + e.message);
   });
 }
 
