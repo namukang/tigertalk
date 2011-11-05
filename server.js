@@ -5,7 +5,7 @@ var express = require('express')
 var app = express.createServer();
 var port = process.env.PORT || 3000;
 
-var BACKLOG_SIZE = 200;
+var BACKLOG_SIZE = 50;
 
 // Configuration
 app.configure(function() {

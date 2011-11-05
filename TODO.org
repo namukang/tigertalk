@@ -70,3 +70,4 @@
 ** TODO Smaller, user-created rooms
 ** TODO Private messaging
 ** TODO Autocomplete nicks in entry
+** TODO Let users choose their own colors
