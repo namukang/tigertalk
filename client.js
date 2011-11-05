@@ -3,7 +3,8 @@ var socket = io.connect(document.location.hostname);
 var TYPES = {
   msg: "msg",
   join: "join",
-  part: "part"
+  part: "part",
+  logout: "logout"
 }
 
 var url_re = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s]*(\?\S+)?)?)?/g
@@ -13,6 +14,7 @@ var CONFIG = {
   unread: 0, // number of unread messages
   users: [], // online users
   ticket: null, // user's ticket
+  socket_id: null, // id of socket
   nick: null, // user's nick
   seed: 0, // used to give nicks different colors for every session
   colors: ['red', 'green', 'blue', 'purple', 'fuchsia', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
@@ -53,7 +55,8 @@ socket.on('reconnect', function() {
 // Identify the socket using its ticket
 socket.on('connect', function() {
   CONFIG.ticket = readCookie("ticket");
-  socket.emit('identify', CONFIG.ticket);
+  CONFIG.socket_id = readCookie("socket_id");
+  socket.emit('identify', CONFIG.ticket, CONFIG.socket_id);
 });
 
 // Receive a new message from the server
@@ -80,6 +83,15 @@ socket.on('part', function(data) {
   addMessage(time, data.nick, null, TYPES.part);
   removeFromUserList(data.nick);
   updateNumUsers();
+});
+
+// User logged out
+socket.on('logout', function(data) {
+  var time = timeString(new Date(data.time));
+  addMessage(time, null, null, TYPES.logout);
+  $('#users').empty();
+  $('.num_users').html('?');
+  socket.disconnect();
 });
 
 // Populate the user list
@@ -214,6 +226,16 @@ function addMessage(time, nick, msg, type) {
       + '</tr>';
     messageElement.html(content);
     break;
+
+  case TYPES.logout:
+    messageElement.addClass("system");
+    var text = "You have been logged out.";
+    var content = '<tr>'
+      + time_html
+      + '<td class="text">' + text + '</td>'
+      + '</tr>';
+    messageElement.html(content);
+    break;
   }
   // Scroll to bottom only if already scrolled to bottom
   var atBottom = scrolledToBottom();
@@ -318,18 +340,16 @@ $(window).unload(function() {
     type: "GET",
     async: false,
     data: {
-      ticket: CONFIG.ticket
+      ticket: CONFIG.ticket,
+      socket_id: CONFIG.socket_id
     }
   });
-  // On page refresh, unload happens AFTER get request (setting the
-  // new cookie) so we'd be clearing the cookie before we got to use
-  // it if we clear the cookie unconditionally on unload
-  if (CONFIG.ticket === readCookie("ticket")) {
-    // We want to clear the cookie so that we don't have to validate
-    // an invalid ticket and then validate a valid ticket
-    eraseCookie('ticket');
-  }
 });
+
+function logout(e) {
+  e.preventDefault();
+  socket.emit('logout');
+}
 
 $(function() {
   // Set seed
@@ -363,6 +383,7 @@ $(function() {
 
   $('#user-link').click(toggleUserList);
   $('#about-link').click(toggleAbout);
+  $('#logout-link').click(logout);
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");
