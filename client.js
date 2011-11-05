@@ -14,7 +14,7 @@ var CONFIG = {
   ticket: null, // user's ticket
   nick: null, // user's nick
   seed: 0, // used to give nicks different colors for every session
-  colors: ['red', 'green', 'blue', 'purple'] // colors for nicks
+  colors: ['red', 'green', 'blue', 'purple', 'fuchsia', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
 }
 
 // Cookie code!
