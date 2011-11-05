@@ -110,7 +110,7 @@ function addToBackLog(type, msg) {
   msg['type'] = type;
   backLog.push(msg);
   while (backLog.length > BACKLOG_SIZE) {
-    backLog.unshift();
+    backLog.shift();
   }
 }
 
