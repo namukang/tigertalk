@@ -125,11 +125,7 @@ function getName(token, callback) {
       if (response.hasOwnProperty("error")) {
         res.send(response.error.type + ": " + response.error.message);
       } else {
-        if (response.hasOwnProperty("username")) {
-          callback(response.username);
-        } else {
-          callback(response.name);
-        }
+        callback(response.name);
       }
     });
   });

@@ -35,7 +35,7 @@
 ** DONE Better security
    - Don't let client decide nickname; they will just hold the ticket
      which will serve as a unique ID
-** TODO Cache ticket to reduce load times
+** DONE Cache ticket to reduce load times
    - Instead of destroying the ticket when the socket disconnects, let
      them use the same ticket with their netid
    - Problem: person is disconnected twice (loses two sessions instead
@@ -54,6 +54,7 @@
    - lololol this is a feature now
 ** DONE Unread count doesn't show up
 ** DONE Users get disconnected randomly
+** TODO Remove '#_=_' random crap in URL after authenticating with FB
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
