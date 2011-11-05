@@ -8,6 +8,8 @@ exports.authenticate = function(req, res, app_url, ticketToNick, nickToTicket) {
     res.cookie("ticket", req.query.ticket);
     res.redirect('home');
   } else if (req.cookies.ticket) {
+    var socket_id = Math.floor(Math.random() * 99999999999);
+    res.cookie("socket_id", socket_id);
     var cookieTicket = req.cookies.ticket;
     // Don't validate if we already know the user
     if (ticketToNick.hasOwnProperty(cookieTicket)) {

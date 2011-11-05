@@ -1,5 +1,6 @@
 var express = require('express')
 , sio = require('socket.io')
+, fb = require('./facebook')
 , cas = require('./cas');
 
 var app = express.createServer();
@@ -53,10 +54,14 @@ var backLog = [];
 
 // Routing
 app.get('/', function(req, res) {
+  // Facebook
+  fb.handler(req, res, app.settings.address, ticketToNick, nickToTicket);
+
+  // CAS
   // cas.authenticate(req, res, app.settings.address, ticketToNick, nickToTicket);
 
-  // Use the following when not using CAS
-  randomAuth(req, res);
+  // Random
+  // randomAuth(req, res);
 });
 
 app.get('/client.js', function(req, res) {
