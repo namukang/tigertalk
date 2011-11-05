@@ -6,6 +6,7 @@ var TYPES = {
   part: "part"
 }
 
+var url_re = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s]*(\?\S+)?)?)?/g
 var orange = '#FA7F00';
 var CONFIG = {
   focus: true, // whether document has focus
@@ -180,6 +181,9 @@ function addMessage(time, nick, msg, type) {
     if (nick === CONFIG.nick) {
       messageElement.addClass("owner");
     }
+
+    // Change addresses to links
+    msg = msg.replace(url_re, '<a target="_blank" href="$&">$&</a>');
 
     // Bold your nickname if it is mentioned in a message
     var nick_re = new RegExp(CONFIG.nick);

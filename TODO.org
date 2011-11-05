@@ -43,7 +43,7 @@
      doesn't work as expected on tigertalk.me so multiple sessions is
      a shitshow
    - Solution: Give each session a unique ID through a cookie
-** TODO Transform links into clickable links
+** DONE Transform links into clickable links
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
