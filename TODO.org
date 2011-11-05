@@ -42,6 +42,7 @@
      of one) due to socket.disconnect and also the /part b/c socket.io
      doesn't work as expected on tigertalk.me so multiple sessions is
      a shitshow
+   - Solution: Give each session a unique ID through a cookie
 ** TODO Transform links into clickable links
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
@@ -68,3 +69,4 @@
 * Feature Requests
 ** TODO Smaller, user-created rooms
 ** TODO Private messaging
+** TODO Autocomplete nicks in entry
