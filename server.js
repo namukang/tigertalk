@@ -77,6 +77,10 @@ app.get('/jquery-1.6.4.min.js', function(req, res) {
   res.sendfile(__dirname + '/jquery-1.6.4.min.js');
 });
 
+app.get('/favicon.ico', function(req, res) {
+  res.sendfile(__dirname + '/favicon.ico');
+});
+
 app.get('/part', function(req, res) {
   var ticket = req.query.ticket;
   var nick = ticketToNick[ticket];
