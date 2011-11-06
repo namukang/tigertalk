@@ -205,6 +205,7 @@ io.sockets.on('connection', function(socket) {
   // Forward received messages to all the clients
   socket.on('client_send', function(text) {
     text = sanitize(text).xss();
+    text = sanitize(text).entityEncode();
     if (!isBlank(text)) {
       socket.get('ticket', function(err, ticket) {
         var nick = ticketToNick[ticket];
