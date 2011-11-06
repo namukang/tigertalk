@@ -5,7 +5,7 @@ var APP_ID = '216415578426810';
 var APP_URL = null;
 var APP_SECRET = 'ed06e7f5c6805820c36c573e6146fdb5';
 
-exports.handler = function(req, res, app_url, ticketToNick, nickToTicket) {
+exports.handler = function(req, res, app_url, ticketToData, nickToTicket) {
   APP_URL = app_url + '/';
   if (req.query.hasOwnProperty("error_reason")) {
     // User pressed "Don't Allow"
@@ -24,22 +24,25 @@ exports.handler = function(req, res, app_url, ticketToNick, nickToTicket) {
     res.cookie("socket_id", socket_id);
     var cookieTicket = req.cookies.ticket;
     // Don't validate if we already know the user
-    if (ticketToNick.hasOwnProperty(cookieTicket)) {
+    if (ticketToData.hasOwnProperty(cookieTicket)) {
       res.sendfile(__dirname + '/index.html');
     } else {
       var token = cookieTicket;
-      validate(token, res, function(nick) {
+      validate(token, res, function(nick, link) {
         // Remove previous ticket for this user if one exists
         // Effects: User is disconnected from any other sessions not
         // using this cookie but this is okay since most users will be
         // using the same cookie
         if (nickToTicket.hasOwnProperty(nick)) {
           var oldTicket = nickToTicket[nick];
-          delete ticketToNick[oldTicket];
+          delete ticketToData[oldTicket];
         }
         // Add a new user
         nickToTicket[nick] = cookieTicket;
-        ticketToNick[cookieTicket] = nick;
+        ticketToData[cookieTicket] = {
+          nick: nick,
+          link: link
+        };
         res.sendfile(__dirname + '/index.html');
       });
     }
@@ -61,13 +64,16 @@ function authenticate(code, res, callback) {
     path: '/oauth/access_token?' + args
   };
   https.get(options, function(fb_res) {
+    var data = '';
     fb_res.on('data', function(chunk) {
-      chunk = chunk.toString();
-      if (chunk.indexOf('error') !== -1) {
-        var response = JSON.parse(chunk);
+      data += chunk.toString();
+    });
+    fb_res.on('end', function() {
+      if (data.indexOf('error') !== -1) {
+        var response = JSON.parse(data);
         res.send(response.error.type + ": " + response.error.message);
       } else {
-        var response = qs.parse(chunk.toString());
+        var response = qs.parse(data);
         var access_token = response.access_token;
         callback(access_token);
       }
@@ -87,8 +93,12 @@ function validate(token, res, callback) {
     path: '/fql?' + args
   };
   https.get(options, function(fb_res) {
+    var data = '';
     fb_res.on('data', function(chunk) {
-      var response = JSON.parse(chunk.toString());
+      data += chunk.toString();
+    });
+    fb_res.on('end', function() {
+      var response = JSON.parse(data);
       if (response.hasOwnProperty("error") || response.data.length === 0) {
         res.clearCookie('ticket');
         redirectToFB(res);
@@ -102,7 +112,7 @@ function validate(token, res, callback) {
           }
         }
         if (valid) {
-          getName(token, callback);
+          getData(token, callback);
         } else {
           res.send("You must be in the Princeton network to use TigerTalk.");
         }
@@ -113,7 +123,7 @@ function validate(token, res, callback) {
   });
 }
 
-function getName(token, callback) {
+function getData(token, callback) {
   var args = qs.stringify({
     access_token: token
   });
@@ -131,15 +141,19 @@ function getName(token, callback) {
       if (response.hasOwnProperty("error")) {
         res.send(response.error.type + ": " + response.error.message);
       } else {
-        callback(response.name);
+        callback(response.name, response.link);
       }
     });
   }).on('error', function(e) {
-    console.log("Error in getName: " + e.message);
+    console.log("Error in getData: " + e.message);
   });
 }
 
 function redirectToFB(res) {
-  var login_url = "https://www.facebook.com/dialog/oauth?client_id=" + APP_ID + "&redirect_uri=" + APP_URL;
+  var args = qs.stringify({
+    client_id: APP_ID,
+    redirect_uri: APP_URL
+  });
+  var login_url = "https://www.facebook.com/dialog/oauth?" + args;
   res.redirect(login_url);
 }

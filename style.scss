@@ -79,6 +79,13 @@ body {
     #users {
       list-style-type: square;
       padding-left: 2em;
+      a {
+        color: black;
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
 }

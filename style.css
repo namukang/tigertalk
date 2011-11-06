@@ -62,6 +62,11 @@ body {
     #sidebar #user-list #users {
       list-style-type: square;
       padding-left: 2em; }
+      #sidebar #user-list #users a {
+        color: black;
+        text-decoration: none; }
+        #sidebar #user-list #users a:hover {
+          text-decoration: underline; }
 
 table.message {
   border-collapse: collapse;
