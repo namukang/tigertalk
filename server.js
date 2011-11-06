@@ -206,16 +206,19 @@ io.sockets.on('connection', function(socket) {
 
   // Forward received messages to all the clients
   socket.on('client_send', function(text) {
+    text = text.toString();
     if (!isBlank(text)) {
       socket.get('ticket', function(err, ticket) {
-        var nick = ticketToNick[ticket];
-        var msg = {
-          time: (new Date()).getTime(),
-          nick: nick,
-          msg: text
-        };
-        io.sockets.emit('msg', msg);
-        addToBackLog('msg', msg);
+        if (ticketToNick.hasOwnProperty(ticket)) {
+          var nick = ticketToNick[ticket];
+          var msg = {
+            time: (new Date()).getTime(),
+            nick: nick,
+            msg: text
+          };
+          io.sockets.emit('msg', msg);
+          addToBackLog('msg', msg);
+        }
       });
     }
   });
