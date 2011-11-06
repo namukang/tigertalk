@@ -1,8 +1,7 @@
 var express = require('express')
 , sio = require('socket.io')
 , fb = require('./facebook')
-, cas = require('./cas')
-, sanitize = require('validator').sanitize;
+, cas = require('./cas');
 
 var app = express.createServer();
 var port = process.env.PORT || 3000;
@@ -17,6 +16,7 @@ app.configure(function() {
 
 app.configure('development', function() {
   app.set('address', 'http://localhost:' + port);
+  app.set('fb_auth', false);
   app.use(express.errorHandler({
     dumpExceptions: true,
     showStack: true
@@ -25,6 +25,7 @@ app.configure('development', function() {
 
 app.configure('production', function() {
   app.set('address', 'http://www.tigertalk.me');
+  app.set('fb_auth', true);
   app.use(express.errorHandler());
 });
 
@@ -55,14 +56,15 @@ var backLog = [];
 
 // Routing
 app.get('/', function(req, res) {
-  // Facebook
-  fb.handler(req, res, app.settings.address, ticketToNick, nickToTicket);
-
+  if (app.settings.fb_auth) {
+    // Facebook
+    fb.handler(req, res, app.settings.address, ticketToNick, nickToTicket);
+  } else {
+    // Random
+    randomAuth(req, res);
+  }
   // CAS
   // cas.authenticate(req, res, app.settings.address, ticketToNick, nickToTicket);
-
-  // Random
-  // randomAuth(req, res);
 });
 
 app.get('/client.js', function(req, res) {
@@ -204,8 +206,6 @@ io.sockets.on('connection', function(socket) {
 
   // Forward received messages to all the clients
   socket.on('client_send', function(text) {
-    text = sanitize(text).xss();
-    text = sanitize(text).entityEncode();
     if (!isBlank(text)) {
       socket.get('ticket', function(err, ticket) {
         var nick = ticketToNick[ticket];

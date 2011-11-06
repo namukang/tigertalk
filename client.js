@@ -62,7 +62,7 @@ socket.on('connect', function() {
 // Receive a new message from the server
 socket.on('msg', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, toStaticHTML(data.msg), TYPES.msg);
+  addMessage(time, data.nick, data.msg, TYPES.msg);
   if (!CONFIG.focus) {
     CONFIG.unread++;
     updateTitle();
@@ -210,10 +210,11 @@ function addMessage(time, nick, msg, type) {
     } else {
       color = getColor(nick);
     }
+
     var content = '<tr>'
       + time_html
       + '<td class="nick" style="color: ' + color + '">' + nick + ':</td>'
-      + '<td class="text">' + msg + '</td>'
+      + '<td class="text">' + toStaticHTML(msg) + '</td>'
       + '</tr>';
     messageElement.html(content);
     break;
