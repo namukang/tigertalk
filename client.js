@@ -308,6 +308,7 @@ function toggleUserList(e) {
   var sidebar = $("#sidebar");
   var main = $(".main");
   main.width("80%");
+  scrollDown();
   sidebar.animate({
     width: 'toggle'
   }, function() {
