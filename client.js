@@ -1,3 +1,8 @@
+// Get rid of fragment added by Facebook
+if (window.location.hash === '#_=_') {
+  window.location.hash = "";
+}
+
 var socket = io.connect(document.location.hostname);
 
 var TYPES = {
