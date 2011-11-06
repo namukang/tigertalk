@@ -1,7 +1,8 @@
 var express = require('express')
 , sio = require('socket.io')
 , fb = require('./facebook')
-, cas = require('./cas');
+, cas = require('./cas')
+, sanitize = require('validator').sanitize;
 
 var app = express.createServer();
 var port = process.env.PORT || 3000;
@@ -199,6 +200,7 @@ io.sockets.on('connection', function(socket) {
 
   // Forward received messages to all the clients
   socket.on('client_send', function(text) {
+    text = sanitize(text).xss();
     if (!isBlank(text)) {
       socket.get('ticket', function(err, ticket) {
         var nick = ticketToNick[ticket];
