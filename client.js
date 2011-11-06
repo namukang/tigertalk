@@ -184,6 +184,8 @@ function addMessage(time, nick, msg, type) {
     break;
     
   case TYPES.msg:
+    // Sanitize input
+    msg = toStaticHTML(msg);
     if (nick === undefined) {
       console.log("Undefined nick in msg!");
       console.log("msg: " + msg);
@@ -214,7 +216,7 @@ function addMessage(time, nick, msg, type) {
     var content = '<tr>'
       + time_html
       + '<td class="nick" style="color: ' + color + '">' + nick + ':</td>'
-      + '<td class="text">' + toStaticHTML(msg) + '</td>'
+      + '<td class="text">' + msg + '</td>'
       + '</tr>';
     messageElement.html(content);
     break;
