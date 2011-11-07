@@ -44,7 +44,7 @@
      a shitshow
    - Solution: Give each session a unique ID through a cookie
 ** DONE Transform links into clickable links
-** TODO Make list of names in user list into links to FB profiles
+** DONE Make list of names in user list into links to FB profiles
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
@@ -55,7 +55,7 @@
    - lololol this is a feature now
 ** DONE Unread count doesn't show up
 ** DONE Users get disconnected randomly
-** DONE Remove '#_=_' random crap in URL after authenticating with FB
+** TODO Remove '#_=_' random crap in URL after authenticating with FB
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
