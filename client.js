@@ -385,7 +385,7 @@ function share(e) {
     method: 'feed',
     name: 'TigerTalk',
     message: "Chat with me on TigerTalk!",
-    link: 'https://www.tigertalk.me',
+    link: 'http://www.tigertalk.me',
     description: 'TigerTalk is a real-time chat application exclusively for Princeton students.'
   });
 }
