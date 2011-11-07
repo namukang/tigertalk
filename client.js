@@ -379,6 +379,17 @@ function logout(e) {
   socket.emit('logout');
 }
 
+function share(e) {
+  e.preventDefault();
+  FB.ui({
+    method: 'feed',
+    name: 'TigerTalk',
+    message: "Chat with me on TigerTalk!",
+    link: 'https://www.tigertalk.me',
+    description: 'TigerTalk is a real-time chat application exclusively for Princeton students.'
+  });
+}
+
 $(function() {
   // Set seed
   CONFIG.seed = Math.floor(Math.random() * CONFIG.colors.length);
@@ -412,6 +423,7 @@ $(function() {
   $('#user-link').click(toggleUserList);
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
+  $('#share-link').click(share);
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");

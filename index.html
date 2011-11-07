@@ -23,9 +23,28 @@
     <!-- Google Analytics END -->
   </head>
   <body>
+    <div id="fb-root"></div>
+      <script>
+        window.fbAsyncInit = function() {
+          FB.init({
+            appId      : '216415578426810',
+            status     : true,
+            cookie     : true,
+            xfbml      : true
+          });
+        };
+        (function(d){
+           var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+           js = d.createElement('script'); js.id = id; js.async = true;
+           js.src = "//connect.facebook.net/en_US/all.js";
+           d.getElementsByTagName('head')[0].appendChild(js);
+         }(document));
+      </script>
     <div id="header">
       <div id="logo">TigerTalk</div>
       <div id="links">
+        <a id="share-link" href="#">Share</a>
+        <span>|</span>
         <a id="about-link" href="#">About</a>
         <span>|</span>
         <a id="logout-link" href="#">Log Out</a>
