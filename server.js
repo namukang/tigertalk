@@ -151,9 +151,10 @@ function removeFromList(target, list, property) {
     var remove = (property && curElem[property] === target) || (curElem === target);
     if (remove) {
       list.splice(i, 1);
-      break;
+      return true;
     }
   }
+  return false;
 }
 
 function addToBackLog(type, msg) {
@@ -167,18 +168,20 @@ function addToBackLog(type, msg) {
 function disconnectSocket(nick, socket) {
   if (!nickToSockets.hasOwnProperty(nick)) return;
   var sockets = nickToSockets[nick];
-  removeFromList(socket, sockets, null);
-  console.log("LOG: " + nick + " actually disconnecting");
-  console.log("LOG: " + nick + " has " + sockets.length + " sockets left");
-  if (sockets.length === 0) {
-    delete nickToSockets[nick];
-    removeFromList(nick, userList, 'nick');
-    var msg = {
-      time: (new Date()).getTime(),
-      nick: nick
-    };
-    io.sockets.emit('part', msg);
-    addToBackLog('part', msg);
+  var removed = removeFromList(socket, sockets, null);
+  if (removed) {
+    console.log("LOG: " + nick + " actually disconnecting");
+    console.log("LOG: " + nick + " has " + sockets.length + " sockets left");
+    if (sockets.length === 0) {
+      delete nickToSockets[nick];
+      removeFromList(nick, userList, 'nick');
+      var msg = {
+        time: (new Date()).getTime(),
+        nick: nick
+      };
+      io.sockets.emit('part', msg);
+      addToBackLog('part', msg);
+    }
   }
 }
 
