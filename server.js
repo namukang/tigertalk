@@ -9,10 +9,6 @@ var port = process.env.PORT || 3000;
 var BACKLOG_SIZE = 50;
 
 // Configuration
-io.configure(function() {
-  io.set('close timeout', 0);
-});
-
 app.configure(function() {
   app.use(express.bodyParser());
   app.use(express.cookieParser());
@@ -37,15 +33,11 @@ app.listen(port);
 console.log("Server at %s listening on port %d", app.settings.address, port);
 
 var io = sio.listen(app);
-useLongPolling();
-
-// Use long-polling since Heroku does not support WebSockets
-function useLongPolling() {
-  io.configure(function () {
-    io.set("transports", ["xhr-polling"]);
-    io.set("polling duration", 10);
-  });
-}
+io.configure(function() {
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 10);
+  io.set('close timeout', 0);
+});
 
 // Maps tickets to user data one-to-one
 var ticketToData = {};
