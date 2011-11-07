@@ -53,6 +53,7 @@ exports.handler = function(req, res, app_url, ticketToData, nickToTicket) {
 
 // Obtain the access token for the user
 function authenticate(code, res, callback) {
+  console.log("LOG: called authenticate");
   var args = qs.stringify({
     client_id: APP_ID,
     redirect_uri: APP_URL,
@@ -84,6 +85,7 @@ function authenticate(code, res, callback) {
 // Validate that the user associated with this ticket is a valid
 // Princeton student
 function validate(token, res, callback) {
+  console.log("LOG: called validate");
   var args = qs.stringify({
     q: "SELECT affiliations FROM user WHERE uid = me()",
     access_token: token

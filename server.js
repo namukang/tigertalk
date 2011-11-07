@@ -174,6 +174,7 @@ function disconnectSocket(nick, socket) {
   if (removed) {
     console.log("LOG: " + nick + " actually disconnecting");
     console.log("LOG: " + nick + " has " + sockets.length + " sockets left");
+    console.log(sockets);
     if (sockets.length === 0) {
       delete nickToSockets[nick];
       removeFromList(nick, userList, 'nick');
