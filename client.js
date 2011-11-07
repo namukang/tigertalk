@@ -14,6 +14,12 @@ var TYPES = {
 
 var url_re = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s"]*(\?[^\s"]+)?)?)?/g
 var orange = '#FA7F00';
+var default_show_system = readCookie('show_system');
+if (default_show_system === null || default_show_system === 'true') {
+  default_show_system = true;
+} else {
+  default_show_system = false;
+}
 var CONFIG = {
   focus: true, // whether document has focus
   unread: 0, // number of unread messages
@@ -21,7 +27,7 @@ var CONFIG = {
   ticket: null, // user's ticket
   socket_id: null, // id of socket
   nick: null, // user's nick
-  show_system: true, // whether to show system messages
+  show_system: default_show_system, // whether to show system messages
   seed: 0, // used to give nicks different colors for every session
   colors: ['red', 'green', 'blue', 'purple', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
 }
@@ -399,10 +405,12 @@ function share(e) {
 
 function toggleShowSystem(e) {
   if (CONFIG.show_system) {
+    createCookie('show_system', 'false');
     $('.system').hide();
     CONFIG.show_system = false;
     scrollDown();
   } else {
+    createCookie('show_system', 'true');
     $('.system').show();
     CONFIG.show_system = true;
     scrollDown();
@@ -412,6 +420,11 @@ function toggleShowSystem(e) {
 $(function() {
   // Set seed
   CONFIG.seed = Math.floor(Math.random() * CONFIG.colors.length);
+
+  // Uncheck system messages checkbox appropriately
+  if (!CONFIG.show_system) {
+    $("#system-link").removeAttr("checked");
+  }
 
   // Focus on entry element upon page load
   var entry = $("#entry");
