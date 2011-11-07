@@ -165,7 +165,6 @@ function addToBackLog(type, msg) {
 }
 
 function disconnectSocket(nick, socket) {
-  console.log("LOG: " + nick + " called disconnectsocket");
   if (!nickToSockets.hasOwnProperty(nick)) return;
   var sockets = nickToSockets[nick];
   removeFromList(socket, sockets, null);
