@@ -9,6 +9,10 @@ var port = process.env.PORT || 3000;
 var BACKLOG_SIZE = 50;
 
 // Configuration
+io.configure(function() {
+  io.set('close timeout', 0);
+});
+
 app.configure(function() {
   app.use(express.bodyParser());
   app.use(express.cookieParser());
