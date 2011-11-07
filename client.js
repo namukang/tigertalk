@@ -12,7 +12,7 @@ var TYPES = {
   logout: "logout"
 }
 
-var url_re = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s]*(\?\S+)?)?)?/g
+var url_re = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s"]*(\?[^\s"]+)?)?)?/g
 var orange = '#FA7F00';
 var CONFIG = {
   focus: true, // whether document has focus
@@ -219,7 +219,7 @@ function addMessage(time, user, msg, type) {
     }
 
     // Change addresses to links
-    // msg = msg.replace(url_re, '<a target="_blank" href="$&">$&</a>');
+    msg = msg.replace(url_re, '<a target="_blank" href="$&">$&</a>');
 
     // Bold your nickname if it is mentioned in a message
     var firstname_re = new RegExp(CONFIG.nick.split(' ')[0], 'i');
