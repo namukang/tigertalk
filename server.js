@@ -84,10 +84,10 @@ app.get('/favicon.ico', function(req, res) {
 });
 
 app.get('/part', function(req, res) {
-  console.log("part called");
   var ticket = req.query.ticket;
   if (ticketToData.hasOwnProperty(ticket)) {
     var nick = ticketToData[ticket].nick;
+    console.log(nick + ": called part");
     // Make sure user has connection before disconnecting them
     if (nickToSockets.hasOwnProperty(nick)) {
       var sockets = nickToSockets[nick];
@@ -165,12 +165,12 @@ function addToBackLog(type, msg) {
 }
 
 function disconnectSocket(nick, socket) {
-  console.log("disconnectsocket called.");
+  console.log(nick + ": called disconnectsocket");
   if (!nickToSockets.hasOwnProperty(nick)) return;
-  console.log("actually disconnecting socket");
   var sockets = nickToSockets[nick];
   removeFromList(socket, sockets, null);
-  console.log(nick + " has " + sockets.length + " sockets left.");
+  console.log(nick + ": actually disconnecting");
+  console.log(nick + ": " + sockets.length + " sockets left");
   if (sockets.length === 0) {
     delete nickToSockets[nick];
     removeFromList(nick, userList, 'nick');
@@ -240,10 +240,10 @@ io.sockets.on('connection', function(socket) {
 
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
-    console.log("disconnect called.");
     socket.get('ticket', function(err, ticket) {
       if (ticketToData.hasOwnProperty(ticket)) {
         var nick = ticketToData[ticket].nick;
+        console.log(nick + ": called disconnect");
         disconnectSocket(nick, socket);
       }
     });
@@ -251,10 +251,10 @@ io.sockets.on('connection', function(socket) {
 
   // Log out the user completely
   socket.on('logout', function() {
-    console.log("logout called.");
     socket.get('ticket', function(err, ticket) {
       if (!ticketToData.hasOwnProperty(ticket)) return;
       var nick = ticketToData[ticket].nick;
+      console.log(nick + ": called logout");
       if (!nickToSockets.hasOwnProperty(nick)) return;
       var sockets = nickToSockets[nick];
       // Moving from back to front since disconnectSocket removes socket
