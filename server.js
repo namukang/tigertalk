@@ -1,8 +1,7 @@
 var express = require('express')
 , sio = require('socket.io')
 , fb = require('./facebook')
-, cas = require('./cas')
-, sanitize = require('validator').sanitize;
+, cas = require('./cas');
 
 var app = express.createServer();
 var port = process.env.PORT || 3000;
@@ -221,8 +220,6 @@ io.sockets.on('connection', function(socket) {
   socket.on('client_send', function(text) {
     if (!text) return;
     text = text.toString();
-    text = sanitize(text).xss();
-    text = sanitize(text).entityEncode();
     if (!isBlank(text)) {
       socket.get('ticket', function(err, ticket) {
         if (ticketToData.hasOwnProperty(ticket)) {

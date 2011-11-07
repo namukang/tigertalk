@@ -207,7 +207,7 @@ function addMessage(time, user, msg, type) {
   case TYPES.msg:
     var nick = user;
     // Sanitize input
-    // msg = toStaticHTML(msg);
+    msg = toStaticHTML(msg);
     if (nick === undefined) {
       console.log("Undefined nick in msg!");
       console.log("msg: " + msg);
