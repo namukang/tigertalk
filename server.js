@@ -87,7 +87,7 @@ app.get('/part', function(req, res) {
   var ticket = req.query.ticket;
   if (ticketToData.hasOwnProperty(ticket)) {
     var nick = ticketToData[ticket].nick;
-    console.log(nick + ": called part");
+    console.log("LOG: " + nick + " called part");
     // Make sure user has connection before disconnecting them
     if (nickToSockets.hasOwnProperty(nick)) {
       var sockets = nickToSockets[nick];
@@ -165,12 +165,12 @@ function addToBackLog(type, msg) {
 }
 
 function disconnectSocket(nick, socket) {
-  console.log(nick + ": called disconnectsocket");
+  console.log("LOG: " + nick + " called disconnectsocket");
   if (!nickToSockets.hasOwnProperty(nick)) return;
   var sockets = nickToSockets[nick];
   removeFromList(socket, sockets, null);
-  console.log(nick + ": actually disconnecting");
-  console.log(nick + ": " + sockets.length + " sockets left");
+  console.log("LOG: " + nick + " actually disconnecting");
+  console.log("LOG: " + nick + " has " + sockets.length + " sockets left");
   if (sockets.length === 0) {
     delete nickToSockets[nick];
     removeFromList(nick, userList, 'nick');
@@ -195,6 +195,7 @@ io.sockets.on('connection', function(socket) {
     socket.set('socket_id', socket_id);
     var user = ticketToData[ticket];
     var nick = user.nick;
+    console.log("LOG: " + nick + " connected");
     socket.emit('populate', {
       user_list: userList,
       nick: nick,
@@ -203,6 +204,7 @@ io.sockets.on('connection', function(socket) {
     // Only alert other users of connect if this is user's initial
     // connection
     if (!nickToSockets.hasOwnProperty(nick)) {
+      console.log("LOG: " + nick + " first connection");
       nickToSockets[nick] = [socket];
       // Add to user list after populating client
       userList.push(user);
@@ -243,7 +245,7 @@ io.sockets.on('connection', function(socket) {
     socket.get('ticket', function(err, ticket) {
       if (ticketToData.hasOwnProperty(ticket)) {
         var nick = ticketToData[ticket].nick;
-        console.log(nick + ": called disconnect");
+        console.log("LOG: " + nick + " called disconnect");
         disconnectSocket(nick, socket);
       }
     });
@@ -254,7 +256,7 @@ io.sockets.on('connection', function(socket) {
     socket.get('ticket', function(err, ticket) {
       if (!ticketToData.hasOwnProperty(ticket)) return;
       var nick = ticketToData[ticket].nick;
-      console.log(nick + ": called logout");
+      console.log("LOG: " + nick + " called logout");
       if (!nickToSockets.hasOwnProperty(nick)) return;
       var sockets = nickToSockets[nick];
       // Moving from back to front since disconnectSocket removes socket
