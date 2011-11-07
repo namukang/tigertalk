@@ -114,7 +114,7 @@ function validate(token, res, callback) {
         if (valid) {
           getData(token, callback);
         } else {
-          res.send("You must be in the Princeton network to use TigerTalk.");
+          res.send("You must be in the Princeton network to use TigerTalk. If you are a Princeton student, add Princeton to your networks in Account Settings -> Networks");
         }
       }
     }).on('error', function(e) {
