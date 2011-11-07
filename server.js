@@ -84,6 +84,7 @@ app.get('/favicon.ico', function(req, res) {
 });
 
 app.get('/part', function(req, res) {
+  console.log("part called");
   var ticket = req.query.ticket;
   if (ticketToData.hasOwnProperty(ticket)) {
     var nick = ticketToData[ticket].nick;
@@ -164,7 +165,9 @@ function addToBackLog(type, msg) {
 }
 
 function disconnectSocket(nick, socket) {
+  console.log("disconnectsocket called.");
   if (!nickToSockets.hasOwnProperty(nick)) return;
+  console.log("actually disconnecting socket");
   var sockets = nickToSockets[nick];
   removeFromList(socket, sockets, null);
   if (sockets.length === 0) {
@@ -235,6 +238,7 @@ io.sockets.on('connection', function(socket) {
 
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
+    console.log("disconnect called.");
     socket.get('ticket', function(err, ticket) {
       if (ticketToData.hasOwnProperty(ticket)) {
         var nick = ticketToData[ticket].nick;
@@ -245,6 +249,7 @@ io.sockets.on('connection', function(socket) {
 
   // Log out the user completely
   socket.on('logout', function() {
+    console.log("logout called.");
     socket.get('ticket', function(err, ticket) {
       if (!ticketToData.hasOwnProperty(ticket)) return;
       var nick = ticketToData[ticket].nick;
