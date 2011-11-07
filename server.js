@@ -170,6 +170,7 @@ function disconnectSocket(nick, socket) {
   console.log("actually disconnecting socket");
   var sockets = nickToSockets[nick];
   removeFromList(socket, sockets, null);
+  console.log(nick + " has " + sockets.length + " sockets left.");
   if (sockets.length === 0) {
     delete nickToSockets[nick];
     removeFromList(nick, userList, 'nick');

@@ -45,6 +45,9 @@
    - Solution: Give each session a unique ID through a cookie
 ** DONE Transform links into clickable links
 ** DONE Make list of names in user list into links to FB profiles
+** TODO Text formatting for users
+   - <b>, <i>, /me
+** TODO Open Graph integration
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
