@@ -166,7 +166,7 @@ function removeFromUserList(nick) {
 
 // Convert nicknames to class names
 function nickToClassName(nick) {
-  return nick.toLowerCase().replace("#", "").replace(" ", "_");
+  return nick.toLowerCase().replace("#", "").replace(/\s/g, "_");
 }
 
 function updateNumUsers() {
