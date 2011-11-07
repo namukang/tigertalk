@@ -48,6 +48,7 @@
 ** TODO Text formatting for users
    - <b>, <i>, /me
 ** TODO Open Graph integration
+** DONE Hide joins/parts
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
@@ -66,6 +67,7 @@
      but without the space after http
      it makes an large invisible element that, when moused over, changes the sendMessage() function to append "penis" and to append the XSS code
      (so it's self-replicating)
+** TODO Unread count doesn't show up when page reconnects
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom

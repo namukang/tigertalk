@@ -67,6 +67,13 @@ body {
         text-decoration: none; }
         #sidebar #user-list #users a:hover {
           text-decoration: underline; }
+  #sidebar #prefs {
+    font-size: 90%;
+    color: #777;
+    margin: 1em;
+    white-space: nowrap;
+    position: absolute;
+    bottom: 0; }
 
 table.message {
   border-collapse: collapse;

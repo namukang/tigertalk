@@ -21,6 +21,7 @@ var CONFIG = {
   ticket: null, // user's ticket
   socket_id: null, // id of socket
   nick: null, // user's nick
+  show_system: true, // whether to show system messages
   seed: 0, // used to give nicks different colors for every session
   colors: ['red', 'green', 'blue', 'purple', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
 }
@@ -191,6 +192,9 @@ function addMessage(time, user, msg, type) {
   switch (type) {
   case TYPES.join:
     messageElement.addClass("system");
+    if (!CONFIG.show_system) {
+      messageElement.hide();
+    }
     var userLink = $(document.createElement('a'));
     userLink.attr('href', user.link);
     if (user.nick === CONFIG.nick) {
@@ -246,6 +250,9 @@ function addMessage(time, user, msg, type) {
   case TYPES.part:
     var nick = user;
     messageElement.addClass("system");
+    if (!CONFIG.show_system) {
+      messageElement.hide();
+    }
     var text = nick + " left the room.";
     var content = '<tr>'
       + time_html
@@ -390,6 +397,18 @@ function share(e) {
   });
 }
 
+function toggleShowSystem(e) {
+  if (CONFIG.show_system) {
+    $('.system').hide();
+    CONFIG.show_system = false;
+    scrollDown();
+  } else {
+    $('.system').show();
+    CONFIG.show_system = true;
+    scrollDown();
+  }
+}
+
 $(function() {
   // Set seed
   CONFIG.seed = Math.floor(Math.random() * CONFIG.colors.length);
@@ -424,6 +443,7 @@ $(function() {
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
   $('#share-link').click(share);
+  $('#system-link').click(toggleShowSystem);
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");
