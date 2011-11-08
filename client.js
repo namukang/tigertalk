@@ -142,21 +142,44 @@ function addToUserList(user) {
   refreshUserList();
 }
 
+function setUserLink(user, userLink) {
+  FB.api('/' + user.id, function(response) {
+    user.link = response.link;
+    userLink.attr('href', user.link);
+  });
+}
+
 function refreshUserList() {
   var userList = $('#users');
   for (var i = 0; i < CONFIG.users.length; i++) {
     var user = CONFIG.users[i];
-    var userElem = $(document.createElement('li'));
+    // Create user link
     var userLink = $(document.createElement('a'));
-    userLink.attr('href', user.link);
+    if (!user.link) {
+      setUserLink(user, userLink);
+    }
     userLink.attr('target', '_blank');
-    userLink.html(user.nick);
+    // Create user row
+    var userElem = $(document.createElement('tr'));
+    userLink.html(userElem);
+    // Create nick element
+    var userNick = $(document.createElement('td'));
+    userNick.addClass('nick');
+    userNick.css('color', getColor(user.nick));
+    userNick.html(user.nick);
+    // Create pic element
+    var userPic = $(document.createElement('td'));
+    var img = $(document.createElement('img'));
+    img.attr('src', getPicURL(user.id));
+    userPic.html(img);
+    // Add elements to row
+    userElem.append(userPic);
+    userElem.append(userNick);
     userElem.addClass(nickToClassName(user.nick));
-    userElem.html(userLink);
     if (user.nick === CONFIG.nick) {
       userElem.addClass('self');
     }
-    userList.append(userElem);
+    userList.append(userLink);
   }
 }
 
@@ -181,12 +204,19 @@ function updateNumUsers() {
 
 // Assign a color to each nick
 function getColor(nick) {
+  if (nick === CONFIG.nick) {
+    return orange;
+  }
   var nickNum = 0;
   for (var i = 0; i < nick.length; i++) {
     nickNum += nick.charCodeAt(i);
   }
   var index = (nickNum + CONFIG.seed) % CONFIG.colors.length;
   return CONFIG.colors[index];
+}
+
+function getPicURL(id) {
+  return 'https://graph.facebook.com/' + id + '/picture?type=square';
 }
 
 // Add a message to the log
@@ -201,8 +231,6 @@ function addMessage(time, user, msg, type) {
     if (!CONFIG.show_system) {
       messageElement.hide();
     }
-    var userLink = $(document.createElement('a'));
-    userLink.attr('href', user.link);
     if (user.nick === CONFIG.nick) {
       messageElement.addClass("self");
     }
@@ -238,13 +266,7 @@ function addMessage(time, user, msg, type) {
       msg = msg.replace(firstname_match, '<span class="self">' + firstname_match + '</span>');
     }
 
-    var color = null;
-    if (nick === CONFIG.nick) {
-      color = orange;
-    } else {
-      color = getColor(nick);
-    }
-
+    var color = getColor(nick);
     var content = '<tr>'
       + time_html
       + '<td class="nick" style="color: ' + color + '">' + nick + ':</td>'
