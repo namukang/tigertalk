@@ -51,6 +51,7 @@
 ** DONE Hide joins/parts
 ** DONE Color names in list
 ** DONE FB profile pictures in list
+** TODO Generate color only once (randomly) and store it in user data
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
