@@ -157,6 +157,8 @@ function refreshUserList() {
     var userLink = $(document.createElement('a'));
     if (!user.link) {
       setUserLink(user, userLink);
+    } else {
+      userLink.attr('href', user.link);
     }
     userLink.attr('target', '_blank');
     // Create user row
