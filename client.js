@@ -85,7 +85,8 @@ socket.on('msg', function(data) {
 socket.on('join', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, data.user, null, TYPES.join);
-  addToUserList(data.user);
+  CONFIG.users.push(data.user);
+  refreshUserList();
   updateNumUsers();
 });
 
@@ -129,8 +130,8 @@ socket.on('populate', function(data) {
   }
 });
 
-function addToUserList(user) {
-  CONFIG.users.push(user);
+function refreshUserList() {
+  // Sort list
   CONFIG.users.sort(function(a, b) {
     a = a.nick;
     b = b.nick;
@@ -138,11 +139,9 @@ function addToUserList(user) {
     if (a > b) return 1;
     else return -1;
   });
+  // Empty list
   $('#users').empty();
-  refreshUserList();
-}
-
-function refreshUserList() {
+  // Display new list
   var userList = $('#users');
   for (var i = 0; i < CONFIG.users.length; i++) {
     var user = CONFIG.users[i];
