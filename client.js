@@ -142,24 +142,13 @@ function addToUserList(user) {
   refreshUserList();
 }
 
-function setUserLink(user, userLink) {
-  FB.api('/' + user.id, function(response) {
-    user.link = response.link;
-    userLink.attr('href', user.link);
-  });
-}
-
 function refreshUserList() {
   var userList = $('#users');
   for (var i = 0; i < CONFIG.users.length; i++) {
     var user = CONFIG.users[i];
     // Create user link
     var userLink = $(document.createElement('a'));
-    if (!user.link) {
-      setUserLink(user, userLink);
-    } else {
-      userLink.attr('href', user.link);
-    }
+    userLink.attr('href', user.link);
     userLink.attr('target', '_blank');
     // Create user row
     var userElem = $(document.createElement('tr'));

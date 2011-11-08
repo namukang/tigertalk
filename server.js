@@ -133,7 +133,8 @@ function randomAuth(req, res) {
     nickToTicket[randNick] = randTicket;
     ticketToData[randTicket] = {
       nick: randNick,
-      id: 'dk'
+      id: 'dk',
+      link: 'http://www.facebook.com/dk'
     };
     res.sendfile(__dirname + '/index.html');
   }

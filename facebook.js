@@ -28,7 +28,7 @@ exports.handler = function(req, res, app_url, ticketToData, nickToTicket) {
       res.sendfile(__dirname + '/index.html');
     } else {
       var token = cookieTicket;
-      validate(token, res, function(nick, id) {
+      validate(token, res, function(nick, id, link) {
         // Remove previous ticket for this user if one exists
         // Effects: User is disconnected from any other sessions not
         // using this cookie but this is okay since most users will be
@@ -41,7 +41,8 @@ exports.handler = function(req, res, app_url, ticketToData, nickToTicket) {
         nickToTicket[nick] = cookieTicket;
         ticketToData[cookieTicket] = {
           nick: nick,
-          id: id
+          id: id,
+          link: link
         };
         res.sendfile(__dirname + '/index.html');
       });
@@ -141,7 +142,7 @@ function getData(token, callback) {
       if (response.hasOwnProperty("error")) {
         res.send(response.error.type + ": " + response.error.message);
       } else {
-        callback(response.name, response.id);
+        callback(response.name, response.id, response.link);
       }
     });
   }).on('error', function(e) {
