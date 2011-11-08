@@ -35,7 +35,7 @@ console.log("Server at %s listening on port %d", app.settings.address, port);
 var io = sio.listen(app);
 io.configure(function() {
   io.set("transports", ["xhr-polling"]);
-  io.set("polling duration", 10);
+  io.set("polling duration", 1);
 });
 
 io.configure('production', function() {
