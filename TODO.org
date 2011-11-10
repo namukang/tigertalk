@@ -88,4 +88,6 @@
 ** TODO Smaller, user-created rooms
 ** TODO Private messaging
 ** TODO Autocomplete nicks in entry
-** TODO Let users choose their own colors
+** TODO Ping users by flashing description when they're mentioned
+** TODO "Ding" sound for mentions
+** TODO Shift+enter for new lines
