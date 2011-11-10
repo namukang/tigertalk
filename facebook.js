@@ -5,7 +5,7 @@ var APP_ID = '216415578426810';
 var APP_URL = null;
 var APP_SECRET = 'ed06e7f5c6805820c36c573e6146fdb5';
 
-exports.handler = function(req, res, app_url, ticketToData, nickToTicket) {
+exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) {
   APP_URL = app_url + '/';
   if (req.query.hasOwnProperty("error_reason")) {
     // User pressed "Don't Allow"
@@ -14,17 +14,16 @@ exports.handler = function(req, res, app_url, ticketToData, nickToTicket) {
     // User pressed "Allow"
     var code = req.query.code;
     authenticate(code, res, function(access_token) {
-      var socket_id = Math.floor(Math.random() * 99999999999);
-      res.cookie("socket_id", socket_id);
       res.cookie("ticket", access_token);
-      res.redirect('home');
+      res.redirect('/rooms/' + room);
     });
   } else if (req.cookies.hasOwnProperty('ticket')) {
     var socket_id = Math.floor(Math.random() * 99999999999);
     res.cookie("socket_id", socket_id);
+    res.cookie("room", room);
     var cookieTicket = req.cookies.ticket;
     // Don't validate if we already know the user
-    if (ticketToData.hasOwnProperty(cookieTicket)) {
+    if (ticketToUser.hasOwnProperty(cookieTicket)) {
       res.sendfile(__dirname + '/index.html');
     } else {
       var token = cookieTicket;
@@ -35,11 +34,11 @@ exports.handler = function(req, res, app_url, ticketToData, nickToTicket) {
         // using the same cookie
         if (nickToTicket.hasOwnProperty(nick)) {
           var oldTicket = nickToTicket[nick];
-          delete ticketToData[oldTicket];
+          delete ticketToUser[oldTicket];
         }
         // Add a new user
         nickToTicket[nick] = cookieTicket;
-        ticketToData[cookieTicket] = {
+        ticketToUser[cookieTicket] = {
           nick: nick,
           id: id,
           link: link

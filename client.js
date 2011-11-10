@@ -24,6 +24,7 @@ var CONFIG = {
   focus: true, // whether document has focus
   unread: 0, // number of unread messages
   users: [], // online users
+  room: null, // current room
   ticket: null, // user's ticket
   socket_id: null, // id of socket
   nick: null, // user's nick
@@ -68,7 +69,8 @@ socket.on('reconnect', function() {
 socket.on('connect', function() {
   CONFIG.ticket = readCookie("ticket");
   CONFIG.socket_id = readCookie("socket_id");
-  socket.emit('identify', CONFIG.ticket, CONFIG.socket_id);
+  CONFIG.room = readCookie("room");
+  socket.emit('identify', CONFIG.ticket, CONFIG.socket_id, CONFIG.room);
 });
 
 // Receive a new message from the server
