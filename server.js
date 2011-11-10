@@ -46,27 +46,38 @@ io.configure('production', function() {
 });
 
 // Maps tickets to user data one-to-one
-var ticketToData = {};
+var ticketToUser = {};
 // Maps nicks to tickets one-to-one
-var nickToTicket = {};
+// Used to only keep one ticket for each user
+var nickToTicket = {}; // FIXME: change to user ids
 // Maps nicks to their sockets one-to-many
-var nickToSockets = {};
-// List of unique users
-var userList = [];
-// Back log
-var backLog = [];
+var nickToSockets = {}; // FIXME: change to user ids
+// Maps rooms to a list of unique users
+var roomToUsers = {};
+// Maps rooms to backlog
+var roomToLog = {};
+// Maps room to sockets one-to-many
+// NOTE: A single user may have multiple sockets
+var roomToSockets = {};
+// Map room to last used time
+var roomToTime = {};
 
 // Routing
 app.get('/', function(req, res) {
+  var room = "main";
   if (app.settings.fb_auth) {
     // Facebook
-    fb.handler(req, res, app.settings.address, ticketToData, nickToTicket);
+    fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
   } else {
     // Random
-    randomAuth(req, res);
+    randomAuth(req, res, room);
   }
   // CAS
-  // cas.authenticate(req, res, app.settings.address, ticketToData, nickToTicket);
+  // cas.authenticate(req, res, app.settings.address, ticketToUser, nickToTicket);
+});
+
+app.get(/main/i, function (req, res) {
+  res.redirect('/');
 });
 
 app.get('/client.js', function(req, res) {
@@ -87,9 +98,8 @@ app.get('/favicon.ico', function(req, res) {
 
 app.get('/part', function(req, res) {
   var ticket = req.query.ticket;
-  if (ticketToData.hasOwnProperty(ticket)) {
-    var nick = ticketToData[ticket].nick;
-    console.log("LOG: " + nick + " called part");
+  if (ticketToUser.hasOwnProperty(ticket)) {
+    var nick = ticketToUser[ticket].nick;
     // Make sure user has connection before disconnecting them
     if (nickToSockets.hasOwnProperty(nick)) {
       var sockets = nickToSockets[nick];
@@ -107,31 +117,61 @@ app.get('/part', function(req, res) {
   res.end();
 });
 
-function randomAuth(req, res) {
+app.get('/:room', function(req, res) {
+  var room = (req.params.room).toString().toLowerCase();
+  if (room === 'anon') {
+    if (app.settings.fb_auth) {
+      // Facebook
+      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    } else {
+      // Random
+      randomAuth(req, res, room);
+    }
+  } else if (room === 'public') {
+    if (app.settings.fb_auth) {
+      // Facebook
+      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    } else {
+      // Random
+      randomAuth(req, res, room);
+    }
+  } else {
+    if (app.settings.fb_auth) {
+      // Facebook
+      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    } else {
+      // Random
+      randomAuth(req, res, room);
+    }
+  }
+});
+
+function randomAuth(req, res, room) {
   var cookieTicket = req.cookies.ticket;
-  if (cookieTicket && ticketToData.hasOwnProperty(cookieTicket)) {
-    var socket_id = Math.floor(Math.random() * 99999999999);
-    res.cookie("socket_id", socket_id);
+  var socket_id = Math.floor(Math.random() * 99999999999);
+  res.cookie("socket_id", socket_id);
+  res.cookie("room", room);
+  if (cookieTicket && ticketToUser.hasOwnProperty(cookieTicket)) {
     res.sendfile(__dirname + '/index.html');
   } else {
+    // Generate random ticket
     var randTicket = Math.floor(Math.random() * 999999999);
-    while (ticketToData.hasOwnProperty(randTicket)) {
+    while (ticketToUser.hasOwnProperty(randTicket)) {
       randTicket = Math.floor(Math.random() * 999999999);
     }
+    // Generate random nick
     var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
     while (nickToSockets.hasOwnProperty(randNick)) {
       randNick = "Tiger #" + Math.floor(Math.random() * 9999);
     }
     res.cookie("ticket", randTicket);
-    var socket_id = Math.floor(Math.random() * 99999999999);
-    res.cookie("socket_id", socket_id);
     // Remove previous tickets for this user if any
     if (nickToTicket.hasOwnProperty(randNick)) {
       var oldTicket = nickToTicket[randNick];
-      delete ticketToData[oldTicket];
+      delete ticketToUser[oldTicket];
     }
     nickToTicket[randNick] = randTicket;
-    ticketToData[randTicket] = {
+    ticketToUser[randTicket] = {
       nick: randNick,
       id: 'dk',
       link: 'http://www.facebook.com/dk'
@@ -140,27 +180,42 @@ function randomAuth(req, res) {
   }
 }
 
+// Check if text is valid
+function isValid(text) {
+  return (text &&
+          (typeof(text) === 'string' || typeof(text) === 'number') &&
+          !isBlank(text.toString()));
+}
+
 // Check if text only contains whitespace
 function isBlank(text) {
   var blank = /^\s*$/;
   return (text.match(blank) !== null);
 }
 
-// Remove the first occurent of an element based either on a direct
-// match or a match with a property of the element
-function removeFromList(target, list, property) {
-  for (var i = 0; i < list.length; i++) {
-    var curElem = list[i];
-    var remove = (property && curElem[property] === target) || (curElem === target);
-    if (remove) {
-      list.splice(i, 1);
-      return true;
-    }
+function emitToSockets(type, msg, room) {
+  var sockets = roomToSockets[room];
+  for (var i = 0; i < sockets.length; i++) {
+    sockets[i].emit(type, msg);
   }
-  return false;
 }
 
-function addToBackLog(type, msg) {
+// Get the backlog for a room or create one if it does not already
+// exist
+function getBackLog(room) {
+  var backLog;
+  if (roomToLog.hasOwnProperty(room)) {
+    backLog = roomToLog[room];
+  } else {
+    backLog = [];
+    roomToLog[room] = backLog;
+  }
+  return backLog;
+}
+
+// Add to the backlog for a room
+function addToBackLog(type, msg, room) {
+  var backLog = getBackLog(room);
   msg['type'] = type;
   backLog.push(msg);
   while (backLog.length > BACKLOG_SIZE) {
@@ -168,89 +223,206 @@ function addToBackLog(type, msg) {
   }
 }
 
-function disconnectSocket(nick, socket) {
-  if (!nickToSockets.hasOwnProperty(nick)) return;
-  var sockets = nickToSockets[nick];
-  var removed = removeFromList(socket, sockets, null);
-  if (removed) {
-    console.log("LOG: " + nick + " actually disconnecting");
-    console.log("LOG: " + nick + " has " + sockets.length + " sockets left");
-    if (sockets.length === 0) {
-      delete nickToSockets[nick];
-      removeFromList(nick, userList, 'nick');
-      var msg = {
-        time: (new Date()).getTime(),
-        nick: nick
-      };
-      io.sockets.emit('part', msg);
-      addToBackLog('part', msg);
+// Remove an element from a list
+function removeFromList(target, list) {
+  for (var i = 0; i < list.length; i++) {
+    if (target === list[i]) {
+      list.splice(i, 1);
     }
   }
 }
 
+// Get the users in a room
+function getUsers(room) {
+  var userList;
+  if (roomToUsers.hasOwnProperty(room)) {
+    userList = roomToUsers[room];
+  } else {
+    userList = [];
+    roomToUsers[room] = userList;
+  }
+  return userList;
+}
+
+// Add a socket to the room
+function addSocketToRoom(socket, room) {
+  if (roomToSockets.hasOwnProperty(room)) {
+    roomToSockets[room].push(socket);
+  } else {
+    roomToSockets[room] = [socket];
+  }
+}
+
+// Remove socket from the room
+function removeSocketFromRoom(socket, room) {
+  if (roomToSockets.hasOwnProperty(room)) {
+    var sockets = roomToSockets[room];
+    removeFromList(socket, sockets);
+  }
+}
+
+// Remove user from the room list
+function removeUserFromList(nick, room) {
+  var userList = getUsers(room);
+  for (var i = 0; i < userList.length; i++) {
+    var user = userList[i];
+    if (user.nick === nick) {
+      userList.splice(i, 1);
+    }
+  }
+}
+
+// If no one has used a room for 5 minutes, delete it
+setInterval(function() {
+  var now = new Date();
+  for (room in roomToTime) {
+    // Special rooms that should not be deleted
+    if (room === 'main' ||
+        room === 'anon' ||
+        room === 'public') continue;
+    var timestamp = roomToTime[room];
+    // Room must have no connections and not been used for 5 minutes
+    var limit = 5 * 60 * 1000;
+    if (roomToSockets[room].length === 0 &&
+        now - timestamp > limit) {
+        delete roomToUsers[room];
+        delete roomToLog[room];
+        delete roomToSockets[room];
+        delete roomToTime[room];
+    }
+  }
+}, 60 * 1000);
+
+// Check if user is in room list
+function isUserInList(user, room) {
+  var userList = roomToUsers[room];
+  for (var i = 0; i < userList.length; i++) {
+    if (user === userList[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Check if user has any connections in room
+function hasConnectionsInRoom(nick, targetRoom) {
+  var sockets = nickToSockets[nick];
+  var inRoom = false;
+  for (var i = 0; i < sockets.length; i++) {
+    sockets[i].get('room', function(err, room) {
+      if (room === targetRoom) {
+        inRoom = true;
+      }
+    });
+  }
+  return inRoom;
+}
+
+// Add socket to nick
+function addSocketToNick(socket, nick) {
+  if (nickToSockets.hasOwnProperty(nick)) {
+    nickToSockets[nick].push(socket);
+  } else {
+    nickToSockets[nick] = [socket];
+  }
+}
+
+// Disconnect the socket
+function disconnectSocket(nick, socket) {
+  // Make sure user has sockets to disconnect
+  if (!nickToSockets.hasOwnProperty(nick)) return;
+  socket.get('socket_id', function(err, room) {
+    socket.get('room', function(err, room) {
+      console.log(nick + " called disconnectSocket in " + room);
+      // Update room timestamp
+      roomToTime[room] = new Date();
+      // Remove socket
+      var sockets = nickToSockets[nick];
+      removeFromList(socket, sockets);
+      removeSocketFromRoom(socket, room);
+      if (!hasConnectionsInRoom(nick, room)) {
+        removeUserFromList(nick, room);
+        var msg = {
+          time: (new Date()).getTime(),
+          nick: nick
+        };
+        emitToSockets('part', msg, room);
+        addToBackLog('part', msg, room);
+        if (sockets.length === 0) {
+          delete nickToSockets[nick];
+        }
+      }
+    });
+  });
+}
+
 // Messaging
 io.sockets.on('connection', function(socket) {
-  socket.on('identify', function(ticket, socket_id) {
+  socket.on('identify', function(ticket, socket_id, room) {
     // Reconnect user if server restarts
-    if (!ticketToData.hasOwnProperty(ticket)) {
+    if (!ticketToUser.hasOwnProperty(ticket)) {
       socket.emit('reconnect');
       return;
     }
     socket.set('ticket', ticket);
     socket.set('socket_id', socket_id);
-    var user = ticketToData[ticket];
+    socket.set('room', room);
+    var user = ticketToUser[ticket];
     var nick = user.nick;
-    console.log("LOG: " + nick + " connected");
+    var userList = getUsers(room);
+    addSocketToRoom(socket, room);
+    var backLog = getBackLog(room);
     socket.emit('populate', {
       user_list: userList,
       nick: nick,
       backlog: backLog
     });
+    addSocketToNick(socket, nick);
     // Only alert other users of connect if this is user's initial
-    // connection
-    if (!nickToSockets.hasOwnProperty(nick)) {
-      console.log("LOG: " + nick + " first connection");
-      nickToSockets[nick] = [socket];
+    // connection into the room
+    if (!isUserInList(user, room)) {
       // Add to user list after populating client
       userList.push(user);
       var msg = {
         time: (new Date()).getTime(),
         user: user
       };
-      io.sockets.emit('join', msg);
-      addToBackLog('join', msg);
-    } else {
-      nickToSockets[nick].push(socket);
+      emitToSockets('join', msg, room);
+      addToBackLog('join', msg, room);
     }
   });
 
   // Forward received messages to all the clients
   socket.on('client_send', function(text) {
-    if (text && (typeof(text) === 'string' || typeof(text) === 'number')) {
+    if (isValid(text)) {
       text = text.toString();
-      if (!isBlank(text)) {
-        socket.get('ticket', function(err, ticket) {
-          if (ticketToData.hasOwnProperty(ticket)) {
-            var nick = ticketToData[ticket].nick;
+      socket.get('ticket', function(err, ticket) {
+        // Make sure ticket is still valid
+        if (ticketToUser.hasOwnProperty(ticket)) {
+          socket.get('room', function(err, room) {
+            var nick = ticketToUser[ticket].nick;
             var msg = {
               time: (new Date()).getTime(),
               nick: nick,
               msg: text
             };
-            io.sockets.emit('msg', msg);
-            addToBackLog('msg', msg);
-          }
-        });
-      }
+            emitToSockets('msg', msg, room);
+            addToBackLog('msg', msg, room);
+          });
+        } else {
+          socket.emit('reconnect');
+          return;
+        }
+      });
     }
   });
 
   // Notify others that user has disconnected
   socket.on('disconnect', function() {
     socket.get('ticket', function(err, ticket) {
-      if (ticketToData.hasOwnProperty(ticket)) {
-        var nick = ticketToData[ticket].nick;
-        console.log("LOG: " + nick + " called disconnect");
+      // Make sure ticket is still valid
+      if (ticketToUser.hasOwnProperty(ticket)) {
+        var nick = ticketToUser[ticket].nick;
         disconnectSocket(nick, socket);
       }
     });
@@ -259,9 +431,8 @@ io.sockets.on('connection', function(socket) {
   // Log out the user completely
   socket.on('logout', function() {
     socket.get('ticket', function(err, ticket) {
-      if (!ticketToData.hasOwnProperty(ticket)) return;
-      var nick = ticketToData[ticket].nick;
-      console.log("LOG: " + nick + " called logout");
+      if (!ticketToUser.hasOwnProperty(ticket)) return;
+      var nick = ticketToUser[ticket].nick;
       if (!nickToSockets.hasOwnProperty(nick)) return;
       var sockets = nickToSockets[nick];
       // Moving from back to front since disconnectSocket removes socket
@@ -273,8 +444,8 @@ io.sockets.on('connection', function(socket) {
         });
         // Delete all tickets associated with this user
         socket.get('ticket', function(err, ticket) {
-          if (ticketToData.hasOwnProperty(ticket)) {
-            delete ticketToData[ticket];
+          if (ticketToUser.hasOwnProperty(ticket)) {
+            delete ticketToUser[ticket];
           }
         });
         disconnectSocket(nick, socket);
