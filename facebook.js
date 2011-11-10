@@ -15,7 +15,7 @@ exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) 
     var code = req.query.code;
     authenticate(code, res, function(access_token) {
       res.cookie("ticket", access_token);
-      res.redirect('/rooms/' + room);
+      res.redirect('/' + room);
     });
   } else if (req.cookies.hasOwnProperty('ticket')) {
     var socket_id = Math.floor(Math.random() * 99999999999);

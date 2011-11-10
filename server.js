@@ -76,41 +76,8 @@ app.get('/', function(req, res) {
   // cas.authenticate(req, res, app.settings.address, ticketToUser, nickToTicket);
 });
 
-app.get('/rooms', function (req, res) {
+app.get(/main/i, function (req, res) {
   res.redirect('/');
-});
-
-app.get('/rooms/main', function (req, res) {
-  res.redirect('/');
-});
-
-app.get('/rooms/:room', function(req, res) {
-  var room = (req.params.room).toString().toLowerCase();
-  if (room === 'anon') {
-    if (app.settings.fb_auth) {
-      // Facebook
-      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
-    } else {
-      // Random
-      randomAuth(req, res, room);
-    }
-  } else if (room === 'public') {
-    if (app.settings.fb_auth) {
-      // Facebook
-      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
-    } else {
-      // Random
-      randomAuth(req, res, room);
-    }
-  } else {
-    if (app.settings.fb_auth) {
-      // Facebook
-      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
-    } else {
-      // Random
-      randomAuth(req, res, room);
-    }
-  }
 });
 
 app.get('/client.js', function(req, res) {
@@ -148,6 +115,35 @@ app.get('/part', function(req, res) {
     }
   }
   res.end();
+});
+
+app.get('/:room', function(req, res) {
+  var room = (req.params.room).toString().toLowerCase();
+  if (room === 'anon') {
+    if (app.settings.fb_auth) {
+      // Facebook
+      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    } else {
+      // Random
+      randomAuth(req, res, room);
+    }
+  } else if (room === 'public') {
+    if (app.settings.fb_auth) {
+      // Facebook
+      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    } else {
+      // Random
+      randomAuth(req, res, room);
+    }
+  } else {
+    if (app.settings.fb_auth) {
+      // Facebook
+      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    } else {
+      // Random
+      randomAuth(req, res, room);
+    }
+  }
 });
 
 function randomAuth(req, res, room) {

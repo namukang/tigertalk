@@ -89,8 +89,7 @@
 ** TODO Smaller, user-created rooms
    - One of these will be an "anon" room for anonymous interactions
    - Each room will be its own URL (tigertalk.me/rooms/anon)
-   - Associate socket ID with room
-   - if in room, broadcast message
+** TODO Show list of rooms
 ** TODO Private messaging
 ** TODO Autocomplete nicks in entry
 ** TODO Ping users by flashing description when they're mentioned
