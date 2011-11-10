@@ -58,13 +58,14 @@ var backLog = [];
 
 // Routing
 app.get('/', function(req, res) {
-  if (app.settings.fb_auth) {
-    // Facebook
-    fb.handler(req, res, app.settings.address, ticketToData, nickToTicket);
-  } else {
-    // Random
-    randomAuth(req, res);
-  }
+  res.send("TigerTalk will be open soon. Join the conversation and meet new friends tonight at 11PM!");
+  // if (app.settings.fb_auth) {
+  //   // Facebook
+  //   fb.handler(req, res, app.settings.address, ticketToData, nickToTicket);
+  // } else {
+  //   // Random
+  //   randomAuth(req, res);
+  // }
   // CAS
   // cas.authenticate(req, res, app.settings.address, ticketToData, nickToTicket);
 });
