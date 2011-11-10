@@ -25,8 +25,7 @@ app.configure('development', function() {
 
 app.configure('production', function() {
   app.set('address', 'http://www.tigertalk.me');
-  // app.set('fb_auth', true);
-  app.set('fb_auth', false);
+  app.set('fb_auth', true);
   app.use(express.errorHandler());
 });
 
