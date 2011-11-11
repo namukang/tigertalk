@@ -13,7 +13,11 @@ exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) 
   } else if (req.query.hasOwnProperty("code")) {
     // User pressed "Allow"
     var code = req.query.code;
-    authenticate(code, res, function(access_token) {
+    authenticate(code, res, function(access_token, expires) {
+      // Delete access token when it expires
+      setTimeout(function() {
+        delete ticketToUser[access_token];
+      }, expires * 1000);
       res.cookie("ticket", access_token);
       res.redirect('/' + room);
     });
@@ -73,8 +77,9 @@ function authenticate(code, res, callback) {
         res.send(response.error.type + ": " + response.error.message);
       } else {
         var response = qs.parse(data);
+        var expires = response.expires;
         var access_token = response.access_token;
-        callback(access_token);
+        callback(access_token, expires);
       }
     });
   });
@@ -105,6 +110,7 @@ function validate(room, token, res, callback) {
     fb_res.on('end', function() {
       var response = JSON.parse(data);
       if (response.hasOwnProperty("error") || response.data.length === 0) {
+        // Access token may no longer be valid
         res.clearCookie('ticket');
         redirectToFB(res);
       } else {
@@ -148,6 +154,7 @@ function getData(res, token, callback) {
     fb_res.on('end', function() {
       var response = JSON.parse(data);
       if (response.hasOwnProperty("error")) {
+        // Access token may no longer be valid
         res.clearCookie('ticket');
         redirectToFB(res);
       } else {
