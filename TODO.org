@@ -74,6 +74,7 @@
 ** TODO Fix flyouts with z-index
 ** TODO Username detecting regex sucks
 ** TODO User leaves room twice! I show up twice!
+** TODO Make sure ticket, socket_id, and room are valid and won't crash process
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom

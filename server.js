@@ -293,10 +293,10 @@ setInterval(function() {
 }, 60 * 1000);
 
 // Check if user is in room list
-function isUserInList(user, room) {
+function isUserInList(nick, room) {
   var userList = roomToUsers[room];
   for (var i = 0; i < userList.length; i++) {
-    if (user === userList[i]) {
+    if (nick === userList[i].nick) {
       return true;
     }
   }
@@ -304,17 +304,17 @@ function isUserInList(user, room) {
 }
 
 // Check if user has any connections in room
-function hasConnectionsInRoom(nick, room) {
-  var user_sockets = nickToSockets[nick];
-  var room_sockets = roomToSockets[room];
-  for (var i = 0; i < user_sockets.length; i++) {
-    for (var j = 0; j < room_sockets.length; j++) {
-      if (user_sockets[i] === room_sockets[j]) {
-        return true;
+function hasConnectionsInRoom(nick, targetRoom) {
+  var sockets = nickToSockets[nick];
+  var inRoom = false;
+  for (var i = 0; i < sockets.length; i++) {
+    sockets[i].get('room', function(err, room) {
+      if (room === targetRoom) {
+        inRoom = true;
       }
-    }
+    });
   }
-  return false;
+  return inRoom;
 }
 
 // Add socket to nick
@@ -330,28 +330,29 @@ function addSocketToNick(socket, nick) {
 function disconnectSocket(nick, socket) {
   // Make sure user has sockets to disconnect
   if (!nickToSockets.hasOwnProperty(nick)) return;
-  socket.get('socket_id', function(err, room) {
-    socket.get('room', function(err, room) {
-      console.log(nick + " called disconnectSocket in " + room);
-      // Update room timestamp
-      roomToTime[room] = new Date();
-      // Remove socket
-      var sockets = nickToSockets[nick];
-      removeFromList(socket, sockets);
-      removeSocketFromRoom(socket, room);
-      if (!hasConnectionsInRoom(nick, room)) {
-        removeUserFromList(nick, room);
-        var msg = {
-          time: (new Date()).getTime(),
-          nick: nick
-        };
-        emitToSockets('part', msg, room);
-        addToBackLog('part', msg, room);
-        if (sockets.length === 0) {
-          delete nickToSockets[nick];
-        }
+  socket.get('room', function(err, room) {
+    // Make sure user is in room before disconnecting
+    if (!isUserInList(nick, room)) return;
+    console.log("LOG: " + nick + " removed a socket from " + room);
+    // Remove socket
+    var sockets = nickToSockets[nick];
+    removeFromList(socket, sockets);
+    removeSocketFromRoom(socket, room);
+    // Update room timestamp
+    roomToTime[room] = new Date();
+    if (!hasConnectionsInRoom(nick, room)) {
+      if (sockets.length === 0) {
+        delete nickToSockets[nick];
       }
-    });
+      console.log("LOG: " + nick + " left " + room);
+      removeUserFromList(nick, room);
+      var msg = {
+        time: (new Date()).getTime(),
+        nick: nick
+      };
+      emitToSockets('part', msg, room);
+      addToBackLog('part', msg, room);
+    }
   });
 }
 
@@ -365,6 +366,9 @@ io.sockets.on('connection', function(socket) {
     }
     socket.set('ticket', ticket);
     socket.set('socket_id', socket_id);
+    if (room && room.toString().length === 0) {
+      room = "main";
+    }
     socket.set('room', room);
     var user = ticketToUser[ticket];
     var nick = user.nick;
@@ -379,7 +383,7 @@ io.sockets.on('connection', function(socket) {
     addSocketToNick(socket, nick);
     // Only alert other users of connect if this is user's initial
     // connection into the room
-    if (!isUserInList(user, room)) {
+    if (!isUserInList(nick, room)) {
       // Add to user list after populating client
       userList.push(user);
       var msg = {
