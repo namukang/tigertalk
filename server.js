@@ -119,10 +119,6 @@ app.get('/part', function(req, res) {
 
 app.get('/:room', function(req, res) {
   var room = (req.params.room).toString().toLowerCase();
-  if (room === 'reddit') {
-    randomAuth(req, res, room);
-    return;
-  }
   if (room === 'anon') {
     if (app.settings.fb_auth) {
       // Facebook
@@ -163,9 +159,9 @@ function randomAuth(req, res, room) {
       randTicket = Math.floor(Math.random() * 999999999);
     }
     // Generate random nick
-    var randNick = "Redditor #" + Math.floor(Math.random() * 99999);
+    var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
     while (nickToSockets.hasOwnProperty(randNick)) {
-      randNick = "Redditor #" + Math.floor(Math.random() * 99999);
+      randNick = "Tiger #" + Math.floor(Math.random() * 9999);
     }
     res.cookie("ticket", randTicket);
     // Remove previous tickets for this user if any
@@ -176,8 +172,8 @@ function randomAuth(req, res, room) {
     nickToTicket[randNick] = randTicket;
     ticketToUser[randTicket] = {
       nick: randNick,
-      id: 100003182584336,
-      link: 'http://www.reddit.com/r/programming'
+      id: 'dk',
+      link: 'http://www.facebook.com/dk'
     };
     res.sendfile(__dirname + '/index.html');
   }
