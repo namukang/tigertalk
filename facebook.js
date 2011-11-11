@@ -148,7 +148,8 @@ function getData(res, token, callback) {
     fb_res.on('end', function() {
       var response = JSON.parse(data);
       if (response.hasOwnProperty("error")) {
-        res.send(response.error.type + ": " + response.error.message);
+        res.clearCookie('ticket');
+        redirectToFB(res);
       } else {
         callback(response.name, response.id, response.link);
       }
