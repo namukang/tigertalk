@@ -118,7 +118,11 @@ function validate(room, token, res, callback) {
         if (valid) {
           getData(token, callback);
         } else {
-          res.send("You must be in the Princeton network to use TigerTalk. If you are a Princeton student, add Princeton to your networks in Account Settings -> Networks");
+          res.send(
+            "You must be in the Princeton network to use TigerTalk. <br />" +
+              "If you are not a Princeton student, please use the <a href='/public'>public</a> room. <br />" +
+              "If you are a Princeton student, please add Princeton to your Facebook networks in Account Settings -> Networks in order to gain access to TigerTalk. <br />"
+          );
         }
       }
     }).on('error', function(e) {
