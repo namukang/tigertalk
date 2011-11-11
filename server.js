@@ -366,7 +366,7 @@ io.sockets.on('connection', function(socket) {
     }
     socket.set('ticket', ticket);
     socket.set('socket_id', socket_id);
-    if (room && room.toString().length === 0) {
+    if (!room) {
       room = "main";
     }
     socket.set('room', room);
