@@ -26,7 +26,7 @@ exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) 
       res.sendfile(__dirname + '/index.html');
     } else {
       var token = cookieTicket;
-      validate(token, res, function(nick, id, link) {
+      validate(room, token, res, function(nick, id, link) {
         // Remove previous ticket for this user if one exists
         // Effects: User is disconnected from any other sessions not
         // using this cookie but this is okay since most users will be
@@ -82,7 +82,12 @@ function authenticate(code, res, callback) {
 
 // Validate that the user associated with this ticket is a valid
 // Princeton student
-function validate(token, res, callback) {
+function validate(room, token, res, callback) {
+  // Skip the check if this is the public room
+  if (room === 'public') {
+    getData(token, callback);
+    return;
+  }
   var args = qs.stringify({
     q: "SELECT affiliations FROM user WHERE uid = me()",
     access_token: token
