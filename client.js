@@ -379,6 +379,23 @@ function toggleUserList(e) {
   });
 }
 
+// Toggle showing the room list
+function toggleRoomList(e) {
+  e.preventDefault();
+  $('#entry').focus();
+  var sidebar = $("sidebar");
+  var main = $(".main");
+  main.width("80%");
+  scrollDown();
+  sidebar.animate({
+    width: 'toggle'
+  }, function() {
+    if (sidebar.is(":hidden")) {
+      main.width("100%");
+    }
+  });
+}
+
 // Show About content
 function toggleAbout(e) {
   e.preventDefault();
@@ -480,6 +497,7 @@ $(function() {
   });
 
   $('#user-link').click(toggleUserList);
+  $('#room-link').click(toggleRoomList);
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
   $('#share-link').click(share);
