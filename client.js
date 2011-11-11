@@ -161,6 +161,7 @@ function refreshUserList() {
     userNick.html(user.nick);
     // Create pic element
     var userPic = $(document.createElement('td'));
+    userPic.addClass('pic');
     var img = $(document.createElement('img'));
     img.attr('src', getPicURL(user.id));
     userPic.html(img);

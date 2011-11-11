@@ -81,6 +81,10 @@ body {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1em;
+      td.pic {
+        height: 50px;
+        width: 50px;
+      }
       td.nick {
         text-align: center;
         vertical-align: middle;

@@ -64,6 +64,9 @@ body {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1em; }
+      #sidebar #user-list #users td.pic {
+        height: 50px;
+        width: 50px; }
       #sidebar #user-list #users td.nick {
         text-align: center;
         vertical-align: middle;
