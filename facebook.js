@@ -86,7 +86,7 @@ function validate(room, token, res, callback) {
   // Skip the check if this is the public room
   var ALL_ACCESS = true;
   if (room === 'public' || ALL_ACCESS) {
-    getData(token, callback);
+    getData(res, token, callback);
     return;
   }
   var args = qs.stringify({
@@ -117,7 +117,7 @@ function validate(room, token, res, callback) {
           }
         }
         if (valid) {
-          getData(token, callback);
+          getData(res, token, callback);
         } else {
           res.send(
             "You must be in the Princeton network to use TigerTalk. <br />" +
@@ -132,7 +132,7 @@ function validate(room, token, res, callback) {
   });
 }
 
-function getData(token, callback) {
+function getData(res, token, callback) {
   var args = qs.stringify({
     access_token: token
   });
