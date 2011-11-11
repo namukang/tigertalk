@@ -333,7 +333,6 @@ function disconnectSocket(nick, socket) {
   socket.get('room', function(err, room) {
     // Make sure user is in room before disconnecting
     if (!isUserInList(nick, room)) return;
-    console.log("LOG: " + nick + " removed a socket from " + room);
     // Remove socket
     var sockets = nickToSockets[nick];
     removeFromList(socket, sockets);
@@ -372,6 +371,7 @@ io.sockets.on('connection', function(socket) {
     socket.set('room', room);
     var user = ticketToUser[ticket];
     var nick = user.nick;
+    console.log("LOG: " + nick + " joined " + room);
     var userList = getUsers(room);
     addSocketToRoom(socket, room);
     var backLog = getBackLog(room);
