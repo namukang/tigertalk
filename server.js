@@ -304,17 +304,17 @@ function isUserInList(user, room) {
 }
 
 // Check if user has any connections in room
-function hasConnectionsInRoom(nick, targetRoom) {
-  var sockets = nickToSockets[nick];
-  var inRoom = false;
-  for (var i = 0; i < sockets.length; i++) {
-    sockets[i].get('room', function(err, room) {
-      if (room === targetRoom) {
-        inRoom = true;
+function hasConnectionsInRoom(nick, room) {
+  var user_sockets = nickToSockets[nick];
+  var room_sockets = roomToSockets[room];
+  for (var i = 0; i < user_sockets.length; i++) {
+    for (var j = 0; j < room_sockets.length; j++) {
+      if (user_sockets[i] === room_sockets[j]) {
+        return true;
       }
-    });
+    }
   }
-  return inRoom;
+  return false;
 }
 
 // Add socket to nick

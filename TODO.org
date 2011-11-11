@@ -73,6 +73,7 @@
 ** TODO Unread count doesn't show up when page reconnects
 ** TODO Fix flyouts with z-index
 ** TODO Username detecting regex sucks
+** TODO User leaves room twice! I show up twice!
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
