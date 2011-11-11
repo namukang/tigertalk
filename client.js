@@ -69,7 +69,7 @@ socket.on('reconnect', function() {
 socket.on('connect', function() {
   CONFIG.ticket = readCookie("ticket");
   CONFIG.socket_id = readCookie("socket_id");
-  CONFIG.room = readCookie("room");
+  CONFIG.room = document.location.pathname.substring(1);
   socket.emit('identify', CONFIG.ticket, CONFIG.socket_id, CONFIG.room);
 });
 

@@ -150,7 +150,6 @@ function randomAuth(req, res, room) {
   var cookieTicket = req.cookies.ticket;
   var socket_id = Math.floor(Math.random() * 99999999999);
   res.cookie("socket_id", socket_id);
-  res.cookie("room", room);
   if (cookieTicket && ticketToUser.hasOwnProperty(cookieTicket)) {
     res.sendfile(__dirname + '/index.html');
   } else {

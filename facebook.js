@@ -20,7 +20,6 @@ exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) 
   } else if (req.cookies.hasOwnProperty('ticket')) {
     var socket_id = Math.floor(Math.random() * 99999999999);
     res.cookie("socket_id", socket_id);
-    res.cookie("room", room);
     var cookieTicket = req.cookies.ticket;
     // Don't validate if we already know the user
     if (ticketToUser.hasOwnProperty(cookieTicket)) {
