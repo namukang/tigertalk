@@ -268,6 +268,14 @@ function removeUserFromList(nick, room) {
   }
 }
 
+// Delete all data for a room
+function deleteRoom(room) {
+  delete roomToUsers[room];
+  delete roomToLog[room];
+  delete roomToSockets[room];
+  delete roomToTime[room];
+}
+
 // If no one has used a room for 5 minutes, delete it
 setInterval(function() {
   var now = new Date();
@@ -281,10 +289,7 @@ setInterval(function() {
     var limit = 5 * 60 * 1000;
     if (roomToSockets[room].length === 0 &&
         now - timestamp > limit) {
-        delete roomToUsers[room];
-        delete roomToLog[room];
-        delete roomToSockets[room];
-        delete roomToTime[room];
+      deleteRoom(room);
     }
   }
 }, 60 * 1000);

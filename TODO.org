@@ -96,7 +96,7 @@
 ** DONE Highlight messages that you're mentioned in
    - Regexp on message field when receiving message
 * Feature Requests
-** TODO Smaller, user-created rooms
+** DONE Smaller, user-created rooms
    - One of these will be an "anon" room for anonymous interactions
    - Each room will be its own URL (tigertalk.me/rooms/anon)
 ** TODO Show list of rooms
@@ -105,3 +105,6 @@
 ** TODO Ping users by flashing description when they're mentioned
 ** TODO "Ding" sound for mentions
 ** TODO Shift+enter for new lines
+** TODO Only show first names until name conflict appears
+   - query fb for first name
+   - changing names might be disorienting
