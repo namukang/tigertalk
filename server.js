@@ -82,8 +82,13 @@ app.get('/', function(req, res) {
   // cas.authenticate(req, res, app.settings.address, ticketToUser, nickToTicket);
 });
 
-app.get(/main/i, function (req, res) {
-  res.redirect('/');
+app.get(/main$/i, function (req, res) {
+  if (Object.keys(req.query).length === 0) {
+    res.redirect('/');
+  } else {
+    var room = "main";
+    fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+  }
 });
 
 app.get('/client.js', function(req, res) {
