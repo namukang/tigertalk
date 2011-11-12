@@ -87,7 +87,13 @@ app.get(/main$/i, function (req, res) {
     res.redirect('/');
   } else {
     var room = "main";
-    fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    if (app.settings.fb_auth) {
+      // Facebook
+      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
+    } else {
+      // Random
+      randomAuth(req, res, room);
+    }
   }
 });
 

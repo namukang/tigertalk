@@ -81,6 +81,8 @@
      ticket instead of marking it as expired) but this is less than ideal
    - This problem is only important if we want to use their ticket
      (i.e. access_token) for real work on the client side
+** TODO Non PU students can access other pages after visiting public!
+   - Handle public room separately
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
