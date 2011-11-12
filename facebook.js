@@ -68,7 +68,7 @@ exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) 
         res.sendfile(__dirname + '/index.html');
       };
       var ALL_ACCESS = true;
-      if (room === 'public' || ALL_ACCESS) {
+      if (ALL_ACCESS) {
         // Skip validation
         getData(res, token, callback, fallback);
       } else {
@@ -145,7 +145,6 @@ function validate(res, token, callback, fallback) {
         } else {
           res.send(
             "You must be in the Princeton network to use TigerTalk. <br />" +
-              "If you are not a Princeton student, please use the <a href='/public'>public</a> room. <br />" +
               "If you are a Princeton student, please add Princeton to your Facebook networks in Account Settings -> Networks in order to gain access to TigerTalk. <br />"
           );
         }
