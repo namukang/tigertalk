@@ -16,7 +16,8 @@ app.configure(function() {
 
 app.configure('development', function() {
   app.set('address', 'http://localhost:' + port);
-  app.set('fb_auth', false);
+  // app.set('fb_auth', false);
+  app.set('fb_auth', true);
   app.use(express.errorHandler({
     dumpExceptions: true,
     showStack: true
@@ -33,12 +34,16 @@ app.listen(port);
 console.log("Server at %s listening on port %d", app.settings.address, port);
 
 var io = sio.listen(app);
-io.configure(function() {
+io.configure('development', function() {
   io.set("transports", ["xhr-polling"]);
-  io.set("polling duration", 1);
+  io.set("polling duration", 10);
 });
 
 io.configure('production', function() {
+  // Heroku requires long polling
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 1);
+
   io.enable('browser client minification');  // send minified client
   io.enable('browser client etag');          // apply etag caching logic based on version number
   io.enable('browser client gzip');          // gzip the file
@@ -46,6 +51,7 @@ io.configure('production', function() {
 });
 
 // Maps tickets to user data one-to-one
+// These mappings are never deleted, only replaced
 var ticketToUser = {};
 // Maps nicks to tickets one-to-one
 // Used to only keep one ticket for each user
@@ -119,30 +125,10 @@ app.get('/part', function(req, res) {
 
 app.get('/:room', function(req, res) {
   var room = (req.params.room).toString().toLowerCase();
-  if (room === 'anon') {
-    if (app.settings.fb_auth) {
-      // Facebook
-      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
-    } else {
-      // Random
-      randomAuth(req, res, room);
-    }
-  } else if (room === 'public') {
-    if (app.settings.fb_auth) {
-      // Facebook
-      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
-    } else {
-      // Random
-      randomAuth(req, res, room);
-    }
+  if (app.settings.fb_auth) {
+    fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
   } else {
-    if (app.settings.fb_auth) {
-      // Facebook
-      fb.handler(req, res, app.settings.address, ticketToUser, nickToTicket, room);
-    } else {
-      // Random
-      randomAuth(req, res, room);
-    }
+    randomAuth(req, res, room);
   }
 });
 

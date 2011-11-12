@@ -75,6 +75,13 @@
 ** TODO Username detecting regex sucks
 ** TODO User leaves room twice! I show up twice!
 ** TODO Make sure ticket, socket_id, and room are valid and won't crash process
+** TODO Update expired ticket if access_token is no longer valid
+   - Although we force a user to get a new ticket if their current one
+     is expired, a ticket may expire while their session is still active
+   - Previous solution was just to force a reconnect (i.e. delete their
+     ticket instead of marking it as expired) but this is less than ideal
+   - This problem is only important if we want to use their ticket
+     (i.e. access_token) for real work on the client side
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom

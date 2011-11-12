@@ -1,6 +1,7 @@
 // Get rid of fragment added by Facebook
-if (window.location.hash === '#_=_') {
-  window.location.hash = "";
+var fb_trash = '#_=_';
+if (window.location.href.indexOf(fb_trash) !== -1) {
+  window.location.href = window.location.href.replace(fb_trash, '');
 }
 
 var socket = io.connect(document.location.hostname);
