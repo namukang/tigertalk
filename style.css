@@ -18,8 +18,11 @@ body {
   #header #logo {
     padding: 1em;
     font-size: 125%;
-    float: left;
-    color: #fa7f00; }
+    float: left; }
+    #header #logo a {
+      padding: 0;
+      color: #fa7f00;
+      text-decoration: none; }
   #header #links {
     float: right;
     padding: 1em;
