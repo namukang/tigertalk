@@ -138,6 +138,14 @@ app.get('/part', function(req, res) {
 
 app.get('/:room', function(req, res) {
   var room = (req.params.room).toString().toLowerCase();
+  if (room.length > 50) {
+    res.send("Room names must be under 50 characters.");
+    return;
+  }
+  if (/[^\w_\-]/.test(room)) {
+    res.send("Room names may only contains letters, numbers, underscores, and dashes.");
+    return;
+  }
   if (app.settings.fb_auth) {
     fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room);
   } else {

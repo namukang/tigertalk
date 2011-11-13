@@ -539,6 +539,21 @@ function showInSidebar(type) {
   }
 }
 
+// Create/join a room
+function createRoom(e) {
+  e.preventDefault();
+  var room = $.trim($('#room-input').val());
+  if (!room || room.length > 50) {
+    alert("Room names must be between 1 and 50 characters.");
+    return;
+  }
+  if (/[^\w_\-]/.test(room)) {
+    alert("Room names may only contains letters, numbers, underscores, and dashes.");
+    return;
+  }
+  document.location.pathname = room;
+}
+
 $(function() {
   // Set seed
   CONFIG.seed = Math.floor(Math.random() * CONFIG.colors.length);
@@ -585,6 +600,7 @@ $(function() {
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
   $('#system-link').click(toggleShowSystem);
+  $('#room-button').click(createRoom);
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");
