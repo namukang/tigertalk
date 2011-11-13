@@ -570,7 +570,6 @@ $(function() {
 
   // Only show user list at beginning
   $('#room-list').hide();
-  $('#prefs').hide();
 
   // Focus on entry element upon page load
   var entry = $("#entry");
