@@ -295,8 +295,7 @@ setInterval(function() {
   for (room in roomToTime) {
     // Special rooms that should not be deleted
     if (room === 'main' ||
-        room === 'anon' ||
-        room === 'r20') continue;
+        room === 'anon') continue;
     var timestamp = roomToTime[room];
     // Room must have no connections and not been used for 5 minutes
     var limit = 5 * 60 * 1000;
