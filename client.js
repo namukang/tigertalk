@@ -333,9 +333,16 @@ function scrolledToBottom() {
 }
 
 // Scroll to the newest messages
-function scrollDown() {
+function scrollDown(animate) {
   var content = $('#content');
-  content.scrollTop(content.prop("scrollHeight") - content.height());
+  var target = content.prop("scrollHeight") - content.height();
+  if (animate) {
+    content.animate({
+      scrollTop: target
+    });
+  } else {
+    content.scrollTop(target);
+  }
 }
 
 // Update the document title with number of unread messages
@@ -357,21 +364,35 @@ function toggleUserList(e) {
 // Show About content
 function toggleAbout(e) {
   e.preventDefault();
-  $('#entry').focus();
   var extra = $("#extra");
   var content = $("#content");
   var header = $("#header");
-  content.offset({
-    top: header.height() + extra.height()
+  var target_height;
+  var callback = null;
+  if (extra.is(":hidden")) {
+    target_height = extra.height();
+    extra.height(0);
+    extra.show();
+  } else {
+    // Save the original height so we can restore it properly
+    var orig_height = extra.height();
+    target_height = 0;
+    callback = function() {
+      extra.hide();
+      extra.height(orig_height);
+    };
+  }
+  extra.animate({
+    queue: false,
+    height: target_height
+  }, callback);
+  content.animate({
+    queue: false,
+    top: header.height() + target_height
+  }, function() {
+    scrollDown(true);
   });
-  scrollDown();
-  extra.slideToggle(function() {
-    if (extra.is(":hidden")) {
-      content.offset({
-        top: header.height()
-      });
-    }
-  });
+  $('#entry').focus();
 }
 
 // Notify server of disconnection

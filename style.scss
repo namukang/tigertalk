@@ -2,6 +2,8 @@ $orange: #FA7F00;
 $header-height: 50px;
 $toolbar-height: 50px;
 $sidebar-width: 20%;
+$extra-height: 175px;
+$bg-color: #EEE;
 
 html, body {
   height: 100%;
@@ -11,7 +13,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: 'Lucida Grande', Verdana;
-  background: #EEE;
+  background: $bg-color;
   font-size: 14px;
 }
 
@@ -57,7 +59,7 @@ body {
     bottom: $toolbar-height;
   }
   &#extra {
-    height: 175px;
+    height: $extra-height;
     border-bottom: 1px solid #777;
   }
   #log, #about {
