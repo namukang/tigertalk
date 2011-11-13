@@ -1,5 +1,5 @@
-var https = require('https'),
-qs = require('querystring');
+var https = require('https')
+, qs = require('querystring');
 
 // Production
 var APP_URL = null;
@@ -8,7 +8,7 @@ var APP_SECRET = 'ed06e7f5c6805820c36c573e6146fdb5';
 
 var expiredTickets = {};
 
-exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) {
+exports.handler = function(req, res, app_url, ticketToUser, idToTicket, room) {
   APP_URL = app_url + '/';
   if (APP_URL.indexOf('localhost') !== -1) {
     // Development
@@ -54,17 +54,18 @@ exports.handler = function(req, res, app_url, ticketToUser, nickToTicket, room) 
         // Effects: User is disconnected from any other sessions not
         // using this cookie but this is okay since most users will be
         // using the same cookie
-        if (nickToTicket.hasOwnProperty(nick)) {
-          var oldTicket = nickToTicket[nick];
+        if (idToTicket.hasOwnProperty(id)) {
+          var oldTicket = idToTicket[id];
           delete ticketToUser[oldTicket];
         }
         // Add a new user
-        nickToTicket[nick] = cookieTicket;
-        ticketToUser[cookieTicket] = {
+        idToTicket[id] = cookieTicket;
+        var user = {
           nick: nick,
           id: id,
           link: link
-        };
+        }
+        ticketToUser[cookieTicket] = user;
         res.sendfile(__dirname + '/index.html');
       };
       var ALL_ACCESS = true;

@@ -71,7 +71,6 @@ body {
         height: 50px;
         width: 50px; }
       #sidebar #user-list #users td.nick, #sidebar #room-list #users td.nick {
-        text-align: center;
         vertical-align: middle;
         padding: 0 1em; }
     #sidebar #user-list #rooms, #sidebar #room-list #rooms {

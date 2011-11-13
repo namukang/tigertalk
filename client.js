@@ -22,6 +22,7 @@ var CONFIG = {
   room: null, // current room
   ticket: null, // user's ticket
   socket_id: null, // id of socket
+  id: null, // user's id
   nick: null, // user's nick
   show_system: determineShowSystem(), // whether to show system messages
   seed: 0, // used to give nicks different colors for every session
@@ -89,7 +90,7 @@ socket.on('connect', function() {
 // Receive a new message from the server
 socket.on('msg', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, data.msg, TYPES.msg);
+  addMessage(time, data.user, data.msg, TYPES.msg);
   if (!CONFIG.focus) {
     CONFIG.unread++;
     updateTitle();
@@ -108,8 +109,8 @@ socket.on('join', function(data) {
 // User left room
 socket.on('part', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.nick, null, TYPES.part);
-  removeFromUserList(data.nick);
+  addMessage(time, data.user, null, TYPES.part);
+  removeFromUserList(data.user.id);
   updateNumUsers();
 });
 
@@ -127,7 +128,8 @@ socket.on('populate', function(data) {
   // data.user_list does not need to be sorted since the immediately
   // following 'join' will sort the list
   CONFIG.users = data.user_list;
-  CONFIG.nick = data.nick;
+  CONFIG.id = data.user.id;
+  CONFIG.nick = data.user.nick;
   refreshUserList();
   updateNumUsers();
   // Remove loading message
@@ -137,11 +139,7 @@ socket.on('populate', function(data) {
   for (var i = 0; i < backlog.length; i++) {
     var msg = backlog[i];
     var time = timeString(new Date(msg.time));
-    if (msg.type === TYPES.join) {
-      addMessage(time, msg.user, msg.msg, msg.type);
-    } else {
-      addMessage(time, msg.nick, msg.msg, msg.type);
-    }
+    addMessage(time, msg.user, msg.msg, msg.type);
   }
 });
 
@@ -164,6 +162,7 @@ function refreshUserList() {
     var userLink = $(document.createElement('a'));
     userLink.attr('href', user.link);
     userLink.attr('target', '_blank');
+    userLink.addClass(user.id.toString());
     // Create user row
     var userElem = $(document.createElement('tr'));
     userLink.html(userElem);
@@ -181,27 +180,21 @@ function refreshUserList() {
     // Add elements to row
     userElem.append(userPic);
     userElem.append(userNick);
-    userElem.addClass(nickToClassName(user.nick));
-    if (user.nick === CONFIG.nick) {
+    if (user.id === CONFIG.id) {
       userElem.addClass('self');
     }
     userList.append(userLink);
   }
 }
 
-function removeFromUserList(nick) {
+function removeFromUserList(id) {
   for (var i = 0; i < CONFIG.users.length; i++) {
-    if (CONFIG.users[i].nick === nick) {
+    if (CONFIG.users[i].id === id) {
       CONFIG.users.splice(i, 1);
       break;
     }
   }
-  $('#users .' + nickToClassName(nick)).first().remove();
-}
-
-// Convert nicknames to class names
-function nickToClassName(nick) {
-  return nick.toLowerCase().replace("#", "").replace(/\s/g, "_");
+  $('#users .' + id.toString()).remove();
 }
 
 function updateNumUsers() {
@@ -237,7 +230,7 @@ function addMessage(time, user, msg, type) {
     if (!CONFIG.show_system) {
       messageElement.hide();
     }
-    if (user.nick === CONFIG.nick) {
+    if (user.id === CONFIG.id) {
       messageElement.addClass("self");
     }
     var text = user.nick + " joined the room.";
@@ -249,16 +242,10 @@ function addMessage(time, user, msg, type) {
     break;
     
   case TYPES.msg:
-    var nick = user;
     // Sanitize input
     msg = toStaticHTML(msg);
-    if (nick === undefined) {
-      console.log("Undefined nick in msg!");
-      console.log("msg: " + msg);
-      return;
-    }
     // Indicate if you are the owner of the message
-    if (nick === CONFIG.nick) {
+    if (user.id === CONFIG.id) {
       messageElement.addClass("owner");
     }
 
@@ -272,22 +259,21 @@ function addMessage(time, user, msg, type) {
       msg = msg.replace(firstname_match, '<span class="self">' + firstname_match + '</span>');
     }
 
-    var color = getColor(nick);
+    var color = getColor(user.nick); // FIXME: determine color based on ID
     var content = '<tr>'
       + time_html
-      + '<td class="nick" style="color: ' + color + '">' + nick + ':</td>'
+      + '<td class="nick" style="color: ' + color + '">' + user.nick + ':</td>'
       + '<td class="text">' + msg + '</td>'
       + '</tr>';
     messageElement.html(content);
     break;
 
   case TYPES.part:
-    var nick = user;
     messageElement.addClass("system");
     if (!CONFIG.show_system) {
       messageElement.hide();
     }
-    var text = nick + " left the room.";
+    var text = user.nick + " left the room.";
     var content = '<tr>'
       + time_html
       + '<td class="text">' + text + '</td>'
