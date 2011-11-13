@@ -397,13 +397,13 @@ function toggleShowSystem(e) {
     createCookie('show_system', 'false');
     $('.system').hide();
     CONFIG.show_system = false;
-    scrollDown();
   } else {
     createCookie('show_system', 'true');
     $('.system').show();
     CONFIG.show_system = true;
-    scrollDown();
   }
+  $('#entry').focus();
+  scrollDown();
 }
 
 // **********
