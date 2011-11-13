@@ -6,7 +6,7 @@ var express = require('express')
 var app = express.createServer();
 var port = process.env.PORT || 3000;
 
-var BACKLOG_SIZE = 50;
+var BACKLOG_SIZE = 100;
 
 // Maps tickets to user data one-to-one
 // These mappings are never deleted, only replaced
