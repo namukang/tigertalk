@@ -176,8 +176,7 @@ function getData(res, token, callback, fallback) {
       } else {
         var nick = {
           name: response.name,
-          first_name: response.first_name,
-          last_name: response.last_name
+          first_name: response.first_name
         };
         callback(nick, response.id, response.link);
       }
