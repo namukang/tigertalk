@@ -83,6 +83,9 @@
      (i.e. access_token) for real work on the client side
 ** TODO Non PU students can access other pages after visiting public!
    - Handle public room separately
+** TODO Fix design
+   - consider: background of user texts are colored, not nicks
+   - spacing b/w separate messages vs spacing b/w lines in paragraph
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
