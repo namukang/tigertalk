@@ -146,8 +146,8 @@ socket.on('populate', function(data) {
 function refreshUserList() {
   // Sort list
   CONFIG.users.sort(function(a, b) {
-    a = a.nick;
-    b = b.nick;
+    a = a.nick.name;
+    b = b.nick.name;
     if (a === b) return 0;
     if (a > b) return 1;
     else return -1;
@@ -170,7 +170,7 @@ function refreshUserList() {
     var userNick = $(document.createElement('td'));
     userNick.addClass('nick');
     userNick.css('color', getColor(user.id));
-    userNick.html(user.nick);
+    userNick.html(user.nick.name);
     // Create pic element
     var userPic = $(document.createElement('td'));
     userPic.addClass('pic');
@@ -229,7 +229,7 @@ function addMessage(time, user, msg, type) {
     if (user.id === CONFIG.id) {
       messageElement.addClass("self");
     }
-    var text = user.nick + " joined the room.";
+    var text = user.nick.name + " joined the room.";
     var content = '<tr>'
       + time_html
       + '<td class="text">' + text + '</td>'
@@ -249,7 +249,7 @@ function addMessage(time, user, msg, type) {
     msg = msg.replace(url_re, '<a target="_blank" href="$&">$&</a>');
 
     // Bold your nickname if it is mentioned in a message
-    var firstname_re = new RegExp("\\b" + CONFIG.nick.split(' ')[0] + "\\b", 'i');
+    var firstname_re = new RegExp("\\b" + CONFIG.nick.first_name + "\\b", 'i');
     var firstname_match = firstname_re.exec(msg);
     if (firstname_match) {
       msg = msg.replace(firstname_match, '<span class="self">' + firstname_match + '</span>');
@@ -258,7 +258,7 @@ function addMessage(time, user, msg, type) {
     var color = getColor(user.id);
     var content = '<tr>'
       + time_html
-      + '<td class="nick" style="color: ' + color + '">' + user.nick + ':</td>'
+      + '<td class="nick" style="color: ' + color + '">' + user.nick.name + ':</td>'
       + '<td class="text">' + msg + '</td>'
       + '</tr>';
     messageElement.html(content);
@@ -269,7 +269,7 @@ function addMessage(time, user, msg, type) {
     if (!CONFIG.show_system) {
       messageElement.hide();
     }
-    var text = user.nick + " left the room.";
+    var text = user.nick.name + " left the room.";
     var content = '<tr>'
       + time_html
       + '<td class="text">' + text + '</td>'

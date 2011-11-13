@@ -174,7 +174,12 @@ function getData(res, token, callback, fallback) {
       if (response.hasOwnProperty("error")) {
         fallback();
       } else {
-        callback(response.name, response.id, response.link);
+        var nick = {
+          name: response.name,
+          first_name: response.first_name,
+          last_name: response.last_name
+        };
+        callback(nick, response.id, response.link);
       }
     });
   }).on('error', function(e) {
