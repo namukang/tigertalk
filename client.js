@@ -80,6 +80,9 @@ socket.on('connect', function() {
   CONFIG.ticket = readCookie("ticket");
   CONFIG.socket_id = readCookie("socket_id");
   CONFIG.room = document.location.pathname.substring(1);
+  if (!CONFIG.room) {
+    CONFIG.room = "main";
+  }
   socket.emit('identify', CONFIG.ticket, CONFIG.socket_id, CONFIG.room);
 });
 
@@ -152,9 +155,9 @@ function refreshUserList() {
     else return -1;
   });
   // Empty list
-  $('#users').empty();
-  // Display new list
   var userList = $('#users');
+  userList.empty();
+  // Display new list
   for (var i = 0; i < CONFIG.users.length; i++) {
     var user = CONFIG.users[i];
     // Create user link
@@ -365,35 +368,8 @@ function updateTitle() {
 // Toggle showing the user list
 function toggleUserList(e) {
   e.preventDefault();
+  toggleSidebar('users');
   $('#entry').focus();
-  var sidebar = $("#sidebar");
-  var main = $(".main");
-  main.width("80%");
-  scrollDown();
-  sidebar.animate({
-    width: 'toggle'
-  }, function() {
-    if (sidebar.is(":hidden")) {
-      main.width("100%");
-    }
-  });
-}
-
-// Toggle showing the room list
-function toggleRoomList(e) {
-  e.preventDefault();
-  $('#entry').focus();
-  var sidebar = $("sidebar");
-  var main = $(".main");
-  main.width("80%");
-  scrollDown();
-  sidebar.animate({
-    width: 'toggle'
-  }, function() {
-    if (sidebar.is(":hidden")) {
-      main.width("100%");
-    }
-  });
 }
 
 // Show About content
@@ -434,17 +410,6 @@ function logout(e) {
   socket.emit('logout');
 }
 
-function share(e) {
-  e.preventDefault();
-  FB.ui({
-    method: 'feed',
-    name: 'TigerTalk',
-    message: "Chat with me on TigerTalk!",
-    link: 'http://www.tigertalk.me',
-    description: 'TigerTalk is a real-time chat application exclusively for Princeton students.'
-  });
-}
-
 function toggleShowSystem(e) {
   if (CONFIG.show_system) {
     createCookie('show_system', 'false');
@@ -459,16 +424,153 @@ function toggleShowSystem(e) {
   }
 }
 
+// **********
+// START ROOM LISTS
+// **********
+// Populate the room list
+socket.on('room_list', function(roomToNumUsers) {
+  var roomList = createRoomList(roomToNumUsers);
+  roomList.sort(compareByNumUsers);
+  showRoomList(roomList);
+});
+
+// Render the room list
+function showRoomList(rooms) {
+  var roomList = $('#rooms');
+  // Clear the room list
+  roomList.empty();
+  // Populate the room list
+  for (var i = 0; i < rooms.length; i++) {
+    var roomElem = $(document.createElement('li'));
+    var room = rooms[i].room;
+    var numUsers = rooms[i].numUsers;
+    // Create user link
+    var roomLink = $(document.createElement('a'));
+    roomLink.attr('href', '/' + room);
+    roomLink.attr('target', '_blank');
+    roomLink.html(room + ' (' + numUsers + ' users)');
+    if (CONFIG.room === room) {
+      roomLink.addClass('self');
+    }
+    roomElem.html(roomLink);
+    roomList.append(roomElem);
+  }
+}
+
+// Sort the array of rooms by number of users
+function compareByNumUsers(a, b) {
+  return b.numUsers - a.numUsers;
+}
+
+// Convert the roomToNumUsers object to an array
+function createRoomList(roomToNumUsers) {
+  var roomList = [];
+  for (room in roomToNumUsers) {
+    roomList.push({
+      room: room,
+      numUsers: roomToNumUsers[room]
+    });
+  }
+  return roomList;
+}
+
+// Toggle showing the room list
+function toggleRoomList(e) {
+  e.preventDefault();
+  toggleSidebar('rooms');
+  $('#entry').focus();
+}
+// **********
+// END ROOM LISTS
+// **********
+
+// Toggle the current type in the sidebar
+// If sidebar is hidden, show type
+// If type is already showing, hide
+// If sidebar is showing another type, switch
+function toggleSidebar(type) {
+  var main = $(".main");
+  var sidebar = $('#sidebar');
+  var currentShowing = getCurrentList();
+  if (sidebar.is(":hidden")) {
+    // Only pull room list if sidebar is going to be shown
+    if (type === 'rooms') {
+      socket.emit('room_list');
+    }
+    // Just show the sidebar
+    showInSidebar(type);
+    main.width("80%");
+    scrollDown();
+    sidebar.animate({
+      width: 'toggle'
+    });
+  } else if (currentShowing === type) {
+    // Just hide the sidebar
+    sidebar.animate({
+      width: 'toggle'
+    }, function() {
+      main.width("100%");
+      showInSidebar(type);
+    });
+  } else {
+    // Only pull room list if sidebar is going to be shown
+    if (type === 'rooms') {
+      socket.emit('room_list');
+    }
+    // First hide sidebar
+    sidebar.animate({
+      width: 'toggle'
+    }, function() {
+      showInSidebar(type);
+    });
+    // Now show sidebar
+    sidebar.animate({
+      width: 'toggle'
+    });
+  }
+}
+
+// Return the list that is currently being shown in the sidebar
+function getCurrentList() {
+  var roomList = $('#room-list');
+  var userList = $('#user-list');
+  if (roomList.is(":visible")) {
+    return 'rooms';
+  } else if (userList.is(":visible")) {
+    return 'users';
+  } else {
+    return "ERROR";
+  }
+}
+
+// Hide other lists and only show list 'type'
+function showInSidebar(type) {
+  var roomList = $('#room-list');
+  var userList = $('#user-list');
+  var prefs = $('#prefs');
+  $('#sidebar div').hide();
+  if (type === 'rooms') {
+    roomList.show();
+  } else if (type === 'users') {
+    userList.show();
+    prefs.show();
+  }
+}
+
 $(function() {
   // Set seed
   CONFIG.seed = Math.floor(Math.random() * CONFIG.colors.length);
 
-  // Uncheck system messages checkbox appropriately
+  // Check or uncheck system messages checkbox appropriately
   if (CONFIG.show_system) {
     $("#system-link").attr("checked", "checked");
   } else {
     $("#system-link").removeAttr("checked");
   }
+
+  // Only show user list at beginning
+  $('#room-list').hide();
+  $('#prefs').hide();
 
   // Focus on entry element upon page load
   var entry = $("#entry");
@@ -496,11 +598,11 @@ $(function() {
     updateTitle();
   });
 
+  // Set up click handlers
   $('#user-link').click(toggleUserList);
   $('#room-link').click(toggleRoomList);
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
-  $('#share-link').click(share);
   $('#system-link').click(toggleShowSystem);
 
   // Showing loading message

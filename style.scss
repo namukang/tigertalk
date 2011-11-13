@@ -74,10 +74,10 @@ body {
   border-left: 1px solid #777;
   right: 0;
   width: $sidebar-width;
-  #user-list {
+  #user-list, #room-list {
     margin: 1em;
     white-space: nowrap;
-    #users-title {
+    #users-title, #rooms-title {
       font-weight: bold;
       padding-bottom: 1em;
     }
@@ -94,14 +94,10 @@ body {
         vertical-align: middle;
         padding: 0 1em;
       }
-      a {
-        display: block;
-        color: black;
-        text-decoration: none;
-        &:hover {
-          text-decoration: underline;
-        }
-      }
+    }
+    #rooms {
+      list-style: square;
+      padding: 0 2em;
     }
   }
   #prefs {
@@ -109,6 +105,14 @@ body {
     color: #777;
     margin: 1em;
     white-space: nowrap;
+  }
+  a {
+    display: block;
+    color: black;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 

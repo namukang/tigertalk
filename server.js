@@ -8,6 +8,26 @@ var port = process.env.PORT || 3000;
 
 var BACKLOG_SIZE = 50;
 
+// Maps tickets to user data one-to-one
+// These mappings are never deleted, only replaced
+var ticketToUser = {};
+// Maps nicks to tickets one-to-one
+// Used to only keep one ticket for each user
+var nickToTicket = {}; // FIXME: change to user ids
+// Maps nicks to their sockets one-to-many
+var nickToSockets = {}; // FIXME: change to user ids
+// Maps rooms to a list of unique users
+var roomToUsers = {};
+// Maps rooms to backlog
+var roomToLog = {};
+// Maps room to sockets one-to-many
+// NOTE: A single user may have multiple sockets
+var roomToSockets = {};
+// Maps room to last used time
+var roomToTime = {};
+// Maps rooms to number of users
+var roomToNumUsers = {};
+
 // Configuration
 app.configure(function() {
   app.use(express.bodyParser());
@@ -49,24 +69,6 @@ io.configure('production', function() {
   io.enable('browser client gzip');          // gzip the file
   io.set('log level', 1);                    // reduce logging
 });
-
-// Maps tickets to user data one-to-one
-// These mappings are never deleted, only replaced
-var ticketToUser = {};
-// Maps nicks to tickets one-to-one
-// Used to only keep one ticket for each user
-var nickToTicket = {}; // FIXME: change to user ids
-// Maps nicks to their sockets one-to-many
-var nickToSockets = {}; // FIXME: change to user ids
-// Maps rooms to a list of unique users
-var roomToUsers = {};
-// Maps rooms to backlog
-var roomToLog = {};
-// Maps room to sockets one-to-many
-// NOTE: A single user may have multiple sockets
-var roomToSockets = {};
-// Map room to last used time
-var roomToTime = {};
 
 // Routing
 app.get('/', function(req, res) {
@@ -234,6 +236,8 @@ function getUsers(room) {
   if (roomToUsers.hasOwnProperty(room)) {
     userList = roomToUsers[room];
   } else {
+    // Initialize rooms and user list
+    roomToNumUsers[room] = 0;
     userList = [];
     roomToUsers[room] = userList;
   }
@@ -257,8 +261,16 @@ function removeSocketFromRoom(socket, room) {
   }
 }
 
+// Add user to room list
+function addUserToList(user, room) {
+  roomToNumUsers[room]++;
+  var userList = getUsers(room);
+  userList.push(user);
+}
+
 // Remove user from the room list
 function removeUserFromList(nick, room) {
+  roomToNumUsers[room]--;
   var userList = getUsers(room);
   for (var i = 0; i < userList.length; i++) {
     var user = userList[i];
@@ -270,6 +282,7 @@ function removeUserFromList(nick, room) {
 
 // Delete all data for a room
 function deleteRoom(room) {
+  delete roomToNumUsers[room];
   delete roomToUsers[room];
   delete roomToLog[room];
   delete roomToSockets[room];
@@ -341,6 +354,7 @@ function disconnectSocket(nick, socket) {
     // Update room timestamp
     roomToTime[room] = new Date();
     if (!hasConnectionsInRoom(nick, room)) {
+      // Check if users have no more connections to TigerTalk
       if (sockets.length === 0) {
         delete nickToSockets[nick];
       }
@@ -385,8 +399,8 @@ io.sockets.on('connection', function(socket) {
     // Only alert other users of connect if this is user's initial
     // connection into the room
     if (!isUserInList(nick, room)) {
-      // Add to user list after populating client
-      userList.push(user);
+      // Add user to room
+      addUserToList(user, room);
       var msg = {
         time: (new Date()).getTime(),
         user: user
@@ -394,6 +408,17 @@ io.sockets.on('connection', function(socket) {
       emitToSockets('join', msg, room);
       addToBackLog('join', msg, room);
     }
+  });
+
+  // Notify others that user has disconnected
+  socket.on('disconnect', function() {
+    socket.get('ticket', function(err, ticket) {
+      // Make sure ticket is still valid
+      if (ticketToUser.hasOwnProperty(ticket)) {
+        var nick = ticketToUser[ticket].nick;
+        disconnectSocket(nick, socket);
+      }
+    });
   });
 
   // Forward received messages to all the clients
@@ -421,17 +446,6 @@ io.sockets.on('connection', function(socket) {
     }
   });
 
-  // Notify others that user has disconnected
-  socket.on('disconnect', function() {
-    socket.get('ticket', function(err, ticket) {
-      // Make sure ticket is still valid
-      if (ticketToUser.hasOwnProperty(ticket)) {
-        var nick = ticketToUser[ticket].nick;
-        disconnectSocket(nick, socket);
-      }
-    });
-  });
-
   // Log out the user completely
   socket.on('logout', function() {
     socket.get('ticket', function(err, ticket) {
@@ -456,5 +470,10 @@ io.sockets.on('connection', function(socket) {
       }
       delete nickToTicket[nick];
     });
+  });
+
+  // Send the user the list of rooms
+  socket.on('room_list', function() {
+    socket.emit('room_list', roomToNumUsers);
   });
 });

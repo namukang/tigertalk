@@ -57,34 +57,37 @@ body {
   border-left: 1px solid #777;
   right: 0;
   width: 20%; }
-  #sidebar #user-list {
+  #sidebar #user-list, #sidebar #room-list {
     margin: 1em;
     white-space: nowrap; }
-    #sidebar #user-list #users-title {
+    #sidebar #user-list #users-title, #sidebar #user-list #rooms-title, #sidebar #room-list #users-title, #sidebar #room-list #rooms-title {
       font-weight: bold;
       padding-bottom: 1em; }
-    #sidebar #user-list #users {
+    #sidebar #user-list #users, #sidebar #room-list #users {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1em; }
-      #sidebar #user-list #users td.pic {
+      #sidebar #user-list #users td.pic, #sidebar #room-list #users td.pic {
         height: 50px;
         width: 50px; }
-      #sidebar #user-list #users td.nick {
+      #sidebar #user-list #users td.nick, #sidebar #room-list #users td.nick {
         text-align: center;
         vertical-align: middle;
         padding: 0 1em; }
-      #sidebar #user-list #users a {
-        display: block;
-        color: black;
-        text-decoration: none; }
-        #sidebar #user-list #users a:hover {
-          text-decoration: underline; }
+    #sidebar #user-list #rooms, #sidebar #room-list #rooms {
+      list-style: square;
+      padding: 0 2em; }
   #sidebar #prefs {
     font-size: 90%;
     color: #777;
     margin: 1em;
     white-space: nowrap; }
+  #sidebar a {
+    display: block;
+    color: black;
+    text-decoration: none; }
+    #sidebar a:hover {
+      text-decoration: underline; }
 
 table.message {
   border-collapse: collapse;
