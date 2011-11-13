@@ -169,7 +169,7 @@ function refreshUserList() {
     // Create nick element
     var userNick = $(document.createElement('td'));
     userNick.addClass('nick');
-    userNick.css('color', getColor(user.nick));
+    userNick.css('color', getColor(user.id));
     userNick.html(user.nick);
     // Create pic element
     var userPic = $(document.createElement('td'));
@@ -201,16 +201,12 @@ function updateNumUsers() {
   $(".num_users").html(CONFIG.users.length);
 }
 
-// Assign a color to each nick
-function getColor(nick) {
-  if (nick === CONFIG.nick) {
+// Assign a color to each id
+function getColor(id) {
+  if (id === CONFIG.id) {
     return orange;
   }
-  var nickNum = 0;
-  for (var i = 0; i < nick.length; i++) {
-    nickNum += nick.charCodeAt(i);
-  }
-  var index = (nickNum + CONFIG.seed) % CONFIG.colors.length;
+  var index = (id + CONFIG.seed) % CONFIG.colors.length;
   return CONFIG.colors[index];
 }
 
@@ -259,7 +255,7 @@ function addMessage(time, user, msg, type) {
       msg = msg.replace(firstname_match, '<span class="self">' + firstname_match + '</span>');
     }
 
-    var color = getColor(user.nick); // FIXME: determine color based on ID
+    var color = getColor(user.id);
     var content = '<tr>'
       + time_html
       + '<td class="nick" style="color: ' + color + '">' + user.nick + ':</td>'

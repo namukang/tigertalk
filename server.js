@@ -15,7 +15,7 @@ var ticketToUser = {};
 // Used to make sure we only keep one ticket for each user
 var idToTicket = {};
 // Maps ids to their sockets one-to-many
-var idToSockets = {}; // FIXME: change to user ids
+var idToSockets = {};
 // Maps rooms to a list of unique users
 var roomToUsers = {};
 // Maps rooms to backlog
