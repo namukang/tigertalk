@@ -429,7 +429,6 @@ function showRoomList(rooms) {
     // Create user link
     var roomLink = $(document.createElement('a'));
     roomLink.attr('href', '/' + room);
-    roomLink.attr('target', '_blank');
     roomLink.html(room + ' (' + numUsers + ' users)');
     if (CONFIG.room === room) {
       roomLink.addClass('self');
