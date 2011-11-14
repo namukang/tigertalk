@@ -68,7 +68,7 @@ exports.handler = function(req, res, app_url, ticketToUser, idToTicket, room) {
         ticketToUser[cookieTicket] = user;
         res.sendfile(__dirname + '/index.html');
       };
-      var ALL_ACCESS = true;
+      var ALL_ACCESS = false;
       if (ALL_ACCESS) {
         // Skip validation
         getData(res, token, callback, fallback);
