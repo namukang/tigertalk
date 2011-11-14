@@ -162,20 +162,21 @@ socket.on('populate', function(data) {
   }
 });
 
+// Compare by alphabetically ascending
+function compareAlphabetically(a, b) {
+  if (a === b) {
+    return 0;
+  } else if (a > b) {
+    return 1;
+  } else {
+    return -1;
+  }
+}
+
 function refreshUserList() {
   // Sort list
   CONFIG.users.sort(function(a, b) {
-    a = a.nick.name;
-    b = b.nick.name;
-    if (a === b) {
-      return 0;
-    }
-    else if (a > b) {
-      return 1;
-    }
-    else {
-      return -1;
-    }
+    return compareAlphabetically(a.nick.name, b.nick.name);
   });
   // Empty list
   var userList = $('#users');
@@ -469,9 +470,15 @@ function showRoomList(rooms) {
   }
 }
 
-// Sort the array of rooms by number of users
+// Sort the array of rooms by desc number of users
 function compareByNumUsers(a, b) {
-  return b.numUsers - a.numUsers;
+  var userDiff = b.numUsers - a.numUsers;
+  // Sort alphabetically if same number of users
+  if (userDiff === 0) {
+    return compareAlphabetically(a.room, b.room);
+  } else {
+    return userDiff;
+  }
 }
 
 // Convert the roomToNumUsers object to an array
