@@ -11,9 +11,9 @@ var TYPES = {
   join: "join",
   part: "part",
   logout: "logout"
-}
+};
 
-var url_re = /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s"]*(\?[^\s"]+)?)?)?/g
+var url_re = /https?:\/\/([\-\w\.]+)+(:\d+)?(\/([^\s"]*(\?[^\s"]+)?)?)?/g;
 var orange = '#FA7F00';
 var CONFIG = {
   focus: true, // whether document has focus
@@ -27,7 +27,7 @@ var CONFIG = {
   show_system: determineShowSystem(), // whether to show system messages
   seed: 0, // used to give nicks different colors for every session
   colors: ['red', 'green', 'blue', 'purple', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
-}
+};
 
 // Return whether to show system messages
 function determineShowSystem() {
@@ -44,31 +44,56 @@ function determineShowSystem() {
   return show_system_setting;
 }
 
-// Cookie code!
+// **********
+// START COOKIE CODE
 // http://www.quirksmode.org/js/cookies.html
-function createCookie(name,value,days) {
+// **********
+function createCookie(name, value, days) {
+  var expires;
   if (days) {
 	var date = new Date();
 	date.setTime(date.getTime()+(days*24*60*60*1000));
-	var expires = "; expires="+date.toGMTString();
+	expires = "; expires="+date.toGMTString();
   }
-  else var expires = "";
-  document.cookie = name+"="+value+expires+"; path=/";
+  else {
+    expires = "";
+  }
+  document.cookie = name + "=" + value + expires + "; path=/";
 }
 
 function readCookie(name) {
   var nameEQ = name + "=";
   var ca = document.cookie.split(';');
-  for(var i=0;i < ca.length;i++) {
+  for (var i = 0; i < ca.length; i++) {
 	var c = ca[i];
-	while (c.charAt(0)==' ') c = c.substring(1,c.length);
-	if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	while (c.charAt(0) === ' ') {
+      c = c.substring(1, c.length);
+    }
+	if (c.indexOf(nameEQ) === 0) {
+      return c.substring(nameEQ.length, c.length);
+    }
   }
   return null;
 }
 
 function eraseCookie(name) {
-  createCookie(name,"",-1);
+  createCookie(name, "", -1);
+}
+// **********
+// END COOKIE CODE
+// **********
+
+// Convert date to military time
+function timeString(date) {
+  var hour = date.getHours().toString();
+  if (hour.length === 1) {
+    hour = '0' + hour;
+  }
+  var min = date.getMinutes().toString();
+  if (min.length === 1) {
+    min = '0' + min;
+  }
+  return hour + ":" + min;
 }
 
 // Need to reestablish identity
@@ -148,9 +173,15 @@ function refreshUserList() {
   CONFIG.users.sort(function(a, b) {
     a = a.nick.name;
     b = b.nick.name;
-    if (a === b) return 0;
-    if (a > b) return 1;
-    else return -1;
+    if (a === b) {
+      return 0;
+    }
+    else if (a > b) {
+      return 1;
+    }
+    else {
+      return -1;
+    }
   });
   // Empty list
   var userList = $('#users');
@@ -293,19 +324,6 @@ function addMessage(time, user, msg, type) {
   if (atBottom) {
     scrollDown();
   }
-}
-
-// Convert date to military time
-function timeString(date) {
-  var hour = date.getHours().toString();
-  if (hour.length == 1) {
-    hour = '0' + hour;
-  }
-  var min = date.getMinutes().toString();
-  if (min.length == 1) {
-    min = '0' + min;
-  }
-  return hour + ":" + min;
 }
 
 // Sanitize HTML
@@ -468,7 +486,7 @@ function compareByNumUsers(a, b) {
 // Convert the roomToNumUsers object to an array
 function createRoomList(roomToNumUsers) {
   var roomList = [];
-  for (room in roomToNumUsers) {
+  for (var room in roomToNumUsers) {
     roomList.push({
       room: room,
       numUsers: roomToNumUsers[room]
