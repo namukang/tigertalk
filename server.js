@@ -23,9 +23,6 @@
   var roomToUsers = {};
   // Maps rooms to backlog
   var roomToLog = {};
-  // Maps room to sockets one-to-many
-  // NOTE: A single user may have multiple sockets
-  var roomToSockets = {};
   // Maps room to last used time
   var roomToTime = {};
   // Maps rooms to number of users
@@ -181,13 +178,6 @@
             !isBlank(text.toString()));
   }
 
-  function emitToSockets(type, msg, room) {
-    var sockets = roomToSockets[room];
-    for (var i = 0; i < sockets.length; i++) {
-      sockets[i].emit(type, msg);
-    }
-  }
-
   // Get the backlog for a room or create one if it does not already
   // exist
   function getBackLog(room) {
@@ -234,23 +224,6 @@
     return userList;
   }
 
-  // Add a socket to the room
-  function addSocketToRoom(socket, room) {
-    if (roomToSockets.hasOwnProperty(room)) {
-      roomToSockets[room].push(socket);
-    } else {
-      roomToSockets[room] = [socket];
-    }
-  }
-
-  // Remove socket from the room
-  function removeSocketFromRoom(socket, room) {
-    if (roomToSockets.hasOwnProperty(room)) {
-      var sockets = roomToSockets[room];
-      removeFromList(socket, sockets);
-    }
-  }
-
   // Add user to room list
   function addUserToList(user, room) {
     roomToNumUsers[room]++;
@@ -275,7 +248,6 @@
     delete roomToNumUsers[room];
     delete roomToUsers[room];
     delete roomToLog[room];
-    delete roomToSockets[room];
     delete roomToTime[room];
   }
 
@@ -292,7 +264,7 @@
         var timestamp = roomToTime[room];
         // Room must have no connections and not been used for 5 minutes
         var limit = 5 * 60 * 1000;
-        if (roomToSockets[room].length === 0 &&
+        if (roomToNumUsers[room] === 0 &&
             now - timestamp > limit) {
           deleteRoom(room);
         }
@@ -355,7 +327,7 @@
       // Remove socket
       var sockets = idToSockets[id];
       removeFromList(socket, sockets);
-      removeSocketFromRoom(socket, room);
+      socket.leave(room);
       // Update room timestamp
       roomToTime[room] = new Date();
       if (!hasConnectionsInRoom(id, room)) {
@@ -368,7 +340,7 @@
           time: (new Date()).getTime(),
           user: user
         };
-        emitToSockets('part', msg, room);
+        io.sockets.in(room).emit('part', msg);
         addToBackLog('part', msg, room);
       }
     });
@@ -391,7 +363,7 @@
       var user = ticketToUser[ticket];
       var id = user.id;
       var userList = getUsers(room);
-      addSocketToRoom(socket, room);
+      socket.join(room);
       var backLog = getBackLog(room);
       socket.emit('populate', {
         user_list: userList,
@@ -408,7 +380,7 @@
           time: (new Date()).getTime(),
           user: user
         };
-        emitToSockets('join', msg, room);
+        io.sockets.in(room).emit('join', msg);
         addToBackLog('join', msg, room);
       }
     });
@@ -434,7 +406,7 @@
                 user: user,
                 msg: text
               };
-              emitToSockets('msg', msg, room);
+              io.sockets.in(room).emit('msg', msg);
               addToBackLog('msg', msg, room);
             });
           } else {
