@@ -4,6 +4,7 @@
   benefit from stimulating interesting discussions between members of
   the community who would otherwise never get a chance to meet each
   other.
+  - posters: 11*17 inches, full color-- it's 400 copies for $546
 * Core
 ** DONE Add nicks
    - Eventually we want to use Net IDs instead of user chosen nicks
@@ -27,9 +28,9 @@
        a the nick/netid. We have just the netid for the socket so
        anyone can just sign off another user if they so wish. We don't
        want that!
-** TODO Deployment
-   - [ ] Facebook page
-   - [ ] Facebook ads
+** DONE Deployment
+   - [X] Facebook page
+   - [X] Facebook ads
    - [X] Google Analytics
    - [X] Team email
 ** DONE Better security
@@ -53,7 +54,7 @@
 ** DONE FB profile pictures in list
 ** TODO Generate color only once (randomly) and store it in user data
    - would a user's color change if they left and rejoined?
-** TODO Send first name and last name of user separately
+** DONE Send first name and last name of user separately
    - creates path to autocomplete
 * Bugs
 ** DONE Get rid of ticket information in URL after authenticating
@@ -105,7 +106,7 @@
 ** DONE Smaller, user-created rooms
    - One of these will be an "anon" room for anonymous interactions
    - Each room will be its own URL (tigertalk.me/rooms/anon)
-** TODO Show list of rooms
+** DONE Show list of rooms
 ** TODO Private messaging
 ** TODO Autocomplete nicks in entry
 ** TODO Ping users by flashing description when they're mentioned

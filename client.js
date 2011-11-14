@@ -636,6 +636,10 @@ $(function() {
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
   $('#system-link').click(toggleShowSystem);
+  $('#refresh-room-list').click(function (e) {
+    e.preventDefault();
+    socket.emit('room_list');
+  });
   $('#room-button').click(function (e) {
     e.preventDefault();
     var room = $.trim($('#room-input').val());

@@ -62,7 +62,7 @@ body {
     white-space: nowrap; }
     #sidebar #user-list #users-title, #sidebar #user-list #rooms-title, #sidebar #room-list #users-title, #sidebar #room-list #rooms-title {
       font-weight: bold;
-      padding-bottom: 1em; }
+      margin-bottom: 1em; }
     #sidebar #user-list #users, #sidebar #room-list #users {
       width: 100%;
       border-collapse: collapse;
