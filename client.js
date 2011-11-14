@@ -44,10 +44,10 @@ function determineShowSystem() {
   return show_system_setting;
 }
 
-// **********
-// START COOKIE CODE
-// http://www.quirksmode.org/js/cookies.html
-// **********
+/**
+ * Cookie code
+ * http://www.quirksmode.org/js/cookies.html
+ */
 function createCookie(name, value, days) {
   var expires = "";
   if (days) {
@@ -76,9 +76,6 @@ function readCookie(name) {
 function eraseCookie(name) {
   createCookie(name, "", -1);
 }
-// **********
-// END COOKIE CODE
-// **********
 
 // Convert date to military time
 function timeString(date) {
@@ -443,9 +440,9 @@ function toggleShowSystem(e) {
   scrollDown();
 }
 
-// **********
-// START ROOM LISTS
-// **********
+/**
+ * Room lists
+ */
 // Populate the room list
 socket.on('room_list', function(roomToNumUsers) {
   var roomList = createRoomList(roomToNumUsers);
@@ -498,9 +495,6 @@ function toggleRoomList(e) {
   toggleSidebar('rooms');
   $('#entry').focus();
 }
-// **********
-// END ROOM LISTS
-// **********
 
 // Toggle the current type in the sidebar
 // If sidebar is hidden, show type
