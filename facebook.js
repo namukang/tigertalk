@@ -10,6 +10,7 @@
   var APP_SECRET = 'ed06e7f5c6805820c36c573e6146fdb5';
 
   var expiredTickets = {};
+  var ALL_ACCESS = false;
 
   exports.handler = function (req, res, app_url, ticketToUser, idToTicket, room) {
     APP_URL = app_url + '/';
@@ -17,6 +18,7 @@
       // Development
       APP_ID = '300919423260744';
       APP_SECRET = 'e605d10c78279285bea5c25eb37d6f3f';
+      ALL_ACCESS = true;
     }
     if (req.query.hasOwnProperty("error_reason")) {
       // User pressed "Don't Allow"
@@ -71,7 +73,6 @@
           ticketToUser[cookieTicket] = user;
           res.sendfile(__dirname + '/index.html');
         };
-        var ALL_ACCESS = false;
         if (ALL_ACCESS) {
           // Skip validation
           getData(res, token, callback, fallback);
