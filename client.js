@@ -576,11 +576,13 @@ function showInSidebar(type) {
 }
 
 // Create/join a room
-function createRoom(e) {
-  e.preventDefault();
-  var room = $.trim($('#room-input').val());
+function createRoom(room) {
   if (!room || room.length > 50) {
     alert("Room names must be between 1 and 50 characters.");
+    return;
+  }
+  if (room === CONFIG.room) {
+    alert("You are already in room '" + room + "'");
     return;
   }
   if (/[^\w_\-]/.test(room)) {
@@ -611,7 +613,7 @@ $(function() {
   // Send a message if enter is pressed in entry
   var ENTER = 13; // keycode for enter
   entry.keypress(function(e) {
-    if (e.keyCode != ENTER) return;
+    if (e.keyCode !== ENTER) return;
     var msg = entry.val();
     if (!isBlank(msg)) {
       sendMessage(msg);
@@ -636,7 +638,17 @@ $(function() {
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
   $('#system-link').click(toggleShowSystem);
-  $('#room-button').click(createRoom);
+  $('#room-button').click(function (e) {
+    e.preventDefault();
+    var room = $.trim($('#room-input').val());
+    createRoom(room);
+  });
+
+  $('#room-input').keypress(function(e) {
+    if (e.keyCode !== ENTER) return;
+    var room = $.trim($('#room-input').val());
+    createRoom(room);
+  });
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");
