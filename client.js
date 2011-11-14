@@ -367,19 +367,20 @@ function toggleAbout(e) {
   var extra = $("#extra");
   var content = $("#content");
   var header = $("#header");
+  // Height of the extra section when fully displayed
+  var full_height = 175;
   var target_height;
   var callback = null;
   if (extra.is(":hidden")) {
-    target_height = extra.height();
+    target_height = full_height;
     extra.height(0);
     extra.show();
   } else {
     // Save the original height so we can restore it properly
-    var orig_height = extra.height();
     target_height = 0;
     callback = function() {
       extra.hide();
-      extra.height(orig_height);
+      extra.height(full_height);
     };
   }
   extra.animate({
