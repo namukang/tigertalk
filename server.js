@@ -12,7 +12,7 @@
   var BACKLOG_SIZE = 100;
 
   // Maps tickets to user data one-to-one
-  // These mappings are never deleted, only replaced
+  // An entry is only deleted when a user explicitly logs out
   var ticketToUser = {};
   // Maps ids to tickets one-to-one
   // Used to make sure we only keep one ticket for each user
@@ -108,13 +108,14 @@
       if (idToSockets.hasOwnProperty(id)) {
         var sockets = idToSockets[id];
         var socket_id = req.query.socket_id;
+        var callback = function (err, id) {
+          if (id === socket_id) {
+            disconnectSocket(ticket, socket);
+          }
+        };
         for (var i = 0; i < sockets.length; i++) {
           var socket = sockets[i];
-          socket.get('socket_id', function (err, id) {
-            if (id === socket_id) {
-              disconnectSocket(ticket, socket);
-            }
-          });
+          socket.get('socket_id', callback);
         }
       }
     }
@@ -288,12 +289,13 @@
   function hasConnectionsInRoom(id, targetRoom) {
     var sockets = idToSockets[id];
     var inRoom = false;
+    var callback = function (err, room) {
+      if (room === targetRoom) {
+        inRoom = true;
+      }
+    };
     for (var i = 0; i < sockets.length; i++) {
-      sockets[i].get('room', function (err, room) {
-        if (room === targetRoom) {
-          inRoom = true;
-        }
-      });
+      sockets[i].get('room', callback);
     }
     return inRoom;
   }
@@ -435,14 +437,9 @@
           socket.emit('logout', {
             time: (new Date()).getTime()
           });
-          // Delete all tickets associated with this user
-          socket.get('ticket', function (err, ticket) {
-            if (ticketToUser.hasOwnProperty(ticket)) {
-              delete ticketToUser[ticket];
-            }
-          });
           disconnectSocket(ticket, socket);
         }
+        delete ticketToUser[ticket];
         delete idToTicket[id];
       });
     });
