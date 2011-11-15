@@ -43,8 +43,6 @@
         redirectToFB(res, room);
         return;
       }
-      var socket_id = Math.floor(Math.random() * 99999999999);
-      res.cookie("socket_id", socket_id);
       // Don't validate if we already know the user
       if (ticketToUser.hasOwnProperty(cookieTicket)) {
         res.sendfile(__dirname + '/index.html');

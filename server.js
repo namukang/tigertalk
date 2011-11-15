@@ -60,6 +60,7 @@
     // Heroku requires long polling
     io.set("transports", ["xhr-polling"]);
     io.set("polling duration", 1);
+    io.set("close timeout", 2);
 
     io.enable('browser client minification');  // send minified client
     io.enable('browser client etag');          // apply etag caching logic based on version number
@@ -109,28 +110,6 @@
     res.sendfile(__dirname + '/favicon.ico');
   });
 
-  app.get('/part', function (req, res) {
-    var ticket = req.query.ticket;
-    if (ticketToUser.hasOwnProperty(ticket)) {
-      var id = ticketToUser[ticket].id;
-      // Make sure user has connection before disconnecting them
-      if (idToSockets.hasOwnProperty(id)) {
-        var sockets = idToSockets[id];
-        var socket_id = req.query.socket_id;
-        var callback = function (err, id) {
-          if (id === socket_id) {
-            disconnectSocket(ticket, socket);
-          }
-        };
-        for (var i = 0; i < sockets.length; i++) {
-          var socket = sockets[i];
-          socket.get('socket_id', callback);
-        }
-      }
-    }
-    res.end();
-  });
-
   app.get('/:room', function (req, res) {
     var room = (req.params.room).toString().toLowerCase();
     if (room.length > 50) {
@@ -153,8 +132,6 @@
 
   function randomAuth(req, res, room) {
     var cookieTicket = req.cookies.ticket;
-    var socket_id = Math.floor(Math.random() * 99999999999);
-    res.cookie("socket_id", socket_id);
     if (cookieTicket && ticketToUser.hasOwnProperty(cookieTicket)) {
       res.sendfile(__dirname + '/index.html');
     } else {
@@ -319,59 +296,58 @@
   }
 
   // Disconnect the socket
-  function disconnectSocket(ticket, socket) {
-    // Make sure ticket is valid
-    if (!ticketToUser.hasOwnProperty(ticket)) {
-      return;
-    }
-    var user = ticketToUser[ticket];
-    var id = user.id;
-    // Make sure user has sockets to disconnect
-    if (!idToSockets.hasOwnProperty(id)) {
-      return;
-    }
-    socket.get('room', function (err, room) {
-      // Make sure user is in room before disconnecting
-      if (!isUserInList(id, room)) {
+  function disconnectSocket(socket) {
+    socket.get('ticket', function (err, ticket) {
+      // Make sure ticket is valid
+      if (!ticketToUser.hasOwnProperty(ticket)) {
         return;
       }
-      // Remove socket
-      var sockets = idToSockets[id];
-      removeFromList(socket, sockets);
-      // FIXME: socket.leave(room) causes an error if user is
-      // disconnected by /part when other sockets in room... why?
-      socket.leave(room);
-      // Disassociate socket from ticket so if socket is not really
-      // disconnected, it will reconnect
-      socket.set('ticket', null);
-      // Update room timestamp
-      roomToTime[room] = new Date();
-      if (!hasConnectionsInRoom(id, room)) {
-        // Check if users have no more connections to TigerTalk
-        if (sockets.length === 0) {
-          delete idToSockets[id];
-        }
-        removeUserFromList(id, room);
-        var msg = {
-          time: (new Date()).getTime(),
-          user: user
-        };
-        io.sockets.in(room).emit('part', msg);
-        addToBackLog('part', msg, room);
+      var user = ticketToUser[ticket];
+      var id = user.id;
+      // Make sure user has sockets to disconnect
+      if (!idToSockets.hasOwnProperty(id)) {
+        return;
       }
+      socket.get('room', function (err, room) {
+        // Make sure user is in room before disconnecting
+        if (!isUserInList(id, room)) {
+          return;
+        }
+        // Remove socket
+        var sockets = idToSockets[id];
+        removeFromList(socket, sockets);
+        socket.leave(room);
+        // Disassociate socket from ticket so if socket is not really
+        // disconnected, it will reconnect
+        socket.set('ticket', null);
+        // Update room timestamp
+        roomToTime[room] = new Date();
+        if (!hasConnectionsInRoom(id, room)) {
+          // Check if users have no more connections to TigerTalk
+          if (sockets.length === 0) {
+            delete idToSockets[id];
+          }
+          removeUserFromList(id, room);
+          var msg = {
+            time: (new Date()).getTime(),
+            user: user
+          };
+          io.sockets.in(room).emit('part', msg);
+          addToBackLog('part', msg, room);
+        }
+      });
     });
   }
 
   // Messaging
   io.sockets.on('connection', function (socket) {
-    socket.on('identify', function (ticket, socket_id, room) {
+    socket.on('identify', function (ticket, room) {
       // Reconnect user if server restarts
       if (!ticketToUser.hasOwnProperty(ticket)) {
         socket.emit('reconnect');
         return;
       }
       socket.set('ticket', ticket);
-      socket.set('socket_id', socket_id);
       if (!room) {
         room = "main";
       }
@@ -403,9 +379,7 @@
 
     // Notify others that user has disconnected
     socket.on('disconnect', function () {
-      socket.get('ticket', function (err, ticket) {
-        disconnectSocket(ticket, socket);
-      });
+      disconnectSocket(socket);
     });
 
     // Forward received messages to all the clients
@@ -436,10 +410,12 @@
     // Log out the user completely
     socket.on('logout', function () {
       socket.get('ticket', function (err, ticket) {
+        // Make sure ticket is valid
         if (!ticketToUser.hasOwnProperty(ticket)) {
           return;
         }
         var id = ticketToUser[ticket].id;
+        // Make sure user still has sockets
         if (!idToSockets.hasOwnProperty(id)) {
           return;
         }
@@ -451,7 +427,7 @@
           socket.emit('logout', {
             time: (new Date()).getTime()
           });
-          disconnectSocket(ticket, socket);
+          disconnectSocket(socket);
         }
         delete ticketToUser[ticket];
         delete idToTicket[id];

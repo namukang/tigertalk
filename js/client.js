@@ -21,7 +21,6 @@ var CONFIG = {
   users: [], // online users
   room: null, // current room
   ticket: null, // user's ticket
-  socket_id: null, // id of socket
   id: null, // user's id
   nick: null, // user's nick
   show_system: determineShowSystem(), // whether to show system messages
@@ -98,12 +97,11 @@ socket.on('reconnect', function() {
 // Identify the socket using its ticket
 socket.on('connect', function() {
   CONFIG.ticket = readCookie("ticket");
-  CONFIG.socket_id = readCookie("socket_id");
   CONFIG.room = document.location.pathname.substring(1);
   if (!CONFIG.room) {
     CONFIG.room = "main";
   }
-  socket.emit('identify', CONFIG.ticket, CONFIG.socket_id, CONFIG.room);
+  socket.emit('identify', CONFIG.ticket, CONFIG.room);
 });
 
 // Receive a new message from the server
@@ -410,19 +408,6 @@ function toggleAbout(e) {
   });
   $('#entry').focus();
 }
-
-// Notify server of disconnection
-$(window).unload(function() {
-  $.ajax({
-    url: "/part",
-    type: "GET",
-    async: false,
-    data: {
-      ticket: CONFIG.ticket,
-      socket_id: CONFIG.socket_id
-    }
-  });
-});
 
 function logout(e) {
   e.preventDefault();
