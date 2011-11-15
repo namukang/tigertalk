@@ -398,6 +398,10 @@ function sendMessage(msg) {
       alert("Your nick must be under 25 characters.");
       return;
     }
+    if (/[^\w_\-]/.test(nick.name)) {
+      alert("Nicks may only contains letters, numbers, underscores, and dashes.");
+      return;
+    }
     if (nick.name === CONFIG.nick.name) {
       alert("You already have that nickname.");
       return;

@@ -536,6 +536,11 @@
       if (nick.name.length > 25) {
         return;
       }
+      // Nicks may only contain letters, numbers, underscores, and
+      // dashes
+      if (/[^\w_\-]/.test(nick.name)) {
+        return;
+      }
       socket.get('room', function (err, room) {
         // Cannot change nick outside of anon room
         if (room !== 'anon') {
