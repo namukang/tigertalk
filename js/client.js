@@ -18,7 +18,8 @@ var orange = '#FA7F00';
 var CONFIG = {
   focus: true, // whether document has focus
   unread: 0, // number of unread messages
-  users: [], // online users
+  userIDs: [], // ids of online users
+  idToUser: {}, // mapping from id to user
   room: null, // current room
   ticket: null, // user's ticket
   id: null, // user's id
@@ -106,13 +107,13 @@ socket.on('connect', function() {
 
 // Receive a new message from the server
 socket.on('msg', function(data) {
-  $("#jplayer").jPlayer("stop");
   // Only play sound when window does not have focus
   if (!CONFIG.focus) {
+    $("#jplayer").jPlayer("stop");
     $("#jplayer").jPlayer("play");
   }
   var time = timeString(new Date(data.time));
-  addMessage(time, data.user, data.msg, TYPES.msg);
+  addMessage(time, data.user_id, data.msg, TYPES.msg);
   if (!CONFIG.focus) {
     CONFIG.unread++;
     updateTitle();
@@ -122,8 +123,9 @@ socket.on('msg', function(data) {
 // New user has joined
 socket.on('join', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.user, null, TYPES.join);
-  CONFIG.users.push(data.user);
+  CONFIG.idToUser[data.user.id] = data.user;
+  addMessage(time, data.user.id, null, TYPES.join);
+  CONFIG.userIDs.push(data.user.id);
   refreshUserList();
   updateNumUsers();
 });
@@ -131,8 +133,9 @@ socket.on('join', function(data) {
 // User left room
 socket.on('part', function(data) {
   var time = timeString(new Date(data.time));
-  addMessage(time, data.user, null, TYPES.part);
-  removeFromUserList(data.user.id);
+  addMessage(time, data.user_id, null, TYPES.part);
+  delete CONFIG.idToUser[data.user_id];
+  removeFromUserList(data.user_id);
   updateNumUsers();
 });
 
@@ -147,22 +150,29 @@ socket.on('logout', function(data) {
 
 // Populate the user list
 socket.on('populate', function(data) {
-  // data.user_list does not need to be sorted since the immediately
-  // following 'join' will sort the list
-  CONFIG.users = data.user_list;
+  // Populate basic user data
   CONFIG.id = data.user.id;
   CONFIG.nick = data.user.nick;
-  refreshUserList();
-  updateNumUsers();
   // Remove loading message
   $("#loading").remove();
   // Populate log with backlog
   var backlog = data.backlog;
-  for (var i = 0; i < backlog.length; i++) {
-    var msg = backlog[i];
+  CONFIG.idToUser = backlog.mapping;
+  for (var i = 0; i < backlog.log.length; i++) {
+    var msg = backlog.log[i];
     var time = timeString(new Date(msg.time));
-    addMessage(time, msg.user, msg.msg, msg.type);
+    addMessage(time, msg.user_id, msg.msg, msg.type);
   }
+  // data.user_list does not need to be sorted since the immediately
+  // following 'join' will sort the list
+  CONFIG.userIDs = [];
+  for (var i = 0; i < data.user_list.length; i++) {
+    var user = data.user_list[i];
+    CONFIG.idToUser[user.id] = user;
+    CONFIG.userIDs.push(user.id);
+  }
+  refreshUserList();
+  updateNumUsers();
 });
 
 // Compare by alphabetically ascending
@@ -178,15 +188,17 @@ function compareAlphabetically(a, b) {
 
 function refreshUserList() {
   // Sort list
-  CONFIG.users.sort(function(a, b) {
-    return compareAlphabetically(a.nick.name, b.nick.name);
+  CONFIG.userIDs.sort(function(a, b) {
+    var userA = CONFIG.idToUser[a];
+    var userB = CONFIG.idToUser[b];
+    return compareAlphabetically(userA.nick.name, userB.nick.name);
   });
   // Empty list
   var userList = $('#users');
   userList.empty();
   // Display new list
-  for (var i = 0; i < CONFIG.users.length; i++) {
-    var user = CONFIG.users[i];
+  for (var i = 0; i < CONFIG.userIDs.length; i++) {
+    var user = CONFIG.idToUser[CONFIG.userIDs[i]];
     // Create user link
     var userLink = $(document.createElement('a'));
     userLink.attr('href', user.link);
@@ -217,9 +229,9 @@ function refreshUserList() {
 }
 
 function removeFromUserList(id) {
-  for (var i = 0; i < CONFIG.users.length; i++) {
-    if (CONFIG.users[i].id === id) {
-      CONFIG.users.splice(i, 1);
+  for (var i = 0; i < CONFIG.userIDs.length; i++) {
+    if (CONFIG.userIDs[i] === id) {
+      CONFIG.userIDs.splice(i, 1);
       break;
     }
   }
@@ -227,7 +239,7 @@ function removeFromUserList(id) {
 }
 
 function updateNumUsers() {
-  $(".num_users").html(CONFIG.users.length);
+  $(".num_users").html(CONFIG.userIDs.length);
 }
 
 // Assign a color to each id
@@ -244,7 +256,8 @@ function getPicURL(id) {
 }
 
 // Add a message to the log
-function addMessage(time, user, msg, type) {
+function addMessage(time, id, msg, type) {
+  var user = CONFIG.idToUser[id];
   var messageElement = $(document.createElement("table"));
   messageElement.addClass("message");
 
@@ -447,11 +460,11 @@ function toggleMute(e) {
 socket.on('room_list', function(roomToNumUsers) {
   var roomList = createRoomList(roomToNumUsers);
   roomList.sort(compareByNumUsers);
-  showRoomList(roomList);
+  refreshRoomList(roomList);
 });
 
-// Render the room list
-function showRoomList(rooms) {
+// Refresh the room list
+function refreshRoomList(rooms) {
   var roomList = $('#rooms');
   // Clear the room list
   roomList.empty();

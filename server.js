@@ -172,19 +172,45 @@
     if (roomToLog.hasOwnProperty(room)) {
       backLog = roomToLog[room];
     } else {
-      backLog = [];
+      backLog = {
+        log: [],
+        mapping: {} // id to user mapping for client's use
+      };
       roomToLog[room] = backLog;
     }
     return backLog;
   }
 
   // Add to the backlog for a room
+  // NOTE: This is a bit complex b/c we're trying to send the least
+  // amount of data over the network as possible
   function addToBackLog(type, msg, room) {
     var backLog = getBackLog(room);
+    // Add id to user mapping if user joined
+    if (type === 'join') {
+      backLog.mapping[msg.user.id] = msg.user;
+      msg.user_id = msg.user.id;
+      // Eliminate information already stored in mapping
+      delete msg.user;
+    }
     msg.type = type;
-    backLog.push(msg);
-    while (backLog.length > BACKLOG_SIZE) {
-      backLog.shift();
+    backLog.log.push(msg);
+    while (backLog.log.length > BACKLOG_SIZE) {
+      // Eliminate user mapping if no more records of user in log
+      var removed = backLog.log.shift();
+      if (removed.type === 'part') {
+        var inLog = false;
+        for (var i = 0; i < backLog.log.length; i++) {
+          var currMsg = backLog.log[i];
+          if (currMsg.user_id === removed.user_id) {
+            inLog = true;
+            break;
+          }
+        }
+        if (!inLog) {
+          delete backLog.mapping[removed.user_id];
+        }
+      }
     }
   }
 
@@ -330,7 +356,7 @@
           removeUserFromList(id, room);
           var msg = {
             time: (new Date()).getTime(),
-            user: user
+            user_id: user.id
           };
           io.sockets.in(room).emit('part', msg);
           addToBackLog('part', msg, room);
@@ -393,7 +419,7 @@
               var user = ticketToUser[ticket];
               var msg = {
                 time: (new Date()).getTime(),
-                user: user,
+                user_id: user.id,
                 msg: text
               };
               io.sockets.in(room).emit('msg', msg);
