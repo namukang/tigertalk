@@ -90,6 +90,19 @@
 ** TODO Fix design
    - consider: background of user texts are colored, not nicks
    - spacing b/w separate messages vs spacing b/w lines in paragraph
+** TODO socket.leave throws error if disconnectSocket is called from part when other sockets in room
+   - (disable disconnect when socket emits disconnect)
+   - 20:59:40 web.1     | TypeError: Cannot convert null to object
+     20:59:40 web.1     |     at DELETE (native)
+     20:59:40 web.1     |     at Manager.onLeave (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/manager.js:407:28)
+     20:59:40 web.1     |     at Socket.leave (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/socket.js:189:16)
+     20:59:40 web.1     |     at /Users/dskang/Dropbox/tigertalk/server.js:341:14
+     20:59:40 web.1     |     at Client.get (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/stores/memory.js:86:3)
+     20:59:40 web.1     |     at Socket.get (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/socket.js:258:14)
+     20:59:40 web.1     |     at disconnectSocket (/Users/dskang/Dropbox/tigertalk/server.js:333:12)
+     20:59:40 web.1     |     at /Users/dskang/Dropbox/tigertalk/server.js:122:13
+     20:59:40 web.1     |     at Client.get (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/stores/memory.js:86:3)
+     20:59:40 web.1     |     at Socket.get (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/socket.js:258:14)
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom

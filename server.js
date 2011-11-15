@@ -338,6 +338,8 @@
       // Remove socket
       var sockets = idToSockets[id];
       removeFromList(socket, sockets);
+      // FIXME: socket.leave(room) causes an error if user is
+      // disconnected by /part when other sockets in room... why?
       socket.leave(room);
       // Disassociate socket from ticket so if socket is not really
       // disconnected, it will reconnect
