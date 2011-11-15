@@ -57,8 +57,15 @@
   });
 
   io.configure('production', function () {
+    io.set('transports', [
+      'websocket'
+      , 'flashsocket'
+      , 'htmlfile'
+      , 'xhr-polling'
+      , 'jsonp-polling'
+    ]);
     // Heroku requires long polling
-    io.set("transports", ["xhr-polling"]);
+    // io.set("transports", ["xhr-polling"]);
     io.set("polling duration", 1);
     io.set("close timeout", 3);
 
