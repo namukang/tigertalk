@@ -109,7 +109,10 @@ socket.on('connect', function() {
 // Receive a new message from the server
 socket.on('msg', function(data) {
   $("#jplayer").jPlayer("stop");
-  $("#jplayer").jPlayer("play");
+  // Only play sound when window does not have focus
+  if (!CONFIG.focus) {
+    $("#jplayer").jPlayer("play");
+  }
   var time = timeString(new Date(data.time));
   addMessage(time, data.user, data.msg, TYPES.msg);
   if (!CONFIG.focus) {
