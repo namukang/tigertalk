@@ -58,7 +58,7 @@
 
   io.configure('production', function () {
     // Heroku requires long polling
-    // io.set("transports", ["xhr-polling"]);
+    io.set("transports", ["xhr-polling"]);
     io.set("polling duration", 1);
     io.set("close timeout", 3);
 
