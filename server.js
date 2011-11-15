@@ -60,7 +60,6 @@
     // Heroku requires long polling
     io.set("transports", ["xhr-polling"]);
     io.set("polling duration", 1);
-    io.set("close timeout", 2);
 
     io.enable('browser client minification');  // send minified client
     io.enable('browser client etag');          // apply etag caching logic based on version number
@@ -110,27 +109,27 @@
     res.sendfile(__dirname + '/favicon.ico');
   });
 
-  // app.get('/part', function (req, res) {
-  //   var ticket = req.query.ticket;
-  //   if (ticketToUser.hasOwnProperty(ticket)) {
-  //     var id = ticketToUser[ticket].id;
-  //     // Make sure user has connection before disconnecting them
-  //     if (idToSockets.hasOwnProperty(id)) {
-  //       var sockets = idToSockets[id];
-  //       var socket_id = req.query.socket_id;
-  //       var callback = function (err, id) {
-  //         if (id === socket_id) {
-  //           disconnectSocket(ticket, socket);
-  //         }
-  //       };
-  //       for (var i = 0; i < sockets.length; i++) {
-  //         var socket = sockets[i];
-  //         socket.get('socket_id', callback);
-  //       }
-  //     }
-  //   }
-  //   res.end();
-  // });
+  app.get('/part', function (req, res) {
+    var ticket = req.query.ticket;
+    if (ticketToUser.hasOwnProperty(ticket)) {
+      var id = ticketToUser[ticket].id;
+      // Make sure user has connection before disconnecting them
+      if (idToSockets.hasOwnProperty(id)) {
+        var sockets = idToSockets[id];
+        var socket_id = req.query.socket_id;
+        var callback = function (err, id) {
+          if (id === socket_id) {
+            disconnectSocket(ticket, socket);
+          }
+        };
+        for (var i = 0; i < sockets.length; i++) {
+          var socket = sockets[i];
+          socket.get('socket_id', callback);
+        }
+      }
+    }
+    res.end();
+  });
 
   app.get('/:room', function (req, res) {
     var room = (req.params.room).toString().toLowerCase();
@@ -342,6 +341,9 @@
       // FIXME: socket.leave(room) causes an error if user is
       // disconnected by /part when other sockets in room... why?
       socket.leave(room);
+      // Disassociate socket from ticket so if socket is not really
+      // disconnected, it will reconnect
+      socket.set('ticket', null);
       // Update room timestamp
       roomToTime[room] = new Date();
       if (!hasConnectionsInRoom(id, room)) {
