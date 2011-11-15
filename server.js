@@ -60,7 +60,6 @@
     // Heroku requires long polling
     io.set("transports", ["xhr-polling"]);
     io.set("polling duration", 1);
-    io.set("close timeout", 3);
 
     io.enable('browser client minification');  // send minified client
     io.enable('browser client etag');          // apply etag caching logic based on version number
@@ -110,6 +109,28 @@
     res.sendfile(__dirname + '/favicon.ico');
   });
 
+  app.get('/part', function (req, res) {
+    var ticket = req.query.ticket;
+    if (ticketToUser.hasOwnProperty(ticket)) {
+      var id = ticketToUser[ticket].id;
+      // Make sure user has connection before disconnecting them
+      if (idToSockets.hasOwnProperty(id)) {
+        var sockets = idToSockets[id];
+        var socket_id = req.query.socket_id;
+        var callback = function (err, id) {
+          if (id === socket_id) {
+            disconnectSocket(socket);
+          }
+        };
+        for (var i = 0; i < sockets.length; i++) {
+          var socket = sockets[i];
+          socket.get('socket_id', callback);
+        }
+      }
+    }
+    res.end();
+  });
+
   app.get('/:room', function (req, res) {
     var room = (req.params.room).toString().toLowerCase();
     if (room.length > 50) {
@@ -132,6 +153,8 @@
 
   function randomAuth(req, res, room) {
     var cookieTicket = req.cookies.ticket;
+    var socket_id = Math.floor(Math.random() * 99999999999);
+    res.cookie("socket_id", socket_id);
     if (cookieTicket && ticketToUser.hasOwnProperty(cookieTicket)) {
       res.sendfile(__dirname + '/index.html');
     } else {
@@ -342,6 +365,8 @@
         // Remove socket
         var sockets = idToSockets[id];
         removeFromList(socket, sockets);
+        // FIXME: socket.leave(room) causes an error if user is
+        // disconnected by /part when other sockets in room... why?
         socket.leave(room);
         // Disassociate socket from ticket so if socket is not really
         // disconnected, it will reconnect
@@ -367,13 +392,14 @@
 
   // Messaging
   io.sockets.on('connection', function (socket) {
-    socket.on('identify', function (ticket, room) {
+    socket.on('identify', function (ticket, room, socket_id) {
       // Reconnect user if server restarts
       if (!ticketToUser.hasOwnProperty(ticket)) {
         socket.emit('reconnect');
         return;
       }
       socket.set('ticket', ticket);
+      socket.set('socket_id', socket_id);
       if (!room) {
         room = "main";
       }
