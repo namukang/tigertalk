@@ -536,9 +536,9 @@
       if (nick.name.length > 25) {
         return;
       }
-      // Nicks may only contain letters, numbers, underscores, and
-      // dashes
-      if (/[^\w_\-]/.test(nick.name)) {
+      // Nicks may only contain letters, numbers, spaces, underscores,
+      // and dashes
+      if (/[^\w\s_\-]/.test(nick.name)) {
         return;
       }
       socket.get('room', function (err, room) {
