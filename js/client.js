@@ -4,7 +4,7 @@ if (window.location.href.indexOf(fb_trash) !== -1) {
   window.location.href = window.location.href.replace(fb_trash, '');
 }
 
-var socket = io.connect(document.location.hostname);
+var socket = io.connect();
 
 var TYPES = {
   msg: "msg",
