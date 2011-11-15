@@ -10,7 +10,7 @@
   var APP_SECRET = 'ed06e7f5c6805820c36c573e6146fdb5';
 
   var expiredTickets = {};
-  var ALL_ACCESS = false;
+  var ALL_ACCESS = true;
 
   exports.handler = function (req, res, app_url, ticketToUser, idToTicket, room) {
     APP_URL = app_url + '/';
