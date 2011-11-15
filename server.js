@@ -339,6 +339,9 @@
       var sockets = idToSockets[id];
       removeFromList(socket, sockets);
       socket.leave(room);
+      // Disassociate socket from ticket so if socket is not really
+      // disconnected, it will reconnect
+      socket.set('ticket', null);
       // Update room timestamp
       roomToTime[room] = new Date();
       if (!hasConnectionsInRoom(id, room)) {
