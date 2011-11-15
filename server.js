@@ -60,7 +60,7 @@
     // Heroku requires long polling
     io.set("transports", ["xhr-polling"]);
     io.set("polling duration", 1);
-    io.set("close timeout", 2);
+    io.set("close timeout", 3);
 
     io.enable('browser client minification');  // send minified client
     io.enable('browser client etag');          // apply etag caching logic based on version number
