@@ -27,7 +27,6 @@ var CONFIG = {
   id: null, // user's id
   nick: null, // user's nick
   show_system: determineShowSystem(), // whether to show system messages
-  seed: 0, // used to give nicks different colors for every session
   colors: ['red', 'green', 'blue', 'purple', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
 };
 
@@ -262,7 +261,7 @@ function getColor(id) {
   if (id === CONFIG.id) {
     return orange;
   }
-  var index = (id + CONFIG.seed) % CONFIG.colors.length;
+  var index = id % CONFIG.colors.length;
   return CONFIG.colors[index];
 }
 
@@ -679,9 +678,6 @@ function createRoom(room) {
 }
 
 $(function() {
-  // Set seed
-  CONFIG.seed = Math.floor(Math.random() * CONFIG.colors.length);
-
   // Check or uncheck system messages checkbox appropriately
   if (CONFIG.show_system) {
     $("#system-link").attr("checked", "checked");
