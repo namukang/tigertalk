@@ -58,8 +58,7 @@
 
   io.configure('production', function () {
     io.set('transports', [
-      'websocket'
-      , 'flashsocket'
+      'flashsocket'
       , 'htmlfile'
       , 'xhr-polling'
       , 'jsonp-polling'
