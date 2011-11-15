@@ -108,6 +108,8 @@ socket.on('connect', function() {
 
 // Receive a new message from the server
 socket.on('msg', function(data) {
+  $("#jplayer").jPlayer("stop");
+  $("#jplayer").jPlayer("play");
   var time = timeString(new Date(data.time));
   addMessage(time, data.user, data.msg, TYPES.msg);
   if (!CONFIG.focus) {
@@ -425,17 +427,29 @@ function logout(e) {
 }
 
 function toggleShowSystem(e) {
-  if (CONFIG.show_system) {
-    createCookie('show_system', 'false');
-    $('.system').hide();
-    CONFIG.show_system = false;
-  } else {
+  if ($('#system-link').is(':checked')) {
     createCookie('show_system', 'true');
     $('.system').show();
     CONFIG.show_system = true;
+  } else {
+    createCookie('show_system', 'false');
+    $('.system').hide();
+    CONFIG.show_system = false;
   }
   $('#entry').focus();
   scrollDown();
+}
+
+// Toggle whether sound is muted
+function toggleMute(e) {
+  if ($('#mute-link').is(':checked')) {
+    createCookie('muted', 'true');
+    $('#jplayer').jPlayer('mute');
+  } else {
+    createCookie('muted', 'false');
+    $('#jplayer').jPlayer('unmute');
+  }
+  $('#entry').focus();
 }
 
 /**
@@ -636,6 +650,7 @@ $(function() {
   $('#about-link').click(toggleAbout);
   $('#logout-link').click(logout);
   $('#system-link').click(toggleShowSystem);
+  $('#mute-link').click(toggleMute);
   $('#refresh-room-list').click(function (e) {
     e.preventDefault();
     socket.emit('room_list');
@@ -654,4 +669,25 @@ $(function() {
 
   // Showing loading message
   $("#log").append("<table class='system' id='loading'><tr><td>Connecting...</td></tr></table>");
+
+  // Sound is unmuted by default
+  var muted = false;
+  // Check if user wants sound to be muted
+  if (readCookie('muted') === 'true') {
+    muted = true;
+    $('#mute-link').attr('checked', 'checked');
+  }
+  // Enable sound
+  $("#jplayer").jPlayer({
+    ready: function () {
+      $(this).jPlayer("setMedia", {
+        mp3: "/audio/chat-ding.mp3"
+      });
+      // Preload the media
+      $(this).jPlayer("load");
+    },
+    swfPath: "/js",
+    supplied: "mp3",
+    muted: muted
+  });
 });

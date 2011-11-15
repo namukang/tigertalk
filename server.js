@@ -84,16 +84,29 @@
     }
   });
 
-  app.get('/client.js', function (req, res) {
-    res.sendfile(__dirname + '/client.js');
+  // FIXME: Move to express.static
+  app.get('/js/client.js', function (req, res) {
+    res.sendfile(__dirname + '/js/client.js');
   });
 
   app.get('/style.css', function (req, res) {
     res.sendfile(__dirname + '/style.css');
   });
 
-  app.get('/jquery-1.6.4.min.js', function (req, res) {
-    res.sendfile(__dirname + '/jquery-1.6.4.min.js');
+  app.get('/js/jquery-1.6.4.min.js', function (req, res) {
+    res.sendfile(__dirname + '/js/jquery-1.6.4.min.js');
+  });
+
+  app.get('/js/jquery.jplayer.min.js', function (req, res) {
+    res.sendfile(__dirname + '/js/jquery.jplayer.min.js');
+  });
+
+  // FIXME: Remove one of the two sounds
+  app.get('/audio/chat-ding.mp3', function (req, res) {
+    res.sendfile(__dirname + '/audio/chat-ding.mp3');
+  });
+  app.get('/audio/chat-high-ding.mp3', function (req, res) {
+    res.sendfile(__dirname + '/audio/chat-high-ding.mp3');
   });
 
   app.get('/favicon.ico', function (req, res) {
