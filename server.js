@@ -59,7 +59,7 @@
   io.configure('production', function () {
     // Heroku requires long polling
     io.set("transports", ["xhr-polling"]);
-    io.set("polling duration", 1);
+    io.set("polling duration", 0);
     io.set("close timeout", 3);
 
     io.enable('browser client minification');  // send minified client
