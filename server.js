@@ -101,12 +101,8 @@
     res.sendfile(__dirname + '/js/jquery.jplayer.min.js');
   });
 
-  // FIXME: Remove one of the two sounds
   app.get('/audio/chat-ding.mp3', function (req, res) {
     res.sendfile(__dirname + '/audio/chat-ding.mp3');
-  });
-  app.get('/audio/chat-high-ding.mp3', function (req, res) {
-    res.sendfile(__dirname + '/audio/chat-high-ding.mp3');
   });
 
   app.get('/favicon.ico', function (req, res) {

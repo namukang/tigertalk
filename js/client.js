@@ -684,7 +684,7 @@ $(function() {
   $("#jplayer").jPlayer({
     ready: function () {
       $(this).jPlayer("setMedia", {
-        mp3: "/audio/chat-high-ding.mp3"
+        mp3: "/audio/chat-ding.mp3"
       });
       // Preload the media
       $(this).jPlayer("load");
