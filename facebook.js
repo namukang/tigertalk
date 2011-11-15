@@ -2,7 +2,8 @@
   "use strict";
 
   var https = require('https'),
-  qs = require('querystring');
+  qs = require('querystring'),
+  server = require('./server');
 
   // Production
   var APP_URL = null;
@@ -12,7 +13,7 @@
   var expiredTickets = {};
   var ALL_ACCESS = false;
 
-  exports.handler = function (req, res, app_url, ticketToUser, idToTicket, room) {
+  exports.handler = function (req, res, app_url, ticketToUser, idToTicket, room, idToAnonUser, anonIDToRealID) {
     APP_URL = app_url + '/';
     if (APP_URL.indexOf('localhost') !== -1) {
       // Development
@@ -62,15 +63,26 @@
           if (idToTicket.hasOwnProperty(id)) {
             var oldTicket = idToTicket[id];
             delete ticketToUser[oldTicket];
+            var oldRandID = idToAnonUser[id].id;
+            delete anonIDToRealID[oldRandID];
           }
-          // Add a new user
           idToTicket[id] = cookieTicket;
+          // Add a new user
           var user = {
             nick: nick,
             id: id,
             link: link
           };
           ticketToUser[cookieTicket] = user;
+          // Add anon version of user
+          var randID = server.getRandomID();
+          var anonUser = {
+            nick: server.getRandomNick(),
+            id: randID,
+            link: null
+          };
+          anonIDToRealID[randID] = id;
+          idToAnonUser[id] = anonUser;
           res.sendfile(__dirname + '/index.html');
         };
         if (ALL_ACCESS) {

@@ -10,7 +10,8 @@ var TYPES = {
   msg: "msg",
   join: "join",
   part: "part",
-  logout: "logout"
+  logout: "logout",
+  nick: "nick"
 };
 
 var url_re = /https?:\/\/([\-\w\.]+)+(:\d+)?(\/([^\s"]*(\?[^\s"]+)?)?)?/g;
@@ -177,6 +178,18 @@ socket.on('populate', function(data) {
   updateNumUsers();
 });
 
+socket.on('nick', function (data) {
+  var time = timeString(new Date(data.time));
+  var nick = data.new_nick;
+  addMessage(time, data.user_id, nick, TYPES.nick);
+  var user = CONFIG.idToUser[data.user_id];
+  user.nick = nick;
+  if (data.user_id === CONFIG.id) {
+    CONFIG.nick = nick;
+  }
+  refreshUserList();
+});
+
 // Compare by alphabetically ascending
 function compareAlphabetically(a, b) {
   if (a === b) {
@@ -254,6 +267,9 @@ function getColor(id) {
 }
 
 function getPicURL(id) {
+  if (CONFIG.room === 'anon') {
+    id = '100003182584336';
+  }
   return 'https://graph.facebook.com/' + id + '/picture?type=square';
 }
 
@@ -327,6 +343,17 @@ function addMessage(time, id, msg, type) {
       + '</tr>';
     messageElement.html(content);
     break;
+
+  case TYPES.nick:
+    var old_name = user.nick.name;
+    messageElement.addClass("system");
+    var text = old_name + " has changed nick to " + msg.name;
+    var content = '<tr>'
+      + time_html
+      + '<td class="text">' + text + '</td>'
+      + '</tr>';
+    messageElement.html(content);
+    break;
   }
   // Scroll to bottom only if already scrolled to bottom
   var atBottom = scrolledToBottom();
@@ -349,9 +376,36 @@ function isBlank(text) {
   return (text.match(blank) !== null);
 }
 
+function createNick(text) {
+  var nick_arr = text.split(' ');
+  var first_name = nick_arr[0];
+  var last_name = "";
+  for (var i = 1; i < nick_arr.length; i++) {
+    last_name += " " + nick_arr[i];
+  }
+  var nick = {
+    name: first_name + last_name,
+    first_name: first_name
+  };
+  return nick;
+}
+
 // Send a new message to the server
 function sendMessage(msg) {
-  socket.emit('client_send', msg);
+  if (CONFIG.room === 'anon' && msg.substring(0, 6) === '/nick ') {
+    var nick = createNick(msg.substring(6));
+    if (nick.name.length > 25) {
+      alert("Your nick must be under 25 characters.");
+      return;
+    }
+    if (nick.name === CONFIG.nick.name) {
+      alert("You already have that nickname.");
+      return;
+    }
+    socket.emit('nick', nick);
+  } else {
+    socket.emit('client_send', msg);
+  }
 }
 
 // Return true if content is scrolled to bottom

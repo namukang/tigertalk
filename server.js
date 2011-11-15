@@ -28,6 +28,11 @@
   // Maps rooms to number of users
   var roomToNumUsers = {};
 
+  // Maps ids to anon users
+  var idToAnonUser = {};
+  // Maps anon IDs to real IDs
+  var anonIDToRealID = {};
+
   // Configuration
   app.configure(function () {
     app.use(express.bodyParser());
@@ -70,7 +75,7 @@
   // Routing
   app.get('/', function (req, res) {
     var room = "main";
-    fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room);
+    fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room, idToAnonUser, anonIDToRealID);
     // CAS
     // cas.authenticate(req, res, app.settings.address, ticketToUser, idToTicket);
   });
@@ -80,7 +85,7 @@
       res.redirect('/');
     } else {
       var room = "main";
-      fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room);
+      fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room, idToAnonUser, anonIDToRealID);
     }
   });
 
@@ -141,15 +146,29 @@
       res.send("Room names may only contains letters, numbers, underscores, and dashes.");
       return;
     }
-    fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room);
+    fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room, idToAnonUser, anonIDToRealID);
   });
 
   function getRandomNick() {
     // Generate random nick
-    var randNick = "Tiger #" + Math.floor(Math.random() * 9999);
-    return randNick;
+    var randNum = Math.floor(Math.random() * 9999);
+    var randNick = "Tiger #" + randNum;
+    var nick = {
+      name: randNick,
+      first_name: randNum
+    };
+    return nick;
   }
   exports.getRandomNick = getRandomNick;
+
+  function getRandomID() {
+    var randID = Math.floor(Math.random() * 99999999999);
+    while (anonIDToRealID.hasOwnProperty(randID)) {
+      randID = Math.floor(Math.random() * 99999999999);
+    }
+    return randID;
+  }
+  exports.getRandomID = getRandomID;
 
   function randomAuth(req, res, room) {
     var cookieTicket = req.cookies.ticket;
@@ -352,18 +371,21 @@
         return;
       }
       var user = ticketToUser[ticket];
-      var id = user.id;
+      var real_id = user.id;
       // Make sure user has sockets to disconnect
-      if (!idToSockets.hasOwnProperty(id)) {
+      if (!idToSockets.hasOwnProperty(real_id)) {
         return;
       }
       socket.get('room', function (err, room) {
+        if (room === 'anon') {
+          user = idToAnonUser[real_id];
+        }
         // Make sure user is in room before disconnecting
-        if (!isUserInList(id, room)) {
+        if (!isUserInList(user.id, room)) {
           return;
         }
         // Remove socket
-        var sockets = idToSockets[id];
+        var sockets = idToSockets[real_id];
         removeFromList(socket, sockets);
         // FIXME: socket.leave(room) causes an error if user is
         // disconnected by /part when other sockets in room... why?
@@ -373,12 +395,12 @@
         socket.set('ticket', null);
         // Update room timestamp
         roomToTime[room] = new Date();
-        if (!hasConnectionsInRoom(id, room)) {
+        if (!hasConnectionsInRoom(real_id, room)) {
           // Check if users have no more connections to TigerTalk
           if (sockets.length === 0) {
-            delete idToSockets[id];
+            delete idToSockets[real_id];
           }
-          removeUserFromList(id, room);
+          removeUserFromList(user.id, room);
           var msg = {
             time: (new Date()).getTime(),
             user_id: user.id
@@ -405,19 +427,23 @@
       }
       socket.set('room', room);
       var user = ticketToUser[ticket];
-      var id = user.id;
+      var real_id = user.id;
       var userList = getUsers(room);
       socket.join(room);
       var backLog = getBackLog(room);
+      // Use anon user if in anon room
+      if (room === 'anon') {
+        user = idToAnonUser[real_id];
+      }
       socket.emit('populate', {
         user_list: userList,
         user: user,
         backlog: backLog
       });
-      addSocketToId(socket, id);
+      addSocketToId(socket, real_id);
       // Only alert other users of connect if this is user's initial
       // connection into the room
-      if (!isUserInList(id, room)) {
+      if (!isUserInList(user.id, room)) {
         // Add user to room
         addUserToList(user, room);
         var msg = {
@@ -443,6 +469,9 @@
           if (ticketToUser.hasOwnProperty(ticket)) {
             socket.get('room', function (err, room) {
               var user = ticketToUser[ticket];
+              if (room === 'anon') {
+                user = idToAnonUser[user.id];
+              }
               var msg = {
                 time: (new Date()).getTime(),
                 user_id: user.id,
@@ -481,6 +510,10 @@
           });
           disconnectSocket(socket);
         }
+        var anon_id = idToAnonUser[id].id;
+        delete anonIDToRealID[anon_id];
+        delete idToAnonUser[id];
+
         delete ticketToUser[ticket];
         delete idToTicket[id];
       });
@@ -490,5 +523,73 @@
     socket.on('room_list', function () {
       socket.emit('room_list', roomToNumUsers);
     });
+
+    // Change nick for anon room
+    socket.on('nick', function (nick) {
+      // Make sure nick is what we expect
+      if (!nick || !nick.name || !nick.first_name ||
+          typeof(nick.name) !== 'string' ||
+          typeof(nick.first_name) !== 'string') {
+        return;
+      }
+      // Nick must be less than 25 characters
+      if (nick.name.length > 25) {
+        return;
+      }
+      socket.get('room', function (err, room) {
+        // Cannot change nick outside of anon room
+        if (room !== 'anon') {
+          return;
+        }
+        socket.get('ticket', function (err, ticket) {
+          if (!ticketToUser.hasOwnProperty(ticket)) {
+            socket.emit('reconnect');
+            return;
+          }
+          var user = ticketToUser[ticket];
+          // NOTE: You can always offload the sanitization to the
+          // client if need be
+          var new_nick = {
+            name: toStaticHTML(trim(nick.name)),
+            first_name: toStaticHTML(trim(nick.first_name))
+          };
+          var anonUser = idToAnonUser[user.id];
+          if (anonUser.nick.first_name !== new_nick.first_name) {
+            anonUser.nick = new_nick;
+            var data = {
+              user_id: anonUser.id,
+              time: (new Date()).getTime(),
+              new_nick: new_nick
+            };
+            io.sockets.in(room).emit('nick', data);
+          }
+        });
+      });
+    });
+
+    // NOTE: DO NOT USE. USE ONLY WHEN ABSOLUTELY NEEDED.
+    socket.on('whois', function (id) {
+      socket.get('ticket', function (err, ticket) {
+        if (!ticketToUser.hasOwnProperty(ticket)) {
+          socket.emit('reconnect');
+          return;
+        }
+        var user = ticketToUser[ticket];
+        if (user.id === '1355672641') {
+          socket.emit('whois', anonIDToRealID[id]);
+        }
+      });
+    });
   });
 })();
+
+// Used to sanitize user nick changes
+function toStaticHTML(input) {
+  return input.replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function trim(input) {
+  return input.replace(/^\s+|\s+$/g, '');
+}
