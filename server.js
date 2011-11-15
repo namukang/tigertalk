@@ -279,7 +279,7 @@
         var limit = 5 * 60 * 1000;
         if (roomToNumUsers[room] === 0 &&
             now - timestamp > limit) {
-          deleteRoom(room);
+          // deleteRoom(room);
         }
       }
     }
