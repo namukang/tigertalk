@@ -152,6 +152,9 @@ socket.on('logout', function(data) {
 
 // Populate the user list
 socket.on('populate', function(data) {
+  if (CONFIG.room === 'anon') {
+    $('#log').append("<table class='system'><tr><td>TIP: Type '/nick &lt;YOUR NICK&gt;' to change your nick.</td></tr></table>");
+  }
   // Populate basic user data
   CONFIG.id = data.user.id;
   CONFIG.nick = data.user.nick;
