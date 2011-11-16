@@ -376,12 +376,14 @@
     socket.get('ticket', function (err, ticket) {
       // Make sure ticket is valid
       if (!ticketToUser.hasOwnProperty(ticket)) {
+        socket.emit('reconnect');
         return;
       }
       var user = ticketToUser[ticket];
       var real_id = user.id;
       // Make sure user has sockets to disconnect
       if (!idToSockets.hasOwnProperty(real_id)) {
+        socket.emit('reconnect');
         return;
       }
       socket.get('room', function (err, room) {
@@ -597,15 +599,16 @@
       });
     });
   });
+
+  // Used to sanitize user nick changes
+  function toStaticHTML(input) {
+    return input.replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  // Trim out whitespace
+  function trim(input) {
+    return input.replace(/^\s+|\s+$/g, '');
+  }
 })();
-
-// Used to sanitize user nick changes
-function toStaticHTML(input) {
-  return input.replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function trim(input) {
-  return input.replace(/^\s+|\s+$/g, '');
-}
