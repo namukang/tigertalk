@@ -350,7 +350,7 @@ function addMessage(time, id, msg, type) {
   case TYPES.nick:
     var old_name = user.nick.name;
     messageElement.addClass("system");
-    var text = old_name + " has changed their nick to " + msg.name;
+    var text = "'" + old_name + "' has changed their nick to '" + msg.name + "'";
     var content = '<tr>'
       + time_html
       + '<td class="text">' + text + '</td>'
