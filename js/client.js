@@ -21,17 +21,21 @@ var CONFIG = {
   unread: 0, // number of unread messages
   userIDs: [], // ids of online users
   idToUser: {}, // mapping from id to user
-  room: null, // current room
-  ticket: null, // user's ticket
-  socket_id: null, // id of socket
+  room: document.location.pathname.substring(1), // current room
+  ticket: readCookie("ticket"), // user's ticket
+  socket_id: readCookie("socket_id"), // id of socket
   id: null, // user's id
   nick: null, // user's nick
-  show_system: determineShowSystem(), // whether to show system messages
+  show_system: null, // whether to show system messages
   colors: ['red', 'green', 'blue', 'purple', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
 };
 
 // Return whether to show system messages
 function determineShowSystem() {
+  // Anon room should show system messages by default
+  if (CONFIG.room === 'anon') {
+    return true;
+  }
   // Default setting for whether to show system messages
   var default_show_system = false;
   var show_system_setting = readCookie('show_system');
@@ -98,9 +102,6 @@ socket.on('reconnect', function() {
 
 // Identify the socket using its ticket
 socket.on('connect', function() {
-  CONFIG.ticket = readCookie("ticket");
-  CONFIG.socket_id = readCookie("socket_id");
-  CONFIG.room = document.location.pathname.substring(1);
   if (!CONFIG.room) {
     CONFIG.room = "main";
   }
@@ -152,9 +153,6 @@ socket.on('logout', function(data) {
 
 // Populate the user list
 socket.on('populate', function(data) {
-  if (CONFIG.room === 'anon') {
-    $('#log').append("<table class='system'><tr><td>TIP: Type '/nick &lt;YOUR NICK&gt;' to change your nick.</td></tr></table>");
-  }
   // Populate basic user data
   CONFIG.id = data.user.id;
   CONFIG.nick = data.user.nick;
@@ -178,6 +176,9 @@ socket.on('populate', function(data) {
   }
   refreshUserList();
   updateNumUsers();
+  if (CONFIG.room === 'anon') {
+    $('#log').append("<table class='system'><tr><td>TIP: Type '/nick &lt;YOUR NICK&gt;' to change your nickname.</td></tr></table>");
+  }
 });
 
 socket.on('nick', function (data) {
@@ -682,6 +683,7 @@ function createRoom(room) {
 
 $(function() {
   // Check or uncheck system messages checkbox appropriately
+  CONFIG.show_system = determineShowSystem();
   if (CONFIG.show_system) {
     $("#system-link").attr("checked", "checked");
   } else {

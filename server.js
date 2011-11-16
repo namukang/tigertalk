@@ -406,6 +406,9 @@
             user_id: user.id
           };
           io.sockets.in(room).emit('part', msg);
+          if (room === 'anon') {
+            msg.user = user;
+          }
           addToBackLog('part', msg, room);
         }
       });
