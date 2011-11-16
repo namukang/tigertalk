@@ -137,7 +137,12 @@
   });
 
   app.get('/:room', function (req, res) {
-    var room = (req.params.room).toString().toLowerCase();
+    var room = (req.params.room).toString();
+    var room_lowercase = room.toLowerCase();
+    if (room !== room_lowercase) {
+      res.redirect('/' + room_lowercase);
+      return;
+    }
     if (room.length > 50) {
       res.send("Room names must be under 50 characters.");
       return;
