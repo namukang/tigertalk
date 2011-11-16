@@ -27,7 +27,7 @@ var CONFIG = {
   id: null, // user's id
   nick: null, // user's nick
   show_system: null, // whether to show system messages
-  colors: ['red', 'green', 'blue', 'purple', 'maroon', 'navy', 'olive', 'teal', 'brown', 'blueviolet', 'chocolate'] // colors for nicks
+  colors: ['red', 'green', 'blue', 'purple', 'maroon', 'navy', 'olive', 'teal', 'blueviolet', 'chocolate', '#129793', '#505050', '#9BD7D5', '#3688B7', '#70B6C2', '#1D6484'] // colors for nicks
 };
 
 // Return whether to show system messages
