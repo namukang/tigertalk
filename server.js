@@ -227,6 +227,9 @@
   // NOTE: This is a bit complex b/c we're trying to send the least
   // amount of data over the network as possible
   function addToBackLog(type, msg, room) {
+    if (room === 'anon') {
+      return;
+    }
     var backLog = getBackLog(room);
     // Add id to user mapping if user joined
     if (type === 'join') {
