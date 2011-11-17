@@ -177,7 +177,7 @@ socket.on('populate', function(data) {
   refreshUserList();
   updateNumUsers();
   if (CONFIG.room === 'anon') {
-    $('#log').append("<table class='system'><tr><td>TIP: Type '/nick &lt;YOUR NICK&gt;' to change your nickname.</td></tr></table>");
+    $('#log').append("<table class='system'><tr><td>TIP: Type '/nick YOUR NICK' to change your nickname.</td></tr></table>");
   }
 });
 
