@@ -312,8 +312,13 @@ function addMessage(time, id, msg, type) {
     msg = msg.replace(url_re, '<a target="_blank" href="$&">$&</a>');
 
     // Bold your nickname if it is mentioned in a message
-    var firstname_re = new RegExp("\\b" + CONFIG.nick.first_name + "\\b", 'ig');
-    msg = msg.replace(firstname_re, '<span class="self">$&</span>');
+    var fullname_re = new RegExp("\\b" + CONFIG.nick.name + "\\b", 'ig');
+    if (fullname_re.test(msg)) {
+      msg = msg.replace(fullname_re, '<span class="self">$&</span>');
+    } else {
+      var firstname_re = new RegExp("\\b" + CONFIG.nick.first_name + "\\b", 'ig');
+      msg = msg.replace(firstname_re, '<span class="self">$&</span>');
+    }
 
     var color = getColor(user.id);
     var content = '<tr>'
