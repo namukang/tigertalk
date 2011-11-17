@@ -568,11 +568,11 @@
           // NOTE: You can always offload the sanitization to the
           // client if need be
           var new_nick = {
-            name: toStaticHTML(trim(nick.name)),
+            name: toStaticHTML(trim(nick.name)).replace(/\s+/g, ' '),
             first_name: toStaticHTML(trim(nick.first_name))
           };
           var anonUser = idToAnonUser[user.id];
-          if (anonUser.nick.first_name !== new_nick.first_name) {
+          if (anonUser.nick.name !== new_nick.name) {
             anonUser.nick = new_nick;
             var data = {
               user_id: anonUser.id,
