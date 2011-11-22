@@ -7,8 +7,8 @@
 
   // Production
   var APP_URL = null;
-  var APP_ID = '216415578426810';
-  var APP_SECRET = 'ed06e7f5c6805820c36c573e6146fdb5';
+  var APP_ID = process.env.PROD_APP_ID;
+  var APP_SECRET = process.env.PROD_APP_SECRET;
 
   var expiredTickets = {};
   var ALL_ACCESS = false;
@@ -17,8 +17,8 @@
     APP_URL = app_url + '/';
     if (APP_URL.indexOf('localhost') !== -1) {
       // Development
-      APP_ID = '300919423260744';
-      APP_SECRET = 'e605d10c78279285bea5c25eb37d6f3f';
+      APP_ID = process.env.DEV_APP_ID;
+      APP_SECRET = process.env.DEV_APP_SECRET;
       ALL_ACCESS = true;
     }
     if (req.query.hasOwnProperty("error_reason")) {
