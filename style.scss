@@ -76,17 +76,16 @@ body {
   border-left: 1px solid #777;
   right: 0;
   width: $sidebar-width;
-  #user-list, #room-list {
+  #user-list, #self-list, #room-list {
     margin: 1em;
     white-space: nowrap;
-    #users-title, #rooms-title {
+    #users-title, #friends-title, #rooms-title {
       font-weight: bold;
-      margin-bottom: 1em;
     }
-    #users {
+    #users, #friends, #self {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1em;
+      margin: 1em 0;
       td.pic {
         height: 50px;
         width: 50px;
@@ -104,8 +103,10 @@ body {
   #prefs {
     font-size: 90%;
     color: #777;
-    margin: 1em;
+    padding: 1em;
+    padding-top: 0;
     white-space: nowrap;
+    border-bottom: 1px solid black;
   }
   a {
     display: block;

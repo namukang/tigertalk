@@ -19,7 +19,8 @@ var orange = '#FA7F00';
 var CONFIG = {
   focus: true, // whether document has focus
   unread: 0, // number of unread messages
-  userIDs: [], // ids of online users
+  userIDs: [], // ids of online users (excluding friends and yourself)
+  friendIDs: [], // ids of online friends
   idToUser: {}, // mapping from id to user
   room: document.location.pathname.substring(1), // current room
   ticket: readCookie("ticket"), // user's ticket
@@ -48,6 +49,10 @@ function determineShowSystem() {
   }
   return show_system_setting;
 }
+
+/**
+ * Sockets
+ */
 
 // Need to reestablish identity
 socket.on('reconnect', function() {
@@ -82,9 +87,9 @@ socket.on('join', function(data) {
   var time = timeString(new Date(data.time));
   CONFIG.idToUser[data.user.id] = data.user;
   addMessage(time, data.user.id, null, TYPES.join);
-  CONFIG.userIDs.push(data.user.id);
-  refreshUserList();
-  updateNumUsers();
+  if (data.user.id !== CONFIG.id) {
+    addToOnlineList(data.user.id);
+  }
 });
 
 // User left room
@@ -93,6 +98,7 @@ socket.on('part', function(data) {
   addMessage(time, data.user_id, null, TYPES.part);
   delete CONFIG.idToUser[data.user_id];
   removeFromUserList(data.user_id);
+  removeFromFriendList(data.user_id);
   updateNumUsers();
 });
 
@@ -100,8 +106,12 @@ socket.on('part', function(data) {
 socket.on('logout', function(data) {
   var time = timeString(new Date(data.time));
   addMessage(time, null, null, TYPES.logout);
+  $('#friends').empty();
   $('#users').empty();
+  $('.num_friends').html('?');
+  $('.num_others').html('?');
   $('.num_users').html('?');
+  eraseCookie('ticket');
   socket.disconnect();
 });
 
@@ -110,6 +120,9 @@ socket.on('populate', function(data) {
   // Populate basic user data
   CONFIG.id = data.user.id;
   CONFIG.nick = data.user.nick;
+  // Show user in sidebar
+  CONFIG.idToUser[CONFIG.id] = data.user;
+  refreshSelfList();
   // Remove loading message
   $("#loading").remove();
   // Populate log with backlog
@@ -120,19 +133,27 @@ socket.on('populate', function(data) {
     var time = timeString(new Date(msg.time));
     addMessage(time, msg.user_id, msg.msg, msg.type);
   }
-  // data.user_list does not need to be sorted since the immediately
-  // following 'join' will sort the list
-  CONFIG.userIDs = [];
-  for (var i = 0; i < data.user_list.length; i++) {
-    var user = data.user_list[i];
-    CONFIG.idToUser[user.id] = user;
-    CONFIG.userIDs.push(user.id);
-  }
-  refreshUserList();
-  updateNumUsers();
   if (CONFIG.room === 'anon') {
     $('#log').append("<table class='system'><tr><td>TIP: Type '/nick YOUR NICK' to change your nickname.</td></tr></table>");
   }
+  // Populate user lists
+  CONFIG.idToUser = {};
+  for (var i = 0; i < data.user_list.length; i++) {
+    var user = data.user_list[i];
+    CONFIG.idToUser[user.id] = user;
+    // Don't add self to any list
+    if (user.id === CONFIG.id) {
+      continue;
+    }
+    if (CONFIG.room === 'anon') {
+      CONFIG.userIDs.push(user.id);
+    } else {
+      // FIXME: Batch the requests
+      addToOnlineList(user.id);
+    }
+  }
+  refreshUserList();
+  updateNumUsers();
 });
 
 socket.on('nick', function (data) {
@@ -143,9 +164,78 @@ socket.on('nick', function (data) {
   user.nick = nick;
   if (data.user_id === CONFIG.id) {
     CONFIG.nick = nick;
+    refreshSelfList();
+  } else {
+    refreshUserList();
   }
-  refreshUserList();
 });
+
+// Send a new message to the server
+function sendMessage(msg) {
+  if (CONFIG.room === 'anon' && msg.substring(0, 6) === '/nick ') {
+    var nick = createNick(msg.substring(6));
+    if (nick.name.length > 25) {
+      alert("Your nick must be under 25 characters.");
+      return;
+    }
+    if (/[^\w\s_\-]/.test(nick.name)) {
+      alert("Nicks may only contains letters, numbers, spaces, underscores, and dashes.");
+      return;
+    }
+    if (nick.name === CONFIG.nick.name) {
+      alert("You already have that nickname.");
+      return;
+    }
+    socket.emit('nick', nick);
+  } else {
+    socket.emit('client_send', msg);
+  }
+}
+
+// Notify server of disconnection
+$(window).unload(function() {
+  $.ajax({
+    url: "/part",
+    type: "GET",
+    async: false,
+    data: {
+      ticket: CONFIG.ticket,
+      socket_id: CONFIG.socket_id
+    }
+  });
+});
+
+function logout(e) {
+  e.preventDefault();
+  socket.emit('logout');
+}
+
+/**
+ * User lists
+ */
+
+// Add to appropriate list depending on whether or not they are a
+// friend
+function addToOnlineList(id) {
+  FB.api('/me/friends/' + id, { access_token: CONFIG.ticket }, function (response) {
+    if (response.hasOwnProperty("error") &&
+        response.error.type === "OAuthException") {
+      // Access token may have expired
+      eraseCookie("ticket");
+      window.location.reload();
+    } else if (response.data.length === 1) {
+      // Friends
+      CONFIG.friendIDs.push(id);
+      refreshFriendList();
+      updateNumUsers();
+    } else {
+      // Not friends
+      CONFIG.userIDs.push(id);
+      refreshUserList();
+      updateNumUsers();
+    }
+  });
+}
 
 // Compare by alphabetically ascending
 function compareAlphabetically(a, b) {
@@ -158,60 +248,129 @@ function compareAlphabetically(a, b) {
   }
 }
 
-function refreshUserList() {
+// Build the HTML to represent a user in a list
+function buildUserHTML (userID) {
+  var user = CONFIG.idToUser[userID];
+  // Create user link
+  var userLink = $(document.createElement('a'));
+  userLink.attr('href', user.link);
+  userLink.attr('target', '_blank');
+  userLink.addClass(user.id.toString());
+  // Create user row
+  var userElem = $(document.createElement('tr'));
+  userLink.html(userElem);
+  // Create nick element
+  var userNick = $(document.createElement('td'));
+  userNick.addClass('nick');
+  userNick.css('color', getColor(user.id));
+  userNick.html(user.nick.name);
+  // Create pic element
+  var userPic = $(document.createElement('td'));
+  userPic.addClass('pic');
+  var img = $(document.createElement('img'));
+  img.attr('src', getPicURL(user.id));
+  userPic.html(img);
+  // Add elements to row
+  userElem.append(userPic);
+  userElem.append(userNick);
+  if (user.id === CONFIG.id) {
+    userElem.addClass('self');
+  }
+  return userLink;
+}
+
+// Refresh a list of online users
+function refreshOnlineList(list) {
   // Sort list
-  CONFIG.userIDs.sort(function(a, b) {
+  list.sort(function(a, b) {
     var userA = CONFIG.idToUser[a];
     var userB = CONFIG.idToUser[b];
     return compareAlphabetically(userA.nick.name, userB.nick.name);
   });
+
   // Empty list
-  var userList = $('#users');
+  var userList;
+  if (list === CONFIG.userIDs) {
+    userList = $('#users');
+  } else if (list === CONFIG.friendIDs) {
+    userList = $('#friends');
+  } else {
+    console.error("Unknown list to refresh.");
+  }
   userList.empty();
+
   // Display new list
-  for (var i = 0; i < CONFIG.userIDs.length; i++) {
-    var user = CONFIG.idToUser[CONFIG.userIDs[i]];
-    // Create user link
-    var userLink = $(document.createElement('a'));
-    userLink.attr('href', user.link);
-    userLink.attr('target', '_blank');
-    userLink.addClass(user.id.toString());
-    // Create user row
-    var userElem = $(document.createElement('tr'));
-    userLink.html(userElem);
-    // Create nick element
-    var userNick = $(document.createElement('td'));
-    userNick.addClass('nick');
-    userNick.css('color', getColor(user.id));
-    userNick.html(user.nick.name);
-    // Create pic element
-    var userPic = $(document.createElement('td'));
-    userPic.addClass('pic');
-    var img = $(document.createElement('img'));
-    img.attr('src', getPicURL(user.id));
-    userPic.html(img);
-    // Add elements to row
-    userElem.append(userPic);
-    userElem.append(userNick);
-    if (user.id === CONFIG.id) {
-      userElem.addClass('self');
-    }
+  for (var i = 0; i < list.length; i++) {
+    var userLink = buildUserHTML(list[i]);
     userList.append(userLink);
   }
 }
 
-function removeFromUserList(id) {
-  for (var i = 0; i < CONFIG.userIDs.length; i++) {
-    if (CONFIG.userIDs[i] === id) {
-      CONFIG.userIDs.splice(i, 1);
+function refreshSelfList() {
+  var selfList = $("#self");
+  selfList.empty();
+  selfList.append(buildUserHTML(CONFIG.id));
+}
+
+// Refresh the list of online users
+function refreshUserList() {
+  refreshOnlineList(CONFIG.userIDs);
+}
+
+// Refresh the list of online friends
+function refreshFriendList() {
+  refreshOnlineList(CONFIG.friendIDs);
+}
+
+// Remove user from online list
+function removeFromOnlineList(list, id) {
+  for (var i = 0; i < list.length; i++) {
+    if (list[i] === id) {
+      list.splice(i, 1);
       break;
     }
   }
-  $('#users .' + id.toString()).remove();
+  if (list === CONFIG.userIDs) {
+    $('#users .' + id.toString()).remove();
+  } else if (list === CONFIG.friendIDs) {
+    $('#friends .' + id.toString()).remove();
+  } else {
+    console.error("Removing from unknown list.");
+  }
 }
 
+function removeFromUserList(id) {
+  removeFromOnlineList(CONFIG.userIDs, id);
+}
+
+function removeFromFriendList(id) {
+  removeFromOnlineList(CONFIG.friendIDs, id);
+}
+
+/**
+ * User information
+ */
+
+// Update the number of users for each list
 function updateNumUsers() {
-  $(".num_users").html(CONFIG.userIDs.length);
+  var num_friends = CONFIG.friendIDs.length;
+  var num_others = CONFIG.userIDs.length;
+  if (num_friends === 0) {
+    // Remove friends list if no friends online
+    $("#friends-title").hide();
+    $("#friends").hide();
+    $("#users-title").html('Online Users (<span class="num_others">?</span>)');
+  } else if (num_friends == 1) {
+    // Show friends list if a friend appeared
+    $("#friends-title").show();
+    $("#friends").show();
+    $("#users-title").html('More Online Users (<span class="num_others">?</span>)');
+  }
+  // Update numbers
+  $(".num_friends").html(num_friends);
+  $(".num_others").html(num_others);
+  // Include self in count of number of users in room
+  $(".num_users").html(num_others + num_friends + 1);
 }
 
 // Assign a color to each id
@@ -229,6 +388,10 @@ function getPicURL(id) {
   }
   return 'https://graph.facebook.com/' + id + '/picture?type=square';
 }
+
+/**
+ * Chat log
+ */
 
 // Add a message to the log
 function addMessage(time, id, msg, type) {
@@ -325,6 +488,10 @@ function addMessage(time, id, msg, type) {
   }
 }
 
+/**
+ * Helper methods
+ */
+
 // Sanitize HTML
 function toStaticHTML(input) {
   return input.replace(/&/g, "&amp;")
@@ -338,6 +505,20 @@ function isBlank(text) {
   return (text.match(blank) !== null);
 }
 
+// Convert date to military time
+function timeString(date) {
+  var hour = date.getHours().toString();
+  if (hour.length === 1) {
+    hour = '0' + hour;
+  }
+  var min = date.getMinutes().toString();
+  if (min.length === 1) {
+    min = '0' + min;
+  }
+  return hour + ":" + min;
+}
+
+// Convert string to nick object
 function createNick(text) {
   var nick_arr = text.split(' ');
   var first_name = nick_arr[0];
@@ -352,27 +533,9 @@ function createNick(text) {
   return nick;
 }
 
-// Send a new message to the server
-function sendMessage(msg) {
-  if (CONFIG.room === 'anon' && msg.substring(0, 6) === '/nick ') {
-    var nick = createNick(msg.substring(6));
-    if (nick.name.length > 25) {
-      alert("Your nick must be under 25 characters.");
-      return;
-    }
-    if (/[^\w\s_\-]/.test(nick.name)) {
-      alert("Nicks may only contains letters, numbers, spaces, underscores, and dashes.");
-      return;
-    }
-    if (nick.name === CONFIG.nick.name) {
-      alert("You already have that nickname.");
-      return;
-    }
-    socket.emit('nick', nick);
-  } else {
-    socket.emit('client_send', msg);
-  }
-}
+/**
+ * Special effects
+ */
 
 // Return true if content is scrolled to bottom
 function scrolledToBottom() {
@@ -442,24 +605,6 @@ function toggleAbout(e) {
     scrollDown(true);
   });
   $('#entry').focus();
-}
-
-// Notify server of disconnection
-$(window).unload(function() {
-  $.ajax({
-    url: "/part",
-    type: "GET",
-    async: false,
-    data: {
-      ticket: CONFIG.ticket,
-      socket_id: CONFIG.socket_id
-    }
-  });
-});
-
-function logout(e) {
-  e.preventDefault();
-  socket.emit('logout');
 }
 
 function toggleShowSystem(e) {
@@ -550,6 +695,10 @@ function toggleRoomList(e) {
   $('#entry').focus();
 }
 
+/**
+ * Sidebar
+ */
+
 // Toggle the current type in the sidebar
 // If sidebar is hidden, show type
 // If type is already showing, hide
@@ -613,13 +762,15 @@ function getCurrentList() {
 function showInSidebar(type) {
   var roomList = $('#room-list');
   var userList = $('#user-list');
+  var selfList = $('#self-list');
   var prefs = $('#prefs');
   $('#sidebar div').hide();
   if (type === 'rooms') {
     roomList.show();
   } else if (type === 'users') {
-    userList.show();
+    selfList.show();
     prefs.show();
+    userList.show();
   }
 }
 
@@ -757,17 +908,4 @@ function readCookie(name) {
 
 function eraseCookie(name) {
   createCookie(name, "", -1);
-}
-
-// Convert date to military time
-function timeString(date) {
-  var hour = date.getHours().toString();
-  if (hour.length === 1) {
-    hour = '0' + hour;
-  }
-  var min = date.getMinutes().toString();
-  if (min.length === 1) {
-    min = '0' + min;
-  }
-  return hour + ":" + min;
 }

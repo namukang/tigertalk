@@ -8,7 +8,7 @@
     <script type="text/javascript" src="/js/jquery-1.6.4.min.js"></script>
     <script type="text/javascript" src="/js/jquery.jplayer.min.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/js/client.js"></script>
+    <!-- <script type="text/javascript" src="/js/client.js"></script> -->
     <!-- Google Analytics START -->
     <script type="text/javascript">
       var _gaq = _gaq || [];
@@ -26,22 +26,27 @@
   <body>
     <div id="jplayer"></div>
     <div id="fb-root"></div>
-      <script>
-        window.fbAsyncInit = function() {
-          FB.init({
-            appId      : '216415578426810',
-            status     : true,
-            cookie     : true,
-            xfbml      : true
-          });
-        };
-        (function(d){
-           var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
-           js = d.createElement('script'); js.id = id; js.async = true;
-           js.src = "//connect.facebook.net/en_US/all.js";
-           d.getElementsByTagName('head')[0].appendChild(js);
-         }(document));
-      </script>
+    <script>
+      window.fbAsyncInit = function() {
+      FB.init({
+      appId      : '216415578426810',
+      status     : true,
+      cookie     : true,
+      xfbml      : true
+      });
+      // Load client script after FB SDK has been loaded
+      var js = document.createElement('script');
+      js.type = 'text/javascript';
+      js.src = "/js/client.js";
+      document.getElementsByTagName('head')[0].appendChild(js);
+      };
+      (function(d){
+      var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+      js = d.createElement('script'); js.id = id; js.async = true;
+      js.src = "//connect.facebook.net/en_US/all.js";
+      d.getElementsByTagName('head')[0].appendChild(js);
+      }(document));
+    </script>
     <div id="header">
       <div id="logo"><a href="/">TigerTalk</a></div>
       <div id="links">
@@ -73,13 +78,20 @@
       </div>
     </div>
     <div id="sidebar">
+      <div id="self-list">
+        <table id="self">
+        </table>
+      </div>
       <div id="prefs">
         <input id="system-link" type="checkbox" /> Show system messages
         <br />
         <input id="mute-link" type="checkbox" /> Mute sounds
       </div>
       <div id="user-list">
-        <span id="users-title">Online Users (<span class="num_users">?</span>)</span>
+        <span id="friends-title">Online Friends (<span class="num_friends">?</span>)</span>
+        <table id="friends">
+        </table>
+        <span id="users-title">More Online Users (<span class="num_others">?</span>)</span>
         <table id="users">
         </table>
       </div>

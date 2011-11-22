@@ -57,30 +57,31 @@ body {
   border-left: 1px solid #777;
   right: 0;
   width: 20%; }
-  #sidebar #user-list, #sidebar #room-list {
+  #sidebar #user-list, #sidebar #self-list, #sidebar #room-list {
     margin: 1em;
     white-space: nowrap; }
-    #sidebar #user-list #users-title, #sidebar #user-list #rooms-title, #sidebar #room-list #users-title, #sidebar #room-list #rooms-title {
-      font-weight: bold;
-      margin-bottom: 1em; }
-    #sidebar #user-list #users, #sidebar #room-list #users {
+    #sidebar #user-list #users-title, #sidebar #user-list #friends-title, #sidebar #user-list #rooms-title, #sidebar #self-list #users-title, #sidebar #self-list #friends-title, #sidebar #self-list #rooms-title, #sidebar #room-list #users-title, #sidebar #room-list #friends-title, #sidebar #room-list #rooms-title {
+      font-weight: bold; }
+    #sidebar #user-list #users, #sidebar #user-list #friends, #sidebar #user-list #self, #sidebar #self-list #users, #sidebar #self-list #friends, #sidebar #self-list #self, #sidebar #room-list #users, #sidebar #room-list #friends, #sidebar #room-list #self {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1em; }
-      #sidebar #user-list #users td.pic, #sidebar #room-list #users td.pic {
+      margin: 1em 0; }
+      #sidebar #user-list #users td.pic, #sidebar #user-list #friends td.pic, #sidebar #user-list #self td.pic, #sidebar #self-list #users td.pic, #sidebar #self-list #friends td.pic, #sidebar #self-list #self td.pic, #sidebar #room-list #users td.pic, #sidebar #room-list #friends td.pic, #sidebar #room-list #self td.pic {
         height: 50px;
         width: 50px; }
-      #sidebar #user-list #users td.nick, #sidebar #room-list #users td.nick {
+      #sidebar #user-list #users td.nick, #sidebar #user-list #friends td.nick, #sidebar #user-list #self td.nick, #sidebar #self-list #users td.nick, #sidebar #self-list #friends td.nick, #sidebar #self-list #self td.nick, #sidebar #room-list #users td.nick, #sidebar #room-list #friends td.nick, #sidebar #room-list #self td.nick {
         vertical-align: middle;
         padding: 0 1em; }
-    #sidebar #user-list #rooms, #sidebar #room-list #rooms {
+    #sidebar #user-list #rooms, #sidebar #self-list #rooms, #sidebar #room-list #rooms {
       list-style: square;
       padding: 0 2em; }
   #sidebar #prefs {
     font-size: 90%;
     color: #777;
-    margin: 1em;
-    white-space: nowrap; }
+    padding: 1em;
+    padding-top: 0;
+    white-space: nowrap;
+    border-bottom: 1px solid black; }
   #sidebar a {
     display: block;
     color: black;
