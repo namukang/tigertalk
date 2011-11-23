@@ -74,6 +74,9 @@
 
   // Routing
   app.get('/', function (req, res) {
+    res.send("TigerTalk is currently down for development.");
+    return;
+
     var room = "main";
     fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room, idToAnonUser, anonIDToRealID);
     // CAS
@@ -137,6 +140,9 @@
   });
 
   app.get('/:room', function (req, res) {
+    res.send("TigerTalk is currently down for development.");
+    return;
+
     var room = (req.params.room).toString();
     var room_lowercase = room.toLowerCase();
     if (room !== room_lowercase) {
