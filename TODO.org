@@ -122,9 +122,9 @@
 ** DONE Show list of rooms
 ** TODO Private messaging
 ** TODO Autocomplete nicks in entry
-** TODO Ping users by flashing description when they're mentioned
-** TODO "Ding" sound for mentions
+** TODO Ping users by flashing tab title when they're mentioned
+** TODO Allow user to choose when to play "ding" sound (when they're not on TT tab)
+   - Any msg
+   - Mentions
+   - Never
 ** TODO Shift+enter for new lines
-** TODO Only show first names until name conflict appears
-   - query fb for first name
-   - changing names might be disorienting
