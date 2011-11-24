@@ -878,6 +878,11 @@ $(function() {
     supplied: "mp3",
     muted: muted
   });
+
+  // Remove anon option if in anon room
+  if (CONFIG.room === 'anon') {
+    $('#anon-option').hide();
+  }
 });
 
 /**
