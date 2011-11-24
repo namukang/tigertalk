@@ -772,6 +772,9 @@ function showInSidebar(type) {
     roomList.show();
   } else if (type === 'users') {
     selfList.show();
+    if (CONFIG.room !== 'anon') {
+      $('#anon-option').show();
+    }
     prefs.show();
     userList.show();
   }
