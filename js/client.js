@@ -250,6 +250,9 @@ function compareAlphabetically(a, b) {
 
 // Build the HTML to represent a user in a list
 function buildUserHTML (userID) {
+  if (!CONFIG.idToUser.hasOwnProperty(userID)) {
+    return null;
+  }
   var user = CONFIG.idToUser[userID];
   // Create user link
   var userLink = $(document.createElement('a'));
