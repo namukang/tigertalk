@@ -74,9 +74,6 @@
 
   // Routing
   app.get('/', function (req, res) {
-    res.send("In order to encourage people to join the room at the same time, TigerTalk will reopen at 12AM EST. Thanks!");
-    return;
-
     var room = "main";
     fb.handler(req, res, app.settings.address, ticketToUser, idToTicket, room, idToAnonUser, anonIDToRealID);
     // CAS
@@ -140,9 +137,6 @@
   });
 
   app.get('/:room', function (req, res) {
-    res.send("In order to encourage people to join the room at the same time, TigerTalk will reopen at 12AM EST. Thanks!");
-    return;
-
     var room = (req.params.room).toString();
     var room_lowercase = room.toLowerCase();
     if (room !== room_lowercase) {
