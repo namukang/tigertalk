@@ -74,7 +74,7 @@
 
   // Routing
   app.get('/', function (req, res) {
-    res.send("In order to have people join the room at the same time, TigerTalk will reopen at 12AM EST. Thanks!");
+    res.send("In order to encourage people to join the room at the same time, TigerTalk will reopen at 12AM EST. Thanks!");
     return;
 
     var room = "main";
@@ -140,7 +140,7 @@
   });
 
   app.get('/:room', function (req, res) {
-    res.send("In order to have people join the room at the same time, TigerTalk will reopen at 12AM EST. Thanks!");
+    res.send("In order to encourage people to join the room at the same time, TigerTalk will reopen at 12AM EST. Thanks!");
     return;
 
     var room = (req.params.room).toString();
