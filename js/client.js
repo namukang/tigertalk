@@ -772,9 +772,6 @@ function showInSidebar(type) {
     roomList.show();
   } else if (type === 'users') {
     selfList.show();
-    if (CONFIG.room !== 'anon') {
-      $('#anon-option').show();
-    }
     prefs.show();
     userList.show();
   }
@@ -881,11 +878,6 @@ $(function() {
     supplied: "mp3",
     muted: muted
   });
-
-  // Remove anon option if in anon room
-  if (CONFIG.room === 'anon') {
-    $('#anon-option').hide();
-  }
 });
 
 /**
