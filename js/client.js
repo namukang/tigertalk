@@ -22,6 +22,7 @@ var CONFIG = {
   userIDs: [], // ids of online users (excluding friends and yourself)
   friendIDs: [], // ids of online friends
   idToUser: {}, // mapping from id to user
+  idToAdded: {}, // contains mappings for ids which are in a list
   room: document.location.pathname.substring(1), // current room
   ticket: readCookie("ticket"), // user's ticket
   socket_id: readCookie("socket_id"), // id of socket
@@ -99,6 +100,7 @@ socket.on('part', function(data) {
   delete CONFIG.idToUser[data.user_id];
   removeFromUserList(data.user_id);
   removeFromFriendList(data.user_id);
+  delete CONFIG.idToAdded[data.user_id];
   updateNumUsers();
 });
 
@@ -223,16 +225,21 @@ function addToOnlineList(id) {
       // Access token may have expired
       eraseCookie("ticket");
       window.location.reload();
-    } else if (response.data.length === 1) {
-      // Friends
-      CONFIG.friendIDs.push(id);
-      refreshFriendList();
-      updateNumUsers();
-    } else {
-      // Not friends
-      CONFIG.userIDs.push(id);
-      refreshUserList();
-      updateNumUsers();
+    }
+    // Make sure user is not already in a list
+    if (!CONFIG.idToAdded.hasOwnProperty(id)) {
+      CONFIG.idToAdded[id] = true;
+      if (response.data.length === 1) {
+        // Friends
+        CONFIG.friendIDs.push(id);
+        refreshFriendList();
+        updateNumUsers();
+      } else {
+        // Not friends
+        CONFIG.userIDs.push(id);
+        refreshUserList();
+        updateNumUsers();
+      }
     }
   });
 }
