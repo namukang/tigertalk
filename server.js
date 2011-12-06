@@ -63,8 +63,8 @@
 
   io.configure('production', function () {
     // Heroku requires long polling
-    io.set("transports", ["xhr-polling"]);
-    io.set("polling duration", 1);
+    // io.set("transports", ["xhr-polling"]);
+    // io.set("polling duration", 1);
 
     io.enable('browser client minification');  // send minified client
     io.enable('browser client etag');          // apply etag caching logic based on version number
