@@ -11,7 +11,7 @@
   var APP_SECRET = process.env.PROD_APP_SECRET;
 
   var expiredTickets = {};
-  var ALL_ACCESS = false;
+  var ALL_ACCESS = true;
 
   exports.handler = function (req, res, app_url, ticketToUser, idToTicket, room, idToAnonUser, anonIDToRealID) {
     APP_URL = app_url + '/';
