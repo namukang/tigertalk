@@ -103,6 +103,10 @@
      20:59:40 web.1     |     at /Users/dskang/Dropbox/tigertalk/server.js:122:13
      20:59:40 web.1     |     at Client.get (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/stores/memory.js:86:3)
      20:59:40 web.1     |     at Socket.get (/Users/dskang/Dropbox/tigertalk/node_modules/socket.io/lib/socket.js:258:14)
+** TODO Online people show up twice if they join/leave/join
+   - If a user leaves before I get the response back from FB whether they
+     are a friend or not, then they will end up showing twice
+** TODO People end up not showing up in online list even when they're online
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
