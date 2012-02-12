@@ -60,7 +60,8 @@
 ** DONE Get rid of ticket information in URL after authenticating
    - Solution: assign user a cookie containing ticket and redirect to
      home
-** TODO Width 100% overflows with padding
+** DONE Width 100% overflows with padding
+   - box-sizing: border-box
 ** DONE Only scroll to bottom when user is already fully scrolled
 ** DONE Whitespace in beginning of message is ignored in table (feature?)
    - lololol this is a feature now
@@ -107,6 +108,8 @@
    - If a user leaves before I get the response back from FB whether they
      are a friend or not, then they will end up showing twice
 ** TODO People end up not showing up in online list even when they're online
+** TODO io.configure('development') isn't being used in dev... why?
+** TODO long polling creates ridiculous lag with 10 sec
 * Engagement
 ** DONE Add backlog
    - Useful for engaging users the moment they enter the chatroom
