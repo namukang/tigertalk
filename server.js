@@ -39,6 +39,7 @@
     app.use(express.cookieParser());
   });
 
+  console.log(process.env);
   app.configure('development', function () {
     app.set('address', 'http://localhost:' + port);
     app.use(express.errorHandler({
@@ -64,7 +65,7 @@
   io.configure('production', function () {
     // Heroku requires long polling
     io.set("transports", ["xhr-polling"]);
-    io.set("polling duration", 10);
+    io.set("polling duration", 1);
 
     io.enable('browser client minification');  // send minified client
     io.enable('browser client etag');          // apply etag caching logic based on version number
