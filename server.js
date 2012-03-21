@@ -39,7 +39,6 @@
     app.use(express.cookieParser());
   });
 
-  console.log(process.env);
   app.configure('development', function () {
     app.set('address', 'http://localhost:' + port);
     app.use(express.errorHandler({
