@@ -17,8 +17,8 @@
     APP_URL = app_url + '/';
     if (APP_URL.indexOf('localhost') !== -1) {
       // Development
-      APP_ID = process.env.DEV_APP_ID;
-      APP_SECRET = process.env.DEV_APP_SECRET;
+      APP_ID = process.env.DEV_APP_ID || '300919423260744';
+      APP_SECRET = process.env.DEV_APP_SECRET || '28c08b49a2679c487e228743d223da9f';
       ALL_ACCESS = true;
     }
     if (req.query.hasOwnProperty("error_reason")) {
