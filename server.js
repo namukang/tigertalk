@@ -48,7 +48,7 @@
   });
 
   app.configure('production', function () {
-    app.set('address', 'http://www.tigertalk.me');
+    app.set('address', 'http://tigertalk.herokuapp.com');
     app.use(express.errorHandler());
   });
 

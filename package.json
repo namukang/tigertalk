@@ -7,7 +7,7 @@
   },
   "subdomain": "tigertalk",
   "domains": [
-    "tigertalk.me"
+    "tigertalk.herokuapp.com"
   ],
   "scripts": {
     "start": "server.js"
